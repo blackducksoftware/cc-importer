@@ -14,84 +14,88 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import soleng.framework.core.config.ConfigConstants.APPLICATION;
+import soleng.framework.core.config.server.ServerBean;
 import soleng.framework.standard.common.ProjectPojo;
 import soleng.framework.standard.protex.ProtexServerWrapper;
 
+import com.blackducksoftware.soleng.ccimport.exception.CodeCenterImportException;
 import com.blackducksoftware.soleng.ccimporter.config.CodeCenterConfigManager;
 import com.blackducksoftware.soleng.ccimporter.config.ProtexConfigManager;
+import com.blackducksoftware.soleng.ccimporter.model.CCIProject;
 
 /**
  * 
- *  @author Ari Kamen
- *  @date Jun 27, 2014
- *
+ * @author Ari Kamen
+ * @date Jun 27, 2014
+ * 
  */
-public class CCISingleServerProcessor extends CCIProcessor {
+public class CCISingleServerProcessor extends CCIProcessor
+{
 
-    private static Logger log = LoggerFactory.getLogger(CCISingleServerProcessor.class.getName());
+    private static Logger log = LoggerFactory
+	    .getLogger(CCISingleServerProcessor.class.getName());
 
     private ProtexServerWrapper protexWrapper = null;
-    
+
     /**
      * @param configManager
-     * @param protexConfigManager 
+     * @param protexConfigManager
      * @throws Exception
      */
-    public CCISingleServerProcessor(CodeCenterConfigManager configManager, 
-	    ProtexConfigManager protexConfigManager)
-	    throws Exception
+    public CCISingleServerProcessor(CodeCenterConfigManager configManager,
+	    ProtexConfigManager protexConfigManager) throws Exception
     {
 	super(configManager);
+
+	// There will only be one in the single instance
+	ServerBean protexBean = protexConfigManager.getServerBean();
 	
 	// Set up the local Protex config.
-	protexWrapper = new ProtexServerWrapper(protexConfigManager.getServerBean(), protexConfigManager, true);
-	
+	protexWrapper = new ProtexServerWrapper(protexBean, protexConfigManager, true);
+
     }
 
-    /* (non-Javadoc)
-     * @see com.blackducksoftware.soleng.ccimport.CCIProcessor#performImport()
-     */
     @Override
-    public void performImport()
+    public void performSynchronize() throws CodeCenterImportException
     {
 
-	CodeCenterProjectImporter importer = new CodeCenterProjectImporter();
-	
-	try{
-		List<String> projectList = getProjects();
-		
-		log.info("Processing {} projects", projectList);
-		importer.processImport(projectList);
-	} catch (Exception e)
+	CodeCenterProjectSynchronizer synchronizer = new CodeCenterProjectSynchronizer(
+		codeCenterWrapper, codeCenterConfigManager);
+
+	List<CCIProject> projectList = getProjects();
+	log.info("Processing {} projects", projectList);
+
+	for (CCIProject project : projectList)
 	{
-		log.error("Unable to perform import", e);
+	    CCIProject importedProject = null;
+	    try
+	    {
+		importedProject = synchronizer.processImport(project);
+
+	    } catch (Exception e)
+	    {
+		throw new CodeCenterImportException("Unable to perform import",
+			e);
+	    }
+
+	    try
+	    {
+		boolean performValidate = super.codeCenterConfigManager.isValidate();
+		if (performValidate)
+		    synchronizer.processValidation(importedProject);
+	    } catch (Exception e)
+	    {
+		throw new CodeCenterImportException(
+			"Unable to perform validation", e);
+	    }
+
 	}
-	
+
     }
-   
-    private List<String> getProjects()
-    {
-	log.info("Getting Protex project list");
-	List<String> projectList = new ArrayList<String>();
 
-	List<String> userProjectList = codeCenterConfigManager.getProjectList();
-	log.info("Importing your specified projects");
-	for(String projectName : userProjectList)
-	{
-		try{
-			// TODO: This is almost a duplicate of the above, refactor.
-			ProjectPojo project = protexWrapper.getProjectByName(projectName);					
-			if(codeCenterConfigManager.getAppVersion() != null)
-				projectName = project.getProjectName() + "," + codeCenterConfigManager.getAppVersion();
-			
-			log.info("Adding project: " + projectName);
-			projectList.add(projectName);
-		} catch (Exception e)
-		{
-			log.error("Unable to determine project with name: " + projectName);
-		}
-	}
-	
-	return projectList;
+    private List<CCIProject> getProjects() throws CodeCenterImportException
+    {
+	return getProjects(protexWrapper);
     }
 }

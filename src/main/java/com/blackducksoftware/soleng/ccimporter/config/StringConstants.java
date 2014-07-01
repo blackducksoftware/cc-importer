@@ -74,4 +74,7 @@ public class StringConstants {
 	 * --project
 	 */
 	public static final String PROJECT = "--project";
+	
+	public static final String VALIDATE  = "--validate";
+
 }

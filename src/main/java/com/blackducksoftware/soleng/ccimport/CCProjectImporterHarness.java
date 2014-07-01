@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 
 import soleng.framework.core.config.server.ServerBean;
 
+import com.blackducksoftware.soleng.ccimporter.config.CCIConstants;
 import com.blackducksoftware.soleng.ccimporter.config.CodeCenterConfigManager;
 import com.blackducksoftware.soleng.ccimporter.config.ProtexConfigManager;
 
@@ -16,7 +17,7 @@ import com.blackducksoftware.soleng.ccimporter.config.ProtexConfigManager;
  * @author akamen
  * 
  */
-public class CCProjectImporterHarness extends CodeCenterProjectImporter
+public class CCProjectImporterHarness
 {
     private static Logger log = LoggerFactory
 	    .getLogger(CCProjectImporterHarness.class.getName());
@@ -29,8 +30,7 @@ public class CCProjectImporterHarness extends CodeCenterProjectImporter
     {
 
 	// TODO: Get the version from the POM
-
-	log.info("Code Center Importer, version {}", CC_IMPORTER_VERSION);
+	log.info("Code Center Importer, version {}", CCIConstants.CC_IMPORTER_VERSION);
 
 	if (args.length == 0)
 	{
@@ -72,11 +72,9 @@ public class CCProjectImporterHarness extends CodeCenterProjectImporter
 		processor = new CCISingleServerProcessor(ccConfigManager, protexConfigManager);
 	    }
 
-	    // Do the importation
-	    processor.performImport();
+	    processor.performSynchronize();
 
-	    // Do the validation
-
+	    log.info("All finished.");
 	} catch (Exception e)
 	{
 	    log.error("General failure: " + e.getMessage());

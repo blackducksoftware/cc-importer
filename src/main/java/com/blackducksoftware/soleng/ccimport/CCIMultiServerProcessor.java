@@ -38,11 +38,12 @@ public class CCIMultiServerProcessor extends CCIProcessor
      * 2) Create an association
      */
     @Override
-    public void performImport()
+    public void performSynchronize()
     {
 	// TODO Auto-generated method stub
 
-	// For every server bean we have, create a ne
+	// For every server bean we have, create a new protexWrapper
+	// Grab the projects and process import
     }
 
     /**
@@ -57,30 +58,8 @@ public class CCIMultiServerProcessor extends CCIProcessor
 	log.info("Getting Protex project list");
 	List<String> projectList = new ArrayList<String>();
 
-	List<String> userProjectList = codeCenterConfigManager.getProjectList();
-
-	log.info("Importing all projects!");
-
-	try
-	{
-	    List<ProjectPojo> projects = protexWrapper.getProjects();
-
-	    // TODO: Return the actual pojo.
-	    for (ProjectPojo pojo : projects)
-	    {
-		String projectName = pojo.getProjectName();
-		if (codeCenterConfigManager.getAppVersion() != null)
-		    projectName = projectName + ","
-			    + codeCenterConfigManager.getAppVersion();
-
-		log.info("Adding project: " + projectName);
-		projectList.add(projectName);
-	    }
-	} catch (Exception e)
-	{
-	    throw new Exception("Unable to get all projects", e);
-	}
-
+	getProjects(protexWrapper);
+	
 	return projectList;
     }
 }

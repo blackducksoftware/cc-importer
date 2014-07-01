@@ -16,6 +16,8 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.blackducksoftware.soleng.ccimporter.model.CCIProject;
+
 import soleng.framework.core.config.ConfigurationManager;
 import soleng.framework.core.config.ConfigConstants.APPLICATION;
 import soleng.framework.core.config.server.ServerBean;
@@ -35,19 +37,21 @@ public class CCIConfigurationManager extends ConfigurationManager
     private String workflow = "";
     private String owner = "";
     private Boolean submit = false;
-    private List<String> projectList = new ArrayList<String>();
+    private Boolean validate = false;
+
+    private List<CCIProject> projectList = new ArrayList<CCIProject>();
 
     public CCIConfigurationManager()
     {
 	// for command line
 	super();
     }
-    
+
     public CCIConfigurationManager(String fileLocation, APPLICATION appType)
     {
 	super(fileLocation, appType);
     }
-    
+
     protected void initConfigFile()
     {
 
@@ -57,37 +61,82 @@ public class CCIConfigurationManager extends ConfigurationManager
 	owner = getProperty(CCIConstants.OWNER_PROPERTY);
 	submit = getOptionalProperty(CCIConstants.SUBMIT_PROPERTY, false,
 		Boolean.class);
+	validate = getOptionalProperty(
+		CCIConstants.VALIDATE_APPLICATION_PROPERTY, false,
+		Boolean.class);
 
+	/**
+	 * Parse through the user specified list.
+	 */
 	String potentiaList = getOptionalProperty(CCIConstants.PROJECT_PROPERTY);
-	projectList = Arrays.asList(StringUtils.split(potentiaList, ","));
+	projectList = buildProjectList(Arrays.asList(StringUtils.split(
+		potentiaList, ",")));
 
     }
 
-    protected void initCommandLine(String[] args)
+    /**
+     * Builds a user specified list of projects. At the very least, this will
+     * contain a list of project objects with names In some cases it will
+     * contain a version too
+     * 
+     * @param asList
+     * @return
+     */
+    private List<CCIProject> buildProjectList(List<String> asList)
     {
+	List<CCIProject> projectList = new ArrayList<CCIProject>();
 
-	String projectOption = null;
+	for (String userSuppliedProject : asList)
+	{
+	    CCIProject project = new CCIProject();
+	    // First we attempt to tokenize the user supplied list to check for
+	    // versions
+	    String[] projAndVersion = userSuppliedProject.split(";");
+	    if (projAndVersion.length == 1)
+	    {
+		// Just project
+		// Set the name and the user specified version
+		project.setProjectName(projAndVersion[0]);
+		project.setProjectVersion(getAppVersion());
+
+	    } else if (projAndVersion.length == 2)
+	    {
+		// Project and version
+		project.setProjectName(projAndVersion[0].trim());
+		project.setProjectVersion(projAndVersion[1].trim());
+	    } else
+	    {
+		// No idea, say something.
+		log.warn(
+			"User specified element '{}' not understood, expecting comma separated <project name>;<version",
+			userSuppliedProject);
+	    }
+	    projectList.add(project);
+	}
+
+	return projectList;
+    }
+
+    protected void initCommandLine(String[] args, APPLICATION type)
+    {
+	String pServer = null;
+	String pUsername = null;
+	String pPassword = null;
+	String ccServer = null;
+	String ccUsername = null;
+	String ccPassword = null;
+
 	for (int a = 0; a < args.length; a++)
 	{
-
-	    String pServer = null;
-	    String pUsername = null;
-	    String pPassword = null;
-
 	    if (args[a].equals(StringConstants.PROTEX_SERVER))
 		if (args.length > a + 1 && !args[a + 1].startsWith("-"))
 		    pServer = args[a + 1];
 	    if (args[a].equals(StringConstants.PROTEX_USERNAME))
 		if (args.length > a + 1 && !args[a + 1].startsWith("-"))
 		    pUsername = args[a + 1];
-	    if (args[a].equals(StringConstants.PROTEX_USERNAME))
+	    if (args[a].equals(StringConstants.PROTEX_PASSWORD))
 		if (args.length > a + 1 && !args[a + 1].startsWith("-"))
 		    pPassword = args[a + 1];
-
-	    String ccServer = null;
-	    String ccUsername = null;
-	    String ccPassword = null;
-
 	    if (args[a].equals(StringConstants.CODE_CENTER_SERVER))
 		if (args.length > a + 1 && !args[a + 1].startsWith("-"))
 		    ccServer = args[a + 1];
@@ -97,18 +146,6 @@ public class CCIConfigurationManager extends ConfigurationManager
 	    if (args[a].equals(StringConstants.CODE_CENTER_PASSWORD))
 		if (args.length > a + 1 && !args[a + 1].startsWith("-"))
 		    ccPassword = args[a + 1];
-
-	    ServerBean protexBean = new ServerBean(pServer, pUsername,
-		    pPassword, APPLICATION.PROTEX);
-	    ServerBean ccServerBean = new ServerBean(ccServer, ccUsername,
-		    ccPassword, APPLICATION.CODECENTER);
-
-	    /**
-	     * We are going to add two server beans in the case of command line
-	     * 
-	     */
-	    super.addServerBean(protexBean);
-	    super.addServerBean(ccServerBean);
 
 	    if (args[a].equals(StringConstants.PROTEX_NAME))
 		if (args.length > a + 1 && !args[a + 1].startsWith("-"))
@@ -127,14 +164,8 @@ public class CCIConfigurationManager extends ConfigurationManager
 		    submit = new Boolean(args[a + 1]);
 	    if (args[a].equals(StringConstants.PROJECT))
 		if (args.length > a + 1 && !args[a + 1].startsWith("-"))
-		    projectList = Arrays.asList(StringUtils.split(args[a + 1]));
-	}
-
-	if (projectOption == null)
-	{
-	    log.error("Missing project import options");
-	    usage();
-	    System.exit(-1);
+		    projectList = buildProjectList(Arrays.asList(StringUtils
+			    .split(args[a + 1])));
 	}
 
 	boolean valid = true;
@@ -160,18 +191,29 @@ public class CCIConfigurationManager extends ConfigurationManager
 	    valid = false;
 	}
 
-	if (projectList.isEmpty())
-	{
-	    log.info("Missing project configuration");
-	    valid = false;
-	}
-
 	if (!valid)
 	{
 	    log.error("Missing configuration details.");
 	    usage();
 	    System.exit(-1);
 	}
+
+	/**
+	 * Set up the server beans from the user specified configuration
+	 */
+	ServerBean protexBean = new ServerBean(pServer, pUsername, pPassword,
+		APPLICATION.PROTEX);
+	ServerBean ccServerBean = new ServerBean(ccServer, ccUsername,
+		ccPassword, APPLICATION.CODECENTER);
+
+	/**
+	 * We are going to set that bean which is of interest to us.
+	 * 
+	 */
+	if(type == APPLICATION.PROTEX)
+	    super.addServerBean(protexBean);
+	else if(type == APPLICATION.CODECENTER)
+	    super.addServerBean(ccServerBean);
     }
 
     /**
@@ -199,12 +241,22 @@ public class CCIConfigurationManager extends ConfigurationManager
 	return owner;
     }
 
-    public Boolean getSubmit()
+    public Boolean isSubmit()
     {
 	return submit;
     }
 
-    public List<String> getProjectList()
+    public Boolean isValidate()
+    {
+	return validate;
+    }
+
+    public void setValidate(Boolean validate)
+    {
+	this.validate = validate;
+    }
+
+    public List<CCIProject> getProjectList()
     {
 	return projectList;
     }
@@ -236,6 +288,10 @@ public class CCIConfigurationManager extends ConfigurationManager
 	System.out.println(StringConstants.OWNER
 		+ ": Default application owner in Code Center.");
 	System.out.println(StringConstants.SUBMIT + ": Submit request option.");
-	System.out.println(StringConstants.PROJECT + ": Project list.");
+	System.out.println(StringConstants.VALIDATE + ": Validate option.");
+	System.out
+		.println(StringConstants.PROJECT
+			+ ": Project list, example:  projectName;version,project2;version2 (Leave blank for ALL projects)");
     }
+
 }

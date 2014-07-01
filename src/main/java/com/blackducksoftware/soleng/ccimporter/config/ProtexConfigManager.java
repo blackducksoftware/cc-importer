@@ -26,7 +26,7 @@ public class ProtexConfigManager extends CCIConfigurationManager
     public ProtexConfigManager(String[] args)
     {
 	super();
-	initCommandLine(args);
+	initCommandLine(args, APPLICATION.PROTEX);
     }
     
     public ProtexConfigManager(String fileLocation)

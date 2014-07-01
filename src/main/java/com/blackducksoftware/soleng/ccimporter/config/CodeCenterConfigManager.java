@@ -33,7 +33,7 @@ public class CodeCenterConfigManager extends CCIConfigurationManager
     public CodeCenterConfigManager(String[] args)
     {
 	super();
-	initCommandLine(args);
+	initCommandLine(args, APPLICATION.CODECENTER);
     }
 
     public CodeCenterConfigManager(String fileLocation)
