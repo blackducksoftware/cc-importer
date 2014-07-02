@@ -66,31 +66,7 @@ public class CCISingleServerProcessor extends CCIProcessor
 	List<CCIProject> projectList = getProjects();
 	log.info("Processing {} projects", projectList);
 
-	for (CCIProject project : projectList)
-	{
-	    CCIProject importedProject = null;
-	    try
-	    {
-		importedProject = synchronizer.processImport(project);
-
-	    } catch (Exception e)
-	    {
-		throw new CodeCenterImportException("Unable to perform import",
-			e);
-	    }
-
-	    try
-	    {
-		boolean performValidate = super.codeCenterConfigManager.isValidate();
-		if (performValidate)
-		    synchronizer.processValidation(importedProject);
-	    } catch (Exception e)
-	    {
-		throw new CodeCenterImportException(
-			"Unable to perform validation", e);
-	    }
-
-	}
+	synchronizer.synchronize(projectList);
 
     }
 

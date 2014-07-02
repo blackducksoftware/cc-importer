@@ -40,6 +40,7 @@ import com.blackducksoftware.sdk.codecenter.application.data.ProtexRequest;
 import com.blackducksoftware.sdk.codecenter.approval.data.WorkflowNameToken;
 import com.blackducksoftware.sdk.codecenter.client.util.CodeCenterServerProxyV6_6_0;
 import com.blackducksoftware.sdk.codecenter.cola.ColaApi;
+import com.blackducksoftware.sdk.codecenter.fault.ErrorCode;
 import com.blackducksoftware.sdk.codecenter.fault.SdkFault;
 import com.blackducksoftware.sdk.codecenter.request.RequestApi;
 import com.blackducksoftware.sdk.codecenter.request.data.RequestApplicationComponentToken;
@@ -85,6 +86,46 @@ public class CodeCenterProjectSynchronizer
 	this.configManager = config;
     }
 
+    
+    /**
+     * Synchronizes a list of projects against the specified Code Center Configuration
+     * 
+     * In the event of multiple Protex servers, the alias is used to lookup the Protex configuration
+     * Otherwise the user supplied option is utilized instead.
+     * 
+     * @param projectList
+     * @throws CodeCenterImportException 
+     */
+    public void synchronize(List<CCIProject> projectList) throws CodeCenterImportException
+    {
+	for (CCIProject project : projectList)
+	{
+	    CCIProject importedProject = null;
+	    try
+	    {
+		importedProject = processImport(project);
+
+	    } catch (Exception e)
+	    {
+		throw new CodeCenterImportException("Unable to perform import",
+			e);
+	    }
+
+	    try
+	    {
+		boolean performValidate = configManager.isValidate();
+		if (performValidate)
+		    processValidation(importedProject);
+	    } catch (Exception e)
+	    {
+		throw new CodeCenterImportException(
+			"Unable to perform validation", e);
+	    }
+	}
+	
+    }
+    
+    
     /**
      * An import consists of two steps. First creating and/or finding an
      * application within Code Center that matches Protex. Secondly to perform
@@ -93,7 +134,7 @@ public class CodeCenterProjectSynchronizer
      * @param projectList
      * @return Returns the existing project with a populated Application bean.
      */
-    public CCIProject processImport(CCIProject project)
+    private CCIProject processImport(CCIProject project)
     {
 	try
 	{
@@ -108,8 +149,7 @@ public class CodeCenterProjectSynchronizer
 	    // This takes the Code Center app and attempts to associate it
 	    // with a Protex project. We do not need to return anything because
 	    // the return object is useless to us. Any failure to obtain an
-	    // object
-	    // signifies an error and thus the failure of the import.
+	    // object signifies an error and thus the failure of the import.
 	    associateApplicationToProtexProject(project, app);
 
 	    // If everything goes well, set the application name for
@@ -147,7 +187,7 @@ public class CodeCenterProjectSynchronizer
 	return project;
     }
 
-    public void processValidation(CCIProject importedProject)
+    private void processValidation(CCIProject importedProject)
 	    throws CodeCenterImportException
     {
 	Application app = importedProject.getApplication();
@@ -202,6 +242,7 @@ public class CodeCenterProjectSynchronizer
 		RequestCreate request = new RequestCreate();
 
 		// Should this be requested
+		log.info("User specified submit set to: " + configManager.isSubmit());
 		request.setSubmit(configManager.isSubmit());
 
 		RequestApplicationComponentToken token = new RequestApplicationComponentToken();
@@ -230,6 +271,8 @@ public class CodeCenterProjectSynchronizer
     private Application createApplication(CCIProject project)
 	    throws CodeCenterImportException
     {
+	boolean createNewApplication = false;
+	
 	// The object to return (either existing or new)
 	Application app = null;
 
@@ -255,8 +298,10 @@ public class CodeCenterProjectSynchronizer
 
 	} catch (SdkFault e)
 	{
-	    if (e.getMessage().contains("No Application found with"))
+	    ErrorCode code = e.getFaultInfo().getErrorCode();
+	    if (code == ErrorCode.NO_APPLICATION_NAMEVERISON_FOUND)
 	    {
+		createNewApplication = true;
 		log.info(
 			"[{}] Does NOT exist in Code Center. Attempting to create it...",
 			applicationName);
@@ -268,7 +313,10 @@ public class CodeCenterProjectSynchronizer
 		throw new CodeCenterImportException(
 			"Error when getting Application:" + e.getMessage(), e);
 	    }
-
+	}
+	
+	if(createNewApplication)
+	{
 	    try
 	    {
 		String workflowName = configManager.getWorkflow();
@@ -321,68 +369,78 @@ public class CodeCenterProjectSynchronizer
     private com.blackducksoftware.sdk.codecenter.application.data.Project associateApplicationToProtexProject(
 	    CCIProject cciProject, Application app) throws CodeCenterImportException
     {
-	String applicationName = cciProject.getProjectName();
+	// Use this flag to determine whether we need to perform it
+	// In the case where it exists, we can exit out.
+	boolean performAssociation = false;
+	
+	String projectName = cciProject.getProjectName();
 	String appVersion = cciProject.getProjectVersion();
-	String protexServerName = configManager.getProtexServerName();	
+	String ccProtexAliasName = configManager.getProtexServerName();	
 	
-	try
-	{
-	    log.info("Attempting Protex project association for: "
-		    + applicationName + " version: " + appVersion);
-	    
-	    ProjectNameToken projectToken = new ProjectNameToken();
-	    projectToken.setName(applicationName);
-	    ServerNameToken protexServerToken = new ServerNameToken();
-	    protexServerToken.setName(protexServerName);
-	    projectToken.setServerId(protexServerToken);
-
-	    ccWrapper.getInternalApiWrapper().applicationApi.associateProtexProject(app.getId(), projectToken);
-	
-
-
-	} catch (SdkFault e)
-	{
-	    if (e.getMessage().endsWith("is already associated"))
-	    {
-		log.info(
-			"[{}] Protex project is already associated to application.",
-			applicationName);
-	    } else
-	    {
-		throw new CodeCenterImportException(
-			"Associating Protex project failed:" + e.getMessage(),
-			e);
-	    }
-	} catch (Exception sfe)
-	{
-	    throw new CodeCenterImportException(
-		    "Associating Protex project failed. Does Protex project exist? "
-			    + sfe.getMessage(), sfe);
-	}
-
-	log.info("[{}] Retrieving Protex association...", app.getName());
-
+	// First attempt to retrieve it.
 	com.blackducksoftware.sdk.codecenter.application.data.Project associatedProject = null;
 	try
 	{
 	    associatedProject = ccWrapper.getInternalApiWrapper().applicationApi
 		    .getAssociatedProtexProject(app.getId());
-	} catch (SdkFault e1)
+	    
+	    log.info("[{}] Application is already associated!", projectName);
+	    
+	    return associatedProject;
+	} catch (SdkFault e)
 	{
-	    throw new CodeCenterImportException(
-		    "Retrieving Protex association failed:" + e1.getMessage(),
-		    e1);
+	    ErrorCode code = e.getFaultInfo().getErrorCode();
+	    if(code == ErrorCode.APPLICATION_NOT_ASSOCIATED_WITH_PROTEX_PROJECT  || code == ErrorCode.NO_PROTEX_PROJECT_FOUND)
+	    {
+		performAssociation = true;
+	    }
+	    else
+	    {
+		throw new CodeCenterImportException(
+			"Retrieving Protex association failed:"
+				+ e.getMessage(), e);
+	    }
 	}
-
-	if (associatedProject == null)
+	
+	// If there is no association and we had a "friendly" error message, then create one.
+	if(performAssociation)
 	{
-	    throw new CodeCenterImportException(
-		    "Associated Protex project is null. The Protex project may already be associated with another project.");
-	} else
-	{
-	    log.info("...success!");
+        	try
+        	{
+        	    log.info("Attempting Protex project association for: "
+        		    + projectName + " version: " + appVersion);
+        	    
+        	    ProjectNameToken projectToken = new ProjectNameToken();
+        	    projectToken.setName(projectName);
+        	    ServerNameToken protexServerToken = new ServerNameToken();
+        	    protexServerToken.setName(ccProtexAliasName);
+        	    projectToken.setServerId(protexServerToken);
+        
+        	    ccWrapper.getInternalApiWrapper().applicationApi.associateProtexProject(app.getId(), projectToken);
+        	
+        	    // Get it
+        	    associatedProject = ccWrapper.getInternalApiWrapper().applicationApi
+        		    .getAssociatedProtexProject(app.getId());
+        
+        
+        	} catch (SdkFault e)
+        	{
+        	    if (e.getFaultInfo().getErrorCode() == ErrorCode.PROJECT_ALREADY_ASSOCIATED)
+        	    {
+        		log.info(
+        			"[{}] Protex project is already associated to application.",
+        			projectName);
+        	    }  
+        	    else
+        	    {
+        		throw new CodeCenterImportException(
+        			"Associating Protex project failed:" + e.getMessage(),
+        			e);
+        	    }
+        	}
+        	    
+        	log.info("...success!");
 	}
-
 	return associatedProject;
     }
 

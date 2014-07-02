@@ -55,7 +55,7 @@ public class CCIConfigurationManager extends ConfigurationManager
     protected void initConfigFile()
     {
 
-	protexServerName = getProperty(CCIConstants.PROTEX_PROPERTY);
+	protexServerName = getProperty(CCIConstants.PROTEX_NAME_PROPERTY);
 	appVersion = getProperty(CCIConstants.VERSION_PROPERTY);
 	workflow = getProperty(CCIConstants.WORKFLOW_PROPERTY);
 	owner = getProperty(CCIConstants.OWNER_PROPERTY);
@@ -226,6 +226,15 @@ public class CCIConfigurationManager extends ConfigurationManager
 	return protexServerName;
     }
 
+    /**
+     * This is the name of the Protex configuration within Code Center
+     * @param protexAlias
+     */
+    public void setProtexServerName(String protexAlias)
+    {
+	protexServerName = protexAlias;
+    }
+    
     public String getAppVersion()
     {
 	return appVersion;

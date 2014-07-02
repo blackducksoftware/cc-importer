@@ -26,35 +26,35 @@ public class CCIConstants {
 	/*
 	 * Protex properties
 	 */
-	protected static final String PROTEX_SERVER_NAME_PROPERTY = "env.protex.server";
-	protected static final String PROTEX_USER_NAME_PROPERTY = "env.protex.user";
-	protected static final String PROTEX_PASSWORD_PROPERTY = "env.protex.password";
+	public static final String PROTEX_SERVER_URL_PROPERTY = "env.protex.server";
+	public static final String PROTEX_USER_NAME_PROPERTY = "env.protex.user";
+	public static final String PROTEX_PASSWORD_PROPERTY = "env.protex.password";
 
 	/*
 	 * Code Center properties
 	 */
-	protected static final String CODECENTER_SERVER_NAME_PROPERTY = "env.cc.server";
-	protected static final String CODECENTER_USER_NAME_PROPERTY = "env.cc.user";
-	protected static final String CODECENTER_PASSWORD_PROPERTY = "env.cc.password";
+	public static final String CODECENTER_SERVER_NAME_PROPERTY = "env.cc.server";
+	public static final String CODECENTER_USER_NAME_PROPERTY = "env.cc.user";
+	public static final String CODECENTER_PASSWORD_PROPERTY = "env.cc.password";
 
 	// Protex server property
-	protected static final String PROTEX_PROPERTY = "cc.protex.name";
+	public static final String PROTEX_NAME_PROPERTY = "cc.protex.name";
 
 	// Decault application version property
-	protected static final String VERSION_PROPERTY = "cc.default.app.version";
+	public static final String VERSION_PROPERTY = "cc.default.app.version";
 
 	// Workflow property
-	protected static final String WORKFLOW_PROPERTY = "cc.workflow";
+	public static final String WORKFLOW_PROPERTY = "cc.workflow";
 
 	// Owner property
-	protected static final String OWNER_PROPERTY = "cc.owner";
+	public static final String OWNER_PROPERTY = "cc.owner";
 
 	// Submit request property
 	protected static final String SUBMIT_PROPERTY = "cc.submit.request";
 
 	// Project
-	protected static final String PROJECT_PROPERTY = "protex.project.list";
+	public static final String PROJECT_PROPERTY = "protex.project.list";
 	
 	// Validate Step
-	protected static final String VALIDATE_APPLICATION_PROPERTY = "validate.application";
+	public static final String VALIDATE_APPLICATION_PROPERTY = "validate.application";
 }

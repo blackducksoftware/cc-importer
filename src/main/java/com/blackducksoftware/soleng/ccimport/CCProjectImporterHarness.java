@@ -62,7 +62,7 @@ public class CCProjectImporterHarness
 	    if (servers.size() > 2)
 	    {
 		log.info("Multi-Protex mode started.");
-		processor = new CCIMultiServerProcessor(ccConfigManager);
+		processor = new CCIMultiServerProcessor(ccConfigManager, protexConfigManager);
 	    } else
 	    {
 		/**

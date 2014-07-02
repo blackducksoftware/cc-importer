@@ -11,55 +11,98 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import soleng.framework.core.config.ConfigConstants.APPLICATION;
+import soleng.framework.core.config.server.ServerBean;
 import soleng.framework.standard.common.ProjectPojo;
 import soleng.framework.standard.protex.ProtexServerWrapper;
 
+import com.blackducksoftware.soleng.ccimport.exception.CodeCenterImportException;
+import com.blackducksoftware.soleng.ccimporter.config.CCIConstants;
 import com.blackducksoftware.soleng.ccimporter.config.CodeCenterConfigManager;
+import com.blackducksoftware.soleng.ccimporter.config.ProtexConfigManager;
+import com.blackducksoftware.soleng.ccimporter.model.CCIProject;
 
 public class CCIMultiServerProcessor extends CCIProcessor
 {
 
     private static Logger log = LoggerFactory.getLogger(CCIMultiServerProcessor.class.getName());
 
+    private ProtexConfigManager protexConfig = null;
+    
     /**
      * @param configManager
+     * @param protexConfigManager 
      * @param multiserver
      * @throws Exception
      */
-    public CCIMultiServerProcessor(CodeCenterConfigManager configManager)
+    public CCIMultiServerProcessor(CodeCenterConfigManager configManager, ProtexConfigManager protexConfigManager)
 	    throws Exception
     {
 	super(configManager);
+	
+	this.protexConfig = protexConfigManager;
     }
 
     /**
      * For every established Protex server bean, perform a process which includes:
      * 1) Grab all the projects
      * 2) Create an association
+     * @throws CodeCenterImportException 
      */
     @Override
-    public void performSynchronize()
+    public void performSynchronize() throws CodeCenterImportException
     {
-	// TODO Auto-generated method stub
+	// First thing we do, is blank out any project lists that the user has specified
+	List<CCIProject> userProjectList = codeCenterConfigManager.getProjectList();
+	List<ServerBean> protexServers = codeCenterConfigManager.getServerListByApplication(APPLICATION.PROTEX);
+	CodeCenterProjectSynchronizer synchronizer = new CodeCenterProjectSynchronizer(
+		codeCenterWrapper, codeCenterConfigManager);
+	
+	if(userProjectList.size() > 0)
+	{
+	    log.warn("Project list detected, ignoring in multi-server mode!");
+	    userProjectList.clear();
+	}
 
 	// For every server bean we have, create a new protexWrapper
+	// Use the supplied alias to set the Protex Server name
 	// Grab the projects and process import
+	for(ServerBean protexServer : protexServers)
+	{
+	    log.info("Performing synchronization against:" + protexServer);
+	    String protexAlias = protexServer.getAlias();
+	    
+	    if(protexAlias.isEmpty())
+		throw new CodeCenterImportException("Protex alias cannot be empty!");
+	    else
+	    {
+		log.info("Setting {} to {}", CCIConstants.PROTEX_SERVER_URL_PROPERTY,protexAlias);
+		codeCenterConfigManager.setProtexServerName(protexAlias);
+	    }
+	    ProtexServerWrapper wrapper = null;
+	    try
+	    {
+		wrapper = new ProtexServerWrapper(protexServer, protexConfig, true);		
+	    } catch (Exception e)
+	    {
+		throw new CodeCenterImportException("Unable to establish connection against: " + protexServer);
+	    }
+	    
+	    List<CCIProject> projectList = getAllProjects(wrapper);
+	    synchronizer.synchronize(projectList);
+	}
     }
 
     /**
-     * Determines the correct project list There are several possibilities based
-     * on user specified options.
-     * 
+     * This will get all the projects for that particular wrapper
+     * The underlying call will always collect all, if the project is empty.
+     * @param protexWrapper
      * @return
-     * @throws Exception
+     * @throws CodeCenterImportException
      */
-    private List<String> determineProjectList(ProtexServerWrapper protexWrapper) throws Exception
+    private List<CCIProject> getAllProjects(ProtexServerWrapper protexWrapper) throws CodeCenterImportException
     {
-	log.info("Getting Protex project list");
-	List<String> projectList = new ArrayList<String>();
-
-	getProjects(protexWrapper);
+	return getProjects(protexWrapper);
 	
-	return projectList;
     }
 }
