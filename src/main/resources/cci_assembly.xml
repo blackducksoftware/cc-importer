@@ -1,0 +1,61 @@
+<assembly>  
+	<includeBaseDirectory>false</includeBaseDirectory> 
+	<formats>
+		<format>zip</format> 
+	</formats> 
+	<id>cci</id>
+	<fileSets> 
+	
+		  <fileSet>
+	       <directory>${project.basedir}/src/main/resources</directory>
+	       	<outputDirectory>/properties</outputDirectory>
+	       	<includes>
+				<include>*</include>
+			</includes>
+			<excludes>
+				<exclude>*README*</exclude> <!--  This goes in root -->
+					
+			</excludes>
+	    </fileSet>
+		<!--  Drop Readme, notices, license into root -->
+		 <fileSet>
+	       <directory>${project.basedir}/src/main/resources</directory>
+	       	<outputDirectory>/</outputDirectory>
+	       	<includes>
+				<include>*README*</include>
+				<include>*example*</include>
+			</includes>
+	    </fileSet>
+		<fileSet> 
+			<directory>${project.build.directory}/deploy/bin</directory> 
+			<outputDirectory>/bin</outputDirectory>
+			<includes>
+				<include>*</include>
+			</includes>
+			<fileMode>0777</fileMode>
+		</fileSet> 
+		<fileSet> 
+			<directory>${project.build.directory}/deploy/lib</directory> 
+			<outputDirectory>/lib</outputDirectory>
+			<includes>
+				<include>*.jar</include>
+			</includes>
+		</fileSet> 	
+		<!--  Supply the sources jar -->
+		<fileSet>
+			<directory>${project.basedir}/target</directory> 
+				<outputDirectory>/</outputDirectory>
+				<includes>
+					<include>*sources*.jar</include>
+				</includes>
+		</fileSet>
+		<!--  Any external non-maven libs  -->
+		<fileSet> 
+			<directory>${project.basedir}/externallib</directory> 
+			<outputDirectory>/lib</outputDirectory>
+			<includes>
+				<include>*.jar</include>
+			</includes>
+		</fileSet> 	
+	</fileSets> 
+</assembly> 
