@@ -17,10 +17,10 @@ import com.blackducksoftware.soleng.ccimporter.config.ProtexConfigManager;
  * @author akamen
  * 
  */
-public class CCProjectImporterHarness
+public class CCIProjectImporterHarness
 {
     private static Logger log = LoggerFactory
-	    .getLogger(CCProjectImporterHarness.class.getName());
+	    .getLogger(CCIProjectImporterHarness.class.getName());
 
     private static CodeCenterConfigManager ccConfigManager = null;
     // Used in the case of single-server mode.
@@ -28,10 +28,6 @@ public class CCProjectImporterHarness
     
     public static void main(String args[])
     {
-
-	// TODO: Get the version from the POM
-	log.info("Code Center Importer, version {}", CCIConstants.CC_IMPORTER_VERSION);
-
 	if (args.length == 0)
 	{
 	    log.error("Missing arguments!");
@@ -48,6 +44,8 @@ public class CCProjectImporterHarness
 	    protexConfigManager = new ProtexConfigManager(args);
 	}
 
+	log.info("Running Code Center Importer version: " + ccConfigManager.getVersion());
+	
 	try
 	{
 	    /**

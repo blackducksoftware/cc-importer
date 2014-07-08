@@ -31,7 +31,7 @@ public class CodeCenterProjectHarnessTest
     @Rule
     public final ExpectedSystemExit exit = ExpectedSystemExit.none();
 
-    private CCProjectImporterHarness harness = new CCProjectImporterHarness();
+    private CCIProjectImporterHarness harness = new CCIProjectImporterHarness();
     private  String[] args = null;
     
     // Local config files

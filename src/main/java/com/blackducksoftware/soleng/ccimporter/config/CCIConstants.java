@@ -18,9 +18,8 @@ package com.blackducksoftware.soleng.ccimporter.config;
 
 public class CCIConstants {
 	
-    	// TODO: Make this dynamic!
-	public static final String CC_IMPORTER_VERSION = "1.0.0";
-	
+    	public static final String DESCRIPTION = "Application created by the Code Center Importer version: ";
+    	
 	public static final String CONFIG_FILE_PROPERTY = "-configFile";
 
 	/*

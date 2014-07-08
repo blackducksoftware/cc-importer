@@ -21,12 +21,12 @@
 			<version>4.10</version>
 		</dependency>
 		<dependency>
-		    <groupId>com.github.stefanbirkner</groupId>
-		    <artifactId>system-rules</artifactId>
-		    <version>1.3.0</version>
+			<groupId>com.github.stefanbirkner</groupId>
+			<artifactId>system-rules</artifactId>
+			<version>1.3.0</version>
 		</dependency>
 
-	    <dependency>
+		<dependency>
 			<groupId>log4j</groupId>
 			<artifactId>log4j</artifactId>
 			<version>1.2.14</version>
@@ -81,7 +81,7 @@
 					</execution>
 				</executions>
 			</plugin>
-			
+
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>appassembler-maven-plugin</artifactId>
@@ -121,14 +121,14 @@
 					<includeConfigurationDirectoryInClasspath>true</includeConfigurationDirectoryInClasspath>
 				</configuration>
 			</plugin>
-			<!--  Generate the zip -->
+			<!-- Generate the zip -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-assembly-plugin</artifactId>			
+				<artifactId>maven-assembly-plugin</artifactId>
 				<version>2.4</version>
 				<executions>
 					<execution>
-						<id>assembly</id> 
+						<id>assembly</id>
 						<phase>package</phase>
 						<goals>
 							<goal>single</goal>
@@ -138,12 +138,12 @@
 								<descriptor>src/main/resources/cci_assembly.xml</descriptor>
 							</descriptors>
 							<descriptorRef>build-zip</descriptorRef>
-							<appendAssemblyId>true</appendAssemblyId> 
+							<appendAssemblyId>true</appendAssemblyId>
 						</configuration>
 					</execution>
 				</executions>
 			</plugin>
-		
+
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.1</version>
@@ -152,16 +152,30 @@
 					<target>1.7</target>
 				</configuration>
 			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<configuration>
+					<archive>
+						<manifest>
+							<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+							<addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+						</manifest>
+					</archive>
+				</configuration>
+			</plugin>
+
 		</plugins>
 	</build>
-	
-	  <repositories>
+
+	<repositories>
 		<repository>
 			<id>soleng</id>
 			<name>BlackDuck SolEng Repo</name>
 			<url>http://lame.blackducksoftware.com:8081/artifactory/soleng/</url>
 		</repository>
-		
+
 	</repositories>
-	
+
 </project>

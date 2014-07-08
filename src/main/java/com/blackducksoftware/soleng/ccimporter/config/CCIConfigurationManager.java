@@ -38,6 +38,7 @@ public class CCIConfigurationManager extends ConfigurationManager
     private String owner = "";
     private Boolean submit = false;
     private Boolean validate = false;
+    private String version = "undefined";
 
     private List<CCIProject> projectList = new ArrayList<CCIProject>();
 
@@ -54,6 +55,14 @@ public class CCIConfigurationManager extends ConfigurationManager
 
     protected void initConfigFile()
     {
+	try{
+    		String dynamicVersion = getClass().getPackage().getImplementationVersion();
+    	if(dynamicVersion != null)
+    	    version =  dynamicVersion;
+	} catch (Throwable t)
+	{
+	    log.debug("Could not determine version", t);
+	}
 
 	protexServerName = getProperty(CCIConstants.PROTEX_NAME_PROPERTY);
 	appVersion = getProperty(CCIConstants.VERSION_PROPERTY);
@@ -303,4 +312,12 @@ public class CCIConfigurationManager extends ConfigurationManager
 			+ ": Project list, example:  projectName;version,project2;version2 (Leave blank for ALL projects)");
     }
 
+    /**
+     * Version of the current application (derived from pom.xml)
+     * @return
+     */
+    public String getVersion()
+    {
+	return version;
+    }
 }

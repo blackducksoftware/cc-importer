@@ -72,9 +72,7 @@ public class CodeCenterProjectSynchronizer
 {
     private static Logger log = LoggerFactory
 	    .getLogger(CodeCenterProjectSynchronizer.class.getName());
-    static String description = "Application created by the Code Center Project Importer v"
-	    + CCIConstants.CC_IMPORTER_VERSION;
-
+    
     private CodeCenterServerWrapper ccWrapper = null;
     private CCIConfigurationManager configManager = null;
 
@@ -326,6 +324,10 @@ public class CodeCenterProjectSynchronizer
 		ApplicationCreate appCreate = new ApplicationCreate();
 		appCreate.setName(applicationName);
 		appCreate.setVersion(version);
+		
+		// This is the description that will show up in the main application 
+		// view in Code Center.
+		String description = CCIConstants.DESCRIPTION + configManager.getVersion();
 		appCreate.setDescription(description);
 		WorkflowNameToken wf = new WorkflowNameToken();
 		wf.setName(workflowName);
