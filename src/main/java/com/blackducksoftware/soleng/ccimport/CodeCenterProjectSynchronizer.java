@@ -117,7 +117,7 @@ public class CodeCenterProjectSynchronizer
 	    } catch (Exception e)
 	    {
 		throw new CodeCenterImportException(
-			"Unable to perform validation", e);
+			"Unable to perform validation: " + e.getMessage());
 	    }
 	}
 	
@@ -201,11 +201,13 @@ public class CodeCenterProjectSynchronizer
 		    appIdToken, false, false);
 	} catch (SdkFault e)
 	{
+	    log.error("Unable to validate application {}", applicationName);
 	    throw new CodeCenterImportException(
 		    "Could not validate Application with Protex project:"
-			    + e.getMessage(), e);
+			    + e.getMessage());
 	} catch (Exception sfe)
 	{
+	
 	    throw new CodeCenterImportException("Error with validation:"
 		    + sfe.getMessage(), sfe);
 	}
