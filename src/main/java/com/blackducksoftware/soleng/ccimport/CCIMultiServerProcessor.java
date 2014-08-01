@@ -93,6 +93,11 @@ public class CCIMultiServerProcessor extends CCIProcessor
 	}
     }
 
+	@Override
+	public void runReport() throws CodeCenterImportException {
+		log.error("Not implemented");		
+	}
+    
     /**
      * This will get all the projects for that particular wrapper
      * The underlying call will always collect all, if the project is empty.
@@ -105,4 +110,6 @@ public class CCIMultiServerProcessor extends CCIProcessor
 	return getProjects(protexWrapper);
 	
     }
+
+
 }

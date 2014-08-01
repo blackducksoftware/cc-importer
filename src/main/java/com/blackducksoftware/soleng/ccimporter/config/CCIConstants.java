@@ -56,4 +56,7 @@ public class CCIConstants {
 	
 	// Validate Step
 	public static final String VALIDATE_APPLICATION_PROPERTY = "validate.application";
+
+	// Option to run the tool in report mode only.
+	public static final String RUN_REPORT_PROPERTY = "generate.report";
 }

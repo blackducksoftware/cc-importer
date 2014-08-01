@@ -45,7 +45,6 @@ public class CCIProject extends ProtexProjectPojo
     {
 	StringBuilder sb = new StringBuilder();
 	
-	sb.append("\n");
 	sb.append("Protex Name: " + this.getProjectName());
 	sb.append("\n");
 	sb.append("Version: " + this.getProjectVersion());

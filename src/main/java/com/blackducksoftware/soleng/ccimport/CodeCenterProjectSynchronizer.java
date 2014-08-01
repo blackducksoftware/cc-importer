@@ -220,6 +220,8 @@ public class CodeCenterProjectSynchronizer
 	{
 	    protexOnlyComponents = ccWrapper.getInternalApiWrapper().applicationApi
 		    .getProtexOnlyComponentsFromLastValidation(appIdToken);
+	    
+	   
 	} catch (SdkFault e)
 	{
 	    throw new CodeCenterImportException(
@@ -233,16 +235,15 @@ public class CodeCenterProjectSynchronizer
 
 	List<RequestIdToken> newRequests = new ArrayList<RequestIdToken>();
 
+	log.info("User specified submit set to: " + configManager.isSubmit());
+	
 	for (ProtexRequest protexRequest : protexOnlyComponents)
 	{
-
 	    try
 	    {
-
 		RequestCreate request = new RequestCreate();
 
 		// Should this be requested
-		log.info("User specified submit set to: " + configManager.isSubmit());
 		request.setSubmit(configManager.isSubmit());
 
 		RequestApplicationComponentToken token = new RequestApplicationComponentToken();
@@ -256,7 +257,7 @@ public class CodeCenterProjectSynchronizer
 
 	    } catch (SdkFault e)
 	    {
-		throw new CodeCenterImportException("Error creating request:"
+		throw new CodeCenterImportException("Error creating request: "
 			+ e.getMessage(), e);
 	    }
 
@@ -396,7 +397,7 @@ public class CodeCenterProjectSynchronizer
 	    ErrorCode code = e.getFaultInfo().getErrorCode();
 	    if(code == ErrorCode.APPLICATION_NOT_ASSOCIATED_WITH_PROTEX_PROJECT  || code == ErrorCode.NO_PROTEX_PROJECT_FOUND)
 	    {
-		performAssociation = true;
+	    	performAssociation = true;
 	    }
 	    else
 	    {
@@ -416,6 +417,7 @@ public class CodeCenterProjectSynchronizer
         	    
         	    ProjectNameToken projectToken = new ProjectNameToken();
         	    projectToken.setName(projectName);
+
         	    ServerNameToken protexServerToken = new ServerNameToken();
         	    protexServerToken.setName(ccProtexAliasName);
         	    projectToken.setServerId(protexServerToken);
@@ -432,7 +434,7 @@ public class CodeCenterProjectSynchronizer
         	    if (e.getFaultInfo().getErrorCode() == ErrorCode.PROJECT_ALREADY_ASSOCIATED)
         	    {
         		log.info(
-        			"[{}] Protex project is already associated to application.",
+        			"[{}] Protex project is already associated to application.  Please remove association.",
         			projectName);
         	    }  
         	    else

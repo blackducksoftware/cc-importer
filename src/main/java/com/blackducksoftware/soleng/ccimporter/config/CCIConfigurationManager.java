@@ -39,6 +39,8 @@ public class CCIConfigurationManager extends ConfigurationManager
     private Boolean submit = false;
     private Boolean validate = false;
     private String version = "undefined";
+    
+    private Boolean runReport = false;
 
     private List<CCIProject> projectList = new ArrayList<CCIProject>();
 
@@ -73,6 +75,10 @@ public class CCIConfigurationManager extends ConfigurationManager
 	validate = getOptionalProperty(
 		CCIConstants.VALIDATE_APPLICATION_PROPERTY, false,
 		Boolean.class);
+	
+	runReport = getOptionalProperty(
+			CCIConstants.RUN_REPORT_PROPERTY, false,
+			Boolean.class);
 
 	/**
 	 * Parse through the user specified list.
@@ -320,4 +326,12 @@ public class CCIConfigurationManager extends ConfigurationManager
     {
 	return version;
     }
+
+	public Boolean isRunReport() {
+		return runReport;
+	}
+
+	public void setRunReport(Boolean runReport) {
+		this.runReport = runReport;
+	}
 }

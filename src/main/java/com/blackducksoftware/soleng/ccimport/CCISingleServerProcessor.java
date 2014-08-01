@@ -20,6 +20,7 @@ import soleng.framework.standard.common.ProjectPojo;
 import soleng.framework.standard.protex.ProtexServerWrapper;
 
 import com.blackducksoftware.soleng.ccimport.exception.CodeCenterImportException;
+import com.blackducksoftware.soleng.ccimport.report.CCIReportGenerator;
 import com.blackducksoftware.soleng.ccimporter.config.CodeCenterConfigManager;
 import com.blackducksoftware.soleng.ccimporter.config.ProtexConfigManager;
 import com.blackducksoftware.soleng.ccimporter.model.CCIProject;
@@ -64,7 +65,7 @@ public class CCISingleServerProcessor extends CCIProcessor
 		codeCenterWrapper, codeCenterConfigManager);
 
 	List<CCIProject> projectList = getProjects();
-	log.info("Processing {} projects", projectList);
+	log.info("Processing {} projects for synchronization", projectList);
 
 	synchronizer.synchronize(projectList);
 
@@ -74,4 +75,14 @@ public class CCISingleServerProcessor extends CCIProcessor
     {
 	return getProjects(protexWrapper);
     }
+
+	@Override
+	public void runReport() throws CodeCenterImportException 
+	{
+		CCIReportGenerator reportGen = new CCIReportGenerator(codeCenterWrapper, protexWrapper);
+		List<CCIProject> projectList = getProjects();
+		
+		log.info("Processing {} projects for reporting", projectList);
+		reportGen.generateReport(projectList);
+	}
 }

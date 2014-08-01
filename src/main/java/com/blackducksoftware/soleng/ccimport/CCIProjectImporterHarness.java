@@ -70,7 +70,16 @@ public class CCIProjectImporterHarness
 		processor = new CCISingleServerProcessor(ccConfigManager, protexConfigManager);
 	    }
 
-	    processor.performSynchronize();
+	    if(ccConfigManager.isRunReport())
+	    {
+	    	log.info("Generate Report mode activated");
+	    	processor.runReport();
+	    }
+	    else
+	    {
+		    processor.performSynchronize();
+
+	    }
 
 	    log.info("All finished.");
 	} catch (Exception e)
