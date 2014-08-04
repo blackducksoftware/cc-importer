@@ -76,6 +76,12 @@ public abstract class CCIProcessor
     public abstract void performSynchronize() throws CodeCenterImportException;
 
     /**
+     * Generates a report denoting which application/project is "out of sync"
+     * @throws CodeCenterImportException
+     */
+	public abstract void runReport() throws CodeCenterImportException;
+	
+    /**
      * Returns a list of projects based on either: - Supplied user list - All
      * Projects belonging to that user (assuming supplied user list is empty)
      * 
@@ -161,4 +167,6 @@ public abstract class CCIProcessor
 
 	return project;
     }
+
+
 }
