@@ -39,7 +39,7 @@ public class CCIConfigurationManager extends ConfigurationManager
     private Boolean submit = false;
     private Boolean validate = false;
     private Boolean performDelete = false;
-    private Boolean performSubmit= true;
+    private Boolean performAdd= true;
     private String version = "undefined";
 
     private Boolean runReport = false;
@@ -79,7 +79,7 @@ public class CCIConfigurationManager extends ConfigurationManager
 	validate = getOptionalProperty(
 		CCIConstants.VALIDATE_APPLICATION_PROPERTY, false,
 		Boolean.class);
-	performSubmit = getOptionalProperty(
+	performAdd = getOptionalProperty(
 		CCIConstants.SUBMIT_PROPERTY, true,
 		Boolean.class);
 	performDelete = getOptionalProperty(
@@ -358,13 +358,13 @@ public class CCIConfigurationManager extends ConfigurationManager
 	this.performDelete = performDelete;
     }
 
-    public Boolean isPerformSubmit()
+    public Boolean isPerformAdd()
     {
-	return performSubmit;
+	return performAdd;
     }
 
-    public void setPerformSubmit(Boolean performSubmit)
+    public void setPerformAdd(Boolean performSubmit)
     {
-	this.performSubmit = performSubmit;
+	this.performAdd = performSubmit;
     }
 }

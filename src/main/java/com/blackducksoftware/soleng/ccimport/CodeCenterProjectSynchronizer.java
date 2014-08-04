@@ -103,7 +103,7 @@ public class CodeCenterProjectSynchronizer
     {
 	Integer totalImportsFailed = 0;
 	Integer totalValidationsFailed = 0;
-	
+
 	for (CCIProject project : projectList)
 	{
 	    boolean importSuccess = false;
@@ -115,8 +115,8 @@ public class CodeCenterProjectSynchronizer
 	    } catch (Exception e)
 	    {
 		totalImportsFailed++;
-		log.error("[{}] Unable to perform import: " + 
-			e.getMessage(), project.getProjectName());
+		log.error("[{}] Unable to perform import: " + e.getMessage(),
+			project.getProjectName());
 	    }
 
 	    if (importSuccess)
@@ -130,7 +130,9 @@ public class CodeCenterProjectSynchronizer
 		} catch (Exception e)
 		{
 		    totalValidationsFailed++;
-		    log.error("[{}] Unable to perform validation: " + e.getMessage(), project.getProjectName());
+		    log.error(
+			    "[{}] Unable to perform validation: "
+				    + e.getMessage(), project.getProjectName());
 		}
 	    }
 	}
@@ -138,7 +140,7 @@ public class CodeCenterProjectSynchronizer
 	// Add up the totals
 	reportSummary.addTotalImportsFailed(totalImportsFailed);
 	reportSummary.addTotalValidationsFailed(totalValidationsFailed);
-	
+
 	// Here, we display the basic summary
 	log.info(reportSummary.toString());
     }
@@ -227,7 +229,6 @@ public class CodeCenterProjectSynchronizer
 	}
 
 	// ADD REQUESTS
-
 	addRequestsToCodeCenter(app, summary);
 	// DELETE REQUESTS
 	deleteRequestsFromCodeCenter(app, summary);
@@ -263,50 +264,58 @@ public class CodeCenterProjectSynchronizer
 	}
 
 	// REQUESTS
-	log.info("[{}] Attempting {} component requests...", applicationName,
-		protexOnlyComponents.size());
-
-	List<RequestIdToken> newRequests = new ArrayList<RequestIdToken>();
-
-	log.info("User specified submit set to: " + configManager.isSubmit());
-
-	int requestsAdded = 0;
-	for (ProtexRequest protexRequest : protexOnlyComponents)
+	// Perform only if user wishes
+	if (this.configManager.isPerformAdd())
 	{
-	    try
+	    log.info("[{}] Attempting {} component requests...",
+		    applicationName, protexOnlyComponents.size());
+
+	    List<RequestIdToken> newRequests = new ArrayList<RequestIdToken>();
+
+	    log.info("User specified submit set to: "
+		    + configManager.isSubmit());
+
+	    int requestsAdded = 0;
+	    for (ProtexRequest protexRequest : protexOnlyComponents)
 	    {
-		RequestCreate request = new RequestCreate();
+		try
+		{
+		    RequestCreate request = new RequestCreate();
 
-		// Should this be requested
-		request.setSubmit(configManager.isSubmit());
+		    // Should this be requested
+		    request.setSubmit(configManager.isSubmit());
 
-		RequestApplicationComponentToken token = new RequestApplicationComponentToken();
-		token.setApplicationId(app.getId());
-		token.setComponentId(protexRequest.getComponentId());
+		    RequestApplicationComponentToken token = new RequestApplicationComponentToken();
+		    token.setApplicationId(app.getId());
+		    token.setComponentId(protexRequest.getComponentId());
 
-		request.setApplicationComponentToken(token);
+		    request.setApplicationComponentToken(token);
 
-		newRequests.add(ccWrapper.getInternalApiWrapper().requestApi
-			.createRequest(request));
+		    newRequests
+			    .add(ccWrapper.getInternalApiWrapper().requestApi
+				    .createRequest(request));
 
-		requestsAdded++;
-	    } catch (SdkFault e)
-	    {
-		log.error("[{}] Error creating request: " + e.getMessage(),
-			applicationName, e);
+		    requestsAdded++;
+		} catch (SdkFault e)
+		{
+		    log.error("[{}] Error creating request: " + e.getMessage(),
+			    applicationName, e);
+		}
+
 	    }
-
+	    // We want to keep track of successful requests.
+	    summary.addRequestsAdded(requestsAdded);
+	    log.info("[{}] completed adding requests", applicationName);
+	} else
+	{
+	    log.info("Add request option disabled");
 	}
 
-	log.info("[{}] completed adding requests", applicationName);
-
-	// We want to keep track of successful requests.
-	summary.addRequestsAdded(requestsAdded);
     }
 
     /**
      * Find the number of requests that no longer have any matches against
-     * Protex.
+     * Protex.  Delete those requests, honor user options.
      * 
      * @param app
      * @param summary
@@ -353,7 +362,7 @@ public class CodeCenterProjectSynchronizer
 
 	} else
 	{
-	    log.info("Delete option disabled");
+	    log.info("Delete requests option disabled");
 	}
 
     }
