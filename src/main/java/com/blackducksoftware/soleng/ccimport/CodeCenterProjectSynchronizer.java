@@ -46,6 +46,7 @@ import com.blackducksoftware.sdk.codecenter.request.RequestApi;
 import com.blackducksoftware.sdk.codecenter.request.data.RequestApplicationComponentToken;
 import com.blackducksoftware.sdk.codecenter.request.data.RequestCreate;
 import com.blackducksoftware.sdk.codecenter.request.data.RequestIdToken;
+import com.blackducksoftware.sdk.codecenter.request.data.RequestSummary;
 import com.blackducksoftware.sdk.codecenter.user.data.RoleNameToken;
 import com.blackducksoftware.sdk.codecenter.user.data.UserNameToken;
 import com.blackducksoftware.sdk.protex.client.util.ProtexServerProxyV6_3;
@@ -55,6 +56,7 @@ import com.blackducksoftware.sdk.protex.project.ProjectColumn;
 import com.blackducksoftware.sdk.protex.project.ProjectPageFilter;
 import com.blackducksoftware.sdk.protex.util.PageFilterFactory;
 import com.blackducksoftware.soleng.ccimport.exception.CodeCenterImportException;
+import com.blackducksoftware.soleng.ccimport.report.CCIReportSummary;
 import com.blackducksoftware.soleng.ccimporter.config.CCIConfigurationManager;
 import com.blackducksoftware.soleng.ccimporter.config.CCIConstants;
 import com.blackducksoftware.soleng.ccimporter.config.CodeCenterConfigManager;
@@ -72,9 +74,10 @@ public class CodeCenterProjectSynchronizer
 {
     private static Logger log = LoggerFactory
 	    .getLogger(CodeCenterProjectSynchronizer.class.getName());
-    
+
     private CodeCenterServerWrapper ccWrapper = null;
     private CCIConfigurationManager configManager = null;
+    private CCIReportSummary reportSummary = new CCIReportSummary();
 
     public CodeCenterProjectSynchronizer(
 	    CodeCenterServerWrapper codeCenterWrapper,
@@ -84,46 +87,62 @@ public class CodeCenterProjectSynchronizer
 	this.configManager = config;
     }
 
-    
     /**
-     * Synchronizes a list of projects against the specified Code Center Configuration
+     * Synchronizes a list of projects against the specified Code Center
+     * Configuration
      * 
-     * In the event of multiple Protex servers, the alias is used to lookup the Protex configuration
-     * Otherwise the user supplied option is utilized instead.
+     * In the event of multiple Protex servers, the alias is used to lookup the
+     * Protex configuration Otherwise the user supplied option is utilized
+     * instead.
      * 
      * @param projectList
-     * @throws CodeCenterImportException 
+     * @throws CodeCenterImportException
      */
-    public void synchronize(List<CCIProject> projectList) throws CodeCenterImportException
+    public void synchronize(List<CCIProject> projectList)
+
     {
+	Integer totalImportsFailed = 0;
+	Integer totalValidationsFailed = 0;
+	
 	for (CCIProject project : projectList)
 	{
+	    boolean importSuccess = false;
 	    CCIProject importedProject = null;
 	    try
 	    {
 		importedProject = processImport(project);
-
+		importSuccess = true;
 	    } catch (Exception e)
 	    {
-		throw new CodeCenterImportException("Unable to perform import",
-			e);
+		totalImportsFailed++;
+		log.error("[{}] Unable to perform import: " + 
+			e.getMessage(), project.getProjectName());
 	    }
 
-	    try
+	    if (importSuccess)
 	    {
-		boolean performValidate = configManager.isValidate();
-		if (performValidate)
-		    processValidation(importedProject);
-	    } catch (Exception e)
-	    {
-		throw new CodeCenterImportException(
-			"Unable to perform validation: " + e.getMessage());
+		try
+		{
+		    boolean performValidate = configManager.isValidate();
+		    if (performValidate)
+			reportSummary = processValidation(importedProject,
+				reportSummary);
+		} catch (Exception e)
+		{
+		    totalValidationsFailed++;
+		    log.error("[{}] Unable to perform validation: " + e.getMessage(), project.getProjectName());
+		}
 	    }
 	}
+
+	// Add up the totals
+	reportSummary.addTotalImportsFailed(totalImportsFailed);
+	reportSummary.addTotalValidationsFailed(totalValidationsFailed);
 	
+	// Here, we display the basic summary
+	log.info(reportSummary.toString());
     }
-    
-    
+
     /**
      * An import consists of two steps. First creating and/or finding an
      * application within Code Center that matches Protex. Secondly to perform
@@ -131,12 +150,13 @@ public class CodeCenterProjectSynchronizer
      * 
      * @param projectList
      * @return Returns the existing project with a populated Application bean.
+     * @throws CodeCenterImportException
      */
     private CCIProject processImport(CCIProject project)
+	    throws CodeCenterImportException
     {
 	try
 	{
-
 	    log.info("[{}] Attempting Protex project import. (version: {})",
 		    project.getProjectName(), project.getProjectVersion());
 
@@ -153,41 +173,34 @@ public class CodeCenterProjectSynchronizer
 	    // If everything goes well, set the application name for
 	    // potential validation down the road.
 	    project.setApplication(app);
-
-	    log.info("[{}] IMPORT SUCCESSFUL!", project.getProjectName());
-	    log.info("-----------------------------");
 	} catch (CodeCenterImportException ccie)
 	{
-	    if (ccie.getMessage().contains(
-		    "already associated with Protex Project"))
-	    {
-		String text = ccie.getMessage().replace(
-			"Associating Protex project failed:The Application ",
-			"The Application [")
-			+ "]";
-		text = text.replace(
-			" is already associated with Protex Project ",
-			"] is already associated with Protex Project [");
-
-		log.info(text);
-		log.info("-----------------------------");
-	    } else
-	    {
-		log.error("Skipping application import due to ERROR: {}",
-			ccie.getMessage());
-		log.info("[{}] IMPORT FAILED :-(", project.getProjectName());
-		log.info("-----------------------------");
-	    }
+	    log.error("[{}] IMPORT FAILED", project.getProjectName());
+	    throw new CodeCenterImportException(ccie.getMessage());
 	}
 
-	log.info("---- Done ----");
+	log.info("[{}] IMPORT SUCCESSFUL!", project.getProjectName());
+	log.info("-----------------------------");
 
 	return project;
     }
 
-    private void processValidation(CCIProject importedProject)
-	    throws CodeCenterImportException
+    /**
+     * We expand on the concept validation within CCI Not only do we run the
+     * actual validation call, but we also perform the adjustments based on what
+     * the validation has created.
+     * 
+     * If components do not match, perform the necessary deletes/adds
+     * 
+     * @param importedProject
+     * @param summary
+     * @return
+     * @throws CodeCenterImportException
+     */
+    private CCIReportSummary processValidation(CCIProject importedProject,
+	    CCIReportSummary summary) throws CodeCenterImportException
     {
+	// VALIDATION CALL
 	Application app = importedProject.getApplication();
 	String applicationName = app.getName();
 	ApplicationIdToken appIdToken = app.getId();
@@ -199,6 +212,7 @@ public class CodeCenterProjectSynchronizer
 	{
 	    ccWrapper.getInternalApiWrapper().applicationApi.validate(
 		    appIdToken, false, false);
+	    log.info("[{}] validation completed. ");
 	} catch (SdkFault e)
 	{
 	    log.error("Unable to validate application {}", applicationName);
@@ -207,26 +221,45 @@ public class CodeCenterProjectSynchronizer
 			    + e.getMessage());
 	} catch (Exception sfe)
 	{
-	
+
 	    throw new CodeCenterImportException("Error with validation:"
 		    + sfe.getMessage(), sfe);
 	}
 
-	log.info("...success!");
+	// ADD REQUESTS
 
+	addRequestsToCodeCenter(app, summary);
+	// DELETE REQUESTS
+	deleteRequestsFromCodeCenter(app, summary);
+
+	return summary;
+    }
+
+    /**
+     * Gets the list of components after the last validate that exist in Protex,
+     * but not in Code Center Then attempt to make requests out of them. Honor
+     * user options to submit requests automatically.
+     * 
+     * @param app
+     * @param summary
+     */
+    private void addRequestsToCodeCenter(Application app,
+	    CCIReportSummary summary)
+    {
+	String applicationName = app.getName();
 	List<ProtexRequest> protexOnlyComponents = new ArrayList<ProtexRequest>();
 
 	try
 	{
 	    protexOnlyComponents = ccWrapper.getInternalApiWrapper().applicationApi
-		    .getProtexOnlyComponentsFromLastValidation(appIdToken);
-	    
-	   
+		    .getProtexOnlyComponentsFromLastValidation(app.getId());
+
+	    // Keep track of success versus potentials
+	    summary.addTotalPotentialAdds(protexOnlyComponents.size());
 	} catch (SdkFault e)
 	{
-	    throw new CodeCenterImportException(
-		    "Error getting Protex only components from validation:"
-			    + e.getMessage(), e);
+	    log.error("[{}] Error getting Protex components from validation:"
+		    + e.getMessage(), applicationName, e);
 	}
 
 	// REQUESTS
@@ -236,7 +269,8 @@ public class CodeCenterProjectSynchronizer
 	List<RequestIdToken> newRequests = new ArrayList<RequestIdToken>();
 
 	log.info("User specified submit set to: " + configManager.isSubmit());
-	
+
+	int requestsAdded = 0;
 	for (ProtexRequest protexRequest : protexOnlyComponents)
 	{
 	    try
@@ -247,7 +281,7 @@ public class CodeCenterProjectSynchronizer
 		request.setSubmit(configManager.isSubmit());
 
 		RequestApplicationComponentToken token = new RequestApplicationComponentToken();
-		token.setApplicationId(appIdToken);
+		token.setApplicationId(app.getId());
 		token.setComponentId(protexRequest.getComponentId());
 
 		request.setApplicationComponentToken(token);
@@ -255,14 +289,73 @@ public class CodeCenterProjectSynchronizer
 		newRequests.add(ccWrapper.getInternalApiWrapper().requestApi
 			.createRequest(request));
 
+		requestsAdded++;
 	    } catch (SdkFault e)
 	    {
-		throw new CodeCenterImportException("Error creating request: "
-			+ e.getMessage(), e);
+		log.error("[{}] Error creating request: " + e.getMessage(),
+			applicationName, e);
 	    }
 
 	}
-	log.info("...success!");
+
+	log.info("[{}] completed adding requests", applicationName);
+
+	// We want to keep track of successful requests.
+	summary.addRequestsAdded(requestsAdded);
+    }
+
+    /**
+     * Find the number of requests that no longer have any matches against
+     * Protex.
+     * 
+     * @param app
+     * @param summary
+     */
+    private void deleteRequestsFromCodeCenter(Application app,
+	    CCIReportSummary summary)
+    {
+
+	String applicationName = app.getName();
+	List<RequestSummary> ccOnlyComps = new ArrayList<RequestSummary>();
+
+	try
+	{
+	    ccOnlyComps = ccWrapper.getInternalApiWrapper().applicationApi
+		    .getCodeCenterOnlyComponentsFromLastValidation(app.getId());
+
+	    summary.addTotalPotentialDeletes(ccOnlyComps.size());
+	} catch (SdkFault e)
+	{
+	    log.error("[{}] Error getting CC only components from validation:"
+		    + e.getMessage(), applicationName, e);
+	}
+
+	// Delete the components
+	if (this.configManager.isPerformDelete())
+	{
+	    int totalRequestsDeleted = 0;
+
+	    try
+	    {
+		for (RequestSummary request : ccOnlyComps)
+		{
+		    ccWrapper.getInternalApiWrapper().requestApi
+			    .deleteRequest(request.getId());
+		    totalRequestsDeleted++;
+		}
+	    } catch (SdkFault e)
+	    {
+		log.error("[{}] error deleting request", applicationName, e);
+	    }
+
+	    summary.addRequestsDeleted(totalRequestsDeleted);
+	    log.info("[{}] completed deleing all requests", applicationName);
+
+	} else
+	{
+	    log.info("Delete option disabled");
+	}
+
     }
 
     /**
@@ -273,7 +366,7 @@ public class CodeCenterProjectSynchronizer
 	    throws CodeCenterImportException
     {
 	boolean createNewApplication = false;
-	
+
 	// The object to return (either existing or new)
 	Application app = null;
 
@@ -315,8 +408,8 @@ public class CodeCenterProjectSynchronizer
 			"Error when getting Application:" + e.getMessage(), e);
 	    }
 	}
-	
-	if(createNewApplication)
+
+	if (createNewApplication)
 	{
 	    try
 	    {
@@ -327,10 +420,12 @@ public class CodeCenterProjectSynchronizer
 		ApplicationCreate appCreate = new ApplicationCreate();
 		appCreate.setName(applicationName);
 		appCreate.setVersion(version);
-		
-		// This is the description that will show up in the main application 
+
+		// This is the description that will show up in the main
+		// application
 		// view in Code Center.
-		String description = CCIConstants.DESCRIPTION + configManager.getVersion();
+		String description = CCIConstants.DESCRIPTION
+			+ configManager.getVersion();
 		appCreate.setDescription(description);
 		WorkflowNameToken wf = new WorkflowNameToken();
 		wf.setName(workflowName);
@@ -364,88 +459,88 @@ public class CodeCenterProjectSynchronizer
     }
 
     /**
-     * Attempts to associate Protex projec to CC application.  
-     * Regardless of outcome, then attempts to retrieve it.  
+     * Attempts to associate Protex projec to CC application. Regardless of
+     * outcome, then attempts to retrieve it.
      * 
-     * @param project 
+     * @param project
      * @param app
      * @throws CodeCenterImportException
      */
     private com.blackducksoftware.sdk.codecenter.application.data.Project associateApplicationToProtexProject(
-	    CCIProject cciProject, Application app) throws CodeCenterImportException
+	    CCIProject cciProject, Application app)
+	    throws CodeCenterImportException
     {
 	// Use this flag to determine whether we need to perform it
 	// In the case where it exists, we can exit out.
 	boolean performAssociation = false;
-	
+
 	String projectName = cciProject.getProjectName();
 	String appVersion = cciProject.getProjectVersion();
-	String ccProtexAliasName = configManager.getProtexServerName();	
-	
+	String ccProtexAliasName = configManager.getProtexServerName();
+
 	// First attempt to retrieve it.
 	com.blackducksoftware.sdk.codecenter.application.data.Project associatedProject = null;
 	try
 	{
 	    associatedProject = ccWrapper.getInternalApiWrapper().applicationApi
 		    .getAssociatedProtexProject(app.getId());
-	    
+
 	    log.info("[{}] Application is already associated!", projectName);
-	    
+
 	    return associatedProject;
 	} catch (SdkFault e)
 	{
 	    ErrorCode code = e.getFaultInfo().getErrorCode();
-	    if(code == ErrorCode.APPLICATION_NOT_ASSOCIATED_WITH_PROTEX_PROJECT  || code == ErrorCode.NO_PROTEX_PROJECT_FOUND)
+	    if (code == ErrorCode.APPLICATION_NOT_ASSOCIATED_WITH_PROTEX_PROJECT
+		    || code == ErrorCode.NO_PROTEX_PROJECT_FOUND)
 	    {
-	    	performAssociation = true;
-	    }
-	    else
+		performAssociation = true;
+	    } else
 	    {
 		throw new CodeCenterImportException(
 			"Retrieving Protex association failed:"
 				+ e.getMessage(), e);
 	    }
 	}
-	
-	// If there is no association and we had a "friendly" error message, then create one.
-	if(performAssociation)
-	{
-        	try
-        	{
-        	    log.info("Attempting Protex project association for: "
-        		    + projectName + " version: " + appVersion);
-        	    
-        	    ProjectNameToken projectToken = new ProjectNameToken();
-        	    projectToken.setName(projectName);
 
-        	    ServerNameToken protexServerToken = new ServerNameToken();
-        	    protexServerToken.setName(ccProtexAliasName);
-        	    projectToken.setServerId(protexServerToken);
-        
-        	    ccWrapper.getInternalApiWrapper().applicationApi.associateProtexProject(app.getId(), projectToken);
-        	
-        	    // Get it
-        	    associatedProject = ccWrapper.getInternalApiWrapper().applicationApi
-        		    .getAssociatedProtexProject(app.getId());
-        
-        
-        	} catch (SdkFault e)
-        	{
-        	    if (e.getFaultInfo().getErrorCode() == ErrorCode.PROJECT_ALREADY_ASSOCIATED)
-        	    {
-        		log.info(
-        			"[{}] Protex project is already associated to application.  Please remove association.",
-        			projectName);
-        	    }  
-        	    else
-        	    {
-        		throw new CodeCenterImportException(
-        			"Associating Protex project failed:" + e.getMessage(),
-        			e);
-        	    }
-        	}
-        	    
-        	log.info("...success!");
+	// If there is no association and we had a "friendly" error message,
+	// then create one.
+	if (performAssociation)
+	{
+	    try
+	    {
+		log.info("Attempting Protex project association for: "
+			+ projectName + " version: " + appVersion);
+
+		ProjectNameToken projectToken = new ProjectNameToken();
+		projectToken.setName(projectName);
+
+		ServerNameToken protexServerToken = new ServerNameToken();
+		protexServerToken.setName(ccProtexAliasName);
+		projectToken.setServerId(protexServerToken);
+
+		ccWrapper.getInternalApiWrapper().applicationApi
+			.associateProtexProject(app.getId(), projectToken);
+
+		// Get it
+		associatedProject = ccWrapper.getInternalApiWrapper().applicationApi
+			.getAssociatedProtexProject(app.getId());
+
+	    } catch (SdkFault e)
+	    {
+		if (e.getFaultInfo().getErrorCode() == ErrorCode.PROJECT_ALREADY_ASSOCIATED)
+		{
+		    throw new CodeCenterImportException(
+			    "Protex project is already associated to a different application.  Please remove association.");
+		} else
+		{
+		    throw new CodeCenterImportException(
+			    "Associating Protex project failed:"
+				    + e.getMessage(), e);
+		}
+	    }
+
+	    log.info("...success!");
 	}
 	return associatedProject;
     }

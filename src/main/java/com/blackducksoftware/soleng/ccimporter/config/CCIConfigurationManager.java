@@ -38,8 +38,10 @@ public class CCIConfigurationManager extends ConfigurationManager
     private String owner = "";
     private Boolean submit = false;
     private Boolean validate = false;
+    private Boolean performDelete = false;
+    private Boolean performSubmit= true;
     private String version = "undefined";
-    
+
     private Boolean runReport = false;
 
     private List<CCIProject> projectList = new ArrayList<CCIProject>();
@@ -57,10 +59,12 @@ public class CCIConfigurationManager extends ConfigurationManager
 
     protected void initConfigFile()
     {
-	try{
-    		String dynamicVersion = getClass().getPackage().getImplementationVersion();
-    	if(dynamicVersion != null)
-    	    version =  dynamicVersion;
+	try
+	{
+	    String dynamicVersion = getClass().getPackage()
+		    .getImplementationVersion();
+	    if (dynamicVersion != null)
+		version = dynamicVersion;
 	} catch (Throwable t)
 	{
 	    log.debug("Could not determine version", t);
@@ -75,10 +79,15 @@ public class CCIConfigurationManager extends ConfigurationManager
 	validate = getOptionalProperty(
 		CCIConstants.VALIDATE_APPLICATION_PROPERTY, false,
 		Boolean.class);
-	
-	runReport = getOptionalProperty(
-			CCIConstants.RUN_REPORT_PROPERTY, false,
-			Boolean.class);
+	performSubmit = getOptionalProperty(
+		CCIConstants.SUBMIT_PROPERTY, true,
+		Boolean.class);
+	performDelete = getOptionalProperty(
+		CCIConstants.DELETE_REQUESTS, false,
+		Boolean.class);
+
+	runReport = getOptionalProperty(CCIConstants.RUN_REPORT_PROPERTY,
+		false, Boolean.class);
 
 	/**
 	 * Parse through the user specified list.
@@ -225,9 +234,9 @@ public class CCIConfigurationManager extends ConfigurationManager
 	 * We are going to set that bean which is of interest to us.
 	 * 
 	 */
-	if(type == APPLICATION.PROTEX)
+	if (type == APPLICATION.PROTEX)
 	    super.addServerBean(protexBean);
-	else if(type == APPLICATION.CODECENTER)
+	else if (type == APPLICATION.CODECENTER)
 	    super.addServerBean(ccServerBean);
     }
 
@@ -243,13 +252,14 @@ public class CCIConfigurationManager extends ConfigurationManager
 
     /**
      * This is the name of the Protex configuration within Code Center
+     * 
      * @param protexAlias
      */
     public void setProtexServerName(String protexAlias)
     {
 	protexServerName = protexAlias;
     }
-    
+
     public String getAppVersion()
     {
 	return appVersion;
@@ -320,6 +330,7 @@ public class CCIConfigurationManager extends ConfigurationManager
 
     /**
      * Version of the current application (derived from pom.xml)
+     * 
      * @return
      */
     public String getVersion()
@@ -327,11 +338,33 @@ public class CCIConfigurationManager extends ConfigurationManager
 	return version;
     }
 
-	public Boolean isRunReport() {
-		return runReport;
-	}
+    public Boolean isRunReport()
+    {
+	return runReport;
+    }
 
-	public void setRunReport(Boolean runReport) {
-		this.runReport = runReport;
-	}
+    public void setRunReport(Boolean runReport)
+    {
+	this.runReport = runReport;
+    }
+
+    public Boolean isPerformDelete()
+    {
+	return performDelete;
+    }
+
+    public void setPerformDelete(Boolean performDelete)
+    {
+	this.performDelete = performDelete;
+    }
+
+    public Boolean isPerformSubmit()
+    {
+	return performSubmit;
+    }
+
+    public void setPerformSubmit(Boolean performSubmit)
+    {
+	this.performSubmit = performSubmit;
+    }
 }

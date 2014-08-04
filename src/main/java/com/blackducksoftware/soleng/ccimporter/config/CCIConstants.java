@@ -57,6 +57,13 @@ public class CCIConstants {
 	// Validate Step
 	public static final String VALIDATE_APPLICATION_PROPERTY = "validate.application";
 
+	// Part of validate, should the requests be added?
+	public static final String SUBMIT_REQUESTS = "validate.requests.add";
+	
+	// Part of validate, should CC requests be deleted?
+	public static final String DELETE_REQUESTS = "validate.requests.delete";
+
+	
 	// Option to run the tool in report mode only.
 	public static final String RUN_REPORT_PROPERTY = "generate.report";
 }
