@@ -104,6 +104,8 @@ public class CodeCenterProjectSynchronizer
 	Integer totalImportsFailed = 0;
 	Integer totalValidationsFailed = 0;
 
+	reportSummary.setTotalProtexProjects(projectList.size());
+	
 	for (CCIProject project : projectList)
 	{
 	    boolean importSuccess = false;
@@ -178,6 +180,7 @@ public class CodeCenterProjectSynchronizer
 	} catch (CodeCenterImportException ccie)
 	{
 	    log.error("[{}] IMPORT FAILED", project.getProjectName());
+	    reportSummary.addToFailedImportList(project.getProjectName());
 	    throw new CodeCenterImportException(ccie.getMessage());
 	}
 
@@ -215,15 +218,10 @@ public class CodeCenterProjectSynchronizer
 	    ccWrapper.getInternalApiWrapper().applicationApi.validate(
 		    appIdToken, false, false);
 	    log.info("[{}] validation completed. ");
-	} catch (SdkFault e)
-	{
-	    log.error("Unable to validate application {}", applicationName);
-	    throw new CodeCenterImportException(
-		    "Could not validate Application with Protex project:"
-			    + e.getMessage());
 	} catch (Exception sfe)
 	{
-
+	    reportSummary.addToFailedValidationList(app.getName() + ":" + app.getVersion());
+	    log.error("Unable to validate application {}", applicationName);
 	    throw new CodeCenterImportException("Error with validation:"
 		    + sfe.getMessage(), sfe);
 	}
