@@ -51,9 +51,10 @@ public class CCISingleServerProcessor extends CCIProcessor
 
 	// There will only be one in the single instance
 	ServerBean protexBean = protexConfigManager.getServerBean();
-	
+
 	// Set up the local Protex config.
-	protexWrapper = new ProtexServerWrapper(protexBean, protexConfigManager, true);
+	protexWrapper = new ProtexServerWrapper(protexBean,
+		protexConfigManager, true);
 
     }
 
@@ -76,13 +77,14 @@ public class CCISingleServerProcessor extends CCIProcessor
 	return getProjects(protexWrapper);
     }
 
-	@Override
-	public void runReport() throws CodeCenterImportException 
-	{
-		CCIReportGenerator reportGen = new CCIReportGenerator(codeCenterWrapper, protexWrapper);
-		List<CCIProject> projectList = getProjects();
-		
-		log.info("Processing {} projects for reporting", projectList);
-		reportGen.generateReport(projectList);
-	}
+    @Override
+    public void runReport() throws CodeCenterImportException
+    {
+	CCIReportGenerator reportGen = new CCIReportGenerator(
+		codeCenterWrapper, protexWrapper);
+	List<CCIProject> projectList = getProjects();
+
+	log.info("Processing {} projects for reporting", projectList);
+	reportGen.generateReport(projectList);
+    }
 }

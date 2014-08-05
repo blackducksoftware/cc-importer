@@ -57,6 +57,9 @@ public class CCIConstants {
 	// Validate Step
 	public static final String VALIDATE_APPLICATION_PROPERTY = "validate.application";
 
+	// Option to make the validation "smart" - see Readme
+	public static final String VALIDATE_SMART_APPLICATION_PROPERTY = "validate.application.smart";
+	
 	// Part of validate, should the requests be added?
 	public static final String SUBMIT_REQUESTS = "validate.requests.add";
 	

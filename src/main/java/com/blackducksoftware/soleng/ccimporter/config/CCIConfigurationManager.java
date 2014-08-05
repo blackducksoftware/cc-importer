@@ -40,6 +40,7 @@ public class CCIConfigurationManager extends ConfigurationManager
     private Boolean validate = false;
     private Boolean performDelete = false;
     private Boolean performAdd= true;
+    private Boolean performSmartValidate = false;
     private String version = "undefined";
 
     private Boolean runReport = false;
@@ -78,6 +79,9 @@ public class CCIConfigurationManager extends ConfigurationManager
 		Boolean.class);
 	validate = getOptionalProperty(
 		CCIConstants.VALIDATE_APPLICATION_PROPERTY, false,
+		Boolean.class);
+	performSmartValidate = getOptionalProperty(
+		CCIConstants.VALIDATE_SMART_APPLICATION_PROPERTY, false,
 		Boolean.class);
 	performAdd = getOptionalProperty(
 		CCIConstants.SUBMIT_PROPERTY, true,
@@ -366,5 +370,15 @@ public class CCIConfigurationManager extends ConfigurationManager
     public void setPerformAdd(Boolean performSubmit)
     {
 	this.performAdd = performSubmit;
+    }
+
+    public Boolean isPerformSmartValidate()
+    {
+	return performSmartValidate;
+    }
+
+    public void setPerformSmartValidate(Boolean performSmartValidate)
+    {
+	this.performSmartValidate = performSmartValidate;
     }
 }

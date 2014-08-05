@@ -57,6 +57,7 @@ import com.blackducksoftware.sdk.protex.project.ProjectPageFilter;
 import com.blackducksoftware.sdk.protex.util.PageFilterFactory;
 import com.blackducksoftware.soleng.ccimport.exception.CodeCenterImportException;
 import com.blackducksoftware.soleng.ccimport.report.CCIReportSummary;
+import com.blackducksoftware.soleng.ccimport.validate.CodeCenterValidator;
 import com.blackducksoftware.soleng.ccimporter.config.CCIConfigurationManager;
 import com.blackducksoftware.soleng.ccimporter.config.CCIConstants;
 import com.blackducksoftware.soleng.ccimporter.config.CodeCenterConfigManager;
@@ -205,11 +206,21 @@ public class CodeCenterProjectSynchronizer
     private CCIReportSummary processValidation(CCIProject importedProject,
 	    CCIReportSummary summary) throws CodeCenterImportException
     {
+	
 	// VALIDATION CALL
 	Application app = importedProject.getApplication();
 	String applicationName = app.getName();
 	ApplicationIdToken appIdToken = app.getId();
 
+	// If user selected smart validate, then determine the last date of the application
+	if(this.configManager.isPerformSmartValidate())
+	{
+        	CodeCenterValidator validator = new CodeCenterValidator(this.configManager, this.ccWrapper, app, importedProject);
+        	String lastValidatedDate = validator.getLastValidatedDate();
+        	
+        	// TODO: Compare with refresh date
+	}
+	
 	log.info(
 		"[{}] Attempting validation with Protex. This may take some time, depending on the number of components...",
 		applicationName);

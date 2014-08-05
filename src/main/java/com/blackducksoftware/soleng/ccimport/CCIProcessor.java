@@ -108,6 +108,7 @@ public abstract class CCIProcessor
 		log.info("Found project: " + projectPojo.getProjectName());
 		
 		// If project came back, it is "valid", add it to our list and move on.
+		project.setProjectKey(projectPojo.getProjectKey());
 		projectList.add(project);
 	    } catch (Exception e)
 	    {

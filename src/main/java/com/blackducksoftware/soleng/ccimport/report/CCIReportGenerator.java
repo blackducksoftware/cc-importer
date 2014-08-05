@@ -60,6 +60,8 @@ public class CCIReportGenerator {
 			    associatedProject = this.codeCenterWrapper.getInternalApiWrapper().applicationApi
 				    .getAssociatedProtexProject(app.getId());
 			    
+			    
+			    
 			    String associatedProtexId = associatedProject.getId().getId();
 			    log.info("[{}] application's association found", appName);
 			    
