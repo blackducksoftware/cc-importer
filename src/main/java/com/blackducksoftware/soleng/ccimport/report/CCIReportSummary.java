@@ -4,8 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Bean to hold info to be read out
+ * Summary Bean to keep track of general statistics
  * 
+ *     We do not keep track of imports, because they are not possible to track
+    // since an import is a two-step process (create app, associate) that is always attempted 
+    // and its success does not necessarily imply an actual import
+   * 
  * @author akamen
  * 
  */
@@ -15,6 +19,14 @@ public class CCIReportSummary
     private Integer totalProtexProjects = 0;
     private Integer totalCCApplications = 0;
 
+    // Keep track of how many validates were performed/skipped
+    private Integer totalValidatesPerfomed= 0;
+    private Integer totalValidatesSkipped= 0;
+    
+    // Keep track of how many imports/validates failed
+    private Integer totalImportsFailed = 0;
+    private Integer totalValidationsFailed = 0;
+    
     // These represent how many total mismatches there are
     private Integer totalPotentialAdds = 0;
     private Integer totalPotentialDeletes = 0;
@@ -22,10 +34,6 @@ public class CCIReportSummary
     // These represent how many went through.
     private Integer totalRequestsAdded = 0;
     private Integer totalRequestsDeleted = 0;
-
-    // Keep track of how many imports/validates failed
-    private Integer totalImportsFailed = 0;
-    private Integer totalValidationsFailed = 0;
 
     // List of failed projects
     private List<String> failedImportList = new ArrayList<String>();
@@ -118,17 +126,6 @@ public class CCIReportSummary
     {
 	return totalValidationsFailed;
     }
-
-    public void addTotalValidationsFailed(Integer totalValidationsFailed)
-    {
-	this.totalValidationsFailed += totalValidationsFailed;
-    }
-
-    public void addTotalImportsFailed(Integer totalImportsFailed)
-    {
-	this.totalImportsFailed += totalImportsFailed;
-    }
-
     public List<String> getFailedImportList()
     {
 	return failedImportList;
@@ -149,6 +146,37 @@ public class CCIReportSummary
 	failedValidationList.add(failedValidation);
     }
 
+    public Integer getTotalValidatesSkipped()
+    {
+	return totalValidatesSkipped;
+    }
+
+    
+    // Incremental Adds
+    // These are invoked once after each respective action
+    
+
+    public Integer getTotalValidatesPerfomed()
+    {
+	return totalValidatesPerfomed;
+    }
+    public void addToTotalValidatesPerfomed()
+    {
+	this.totalValidatesPerfomed ++;
+    }
+    public void addTotalValidationsFailed()
+    {
+	this.totalValidationsFailed ++;
+    }
+    public void addTotalImportsFailed()
+    {
+	this.totalImportsFailed ++;
+    }
+    public void addToTotalValidatesSkipped()
+    {
+	this.totalValidatesSkipped++;
+    }
+    
     public String toString()
     {
 	StringBuilder sb = new StringBuilder();
@@ -156,13 +184,17 @@ public class CCIReportSummary
 	sb.append("\n");
 	sb.append("Total Projects Analyzed: " + totalProtexProjects);
 	sb.append("\n");
+	sb.append("Total Validations Performed: " + totalValidatesPerfomed);
+	sb.append("\n");
+	sb.append("Total Validations Skipped: " + totalValidatesSkipped);
+	sb.append("\n");
 	sb.append("Total Imports Failed: " + totalImportsFailed);
 	sb.append("\n");
 	sb.append("Total Validations Failed: " + totalValidationsFailed);
 	sb.append("\n");
-	sb.append("Total Potential Adds: " + totalPotentialAdds);
+	sb.append("Total Potential Request Adds: " + totalPotentialAdds);
 	sb.append("\n");
-	sb.append("Total Potential Deletes: " + totalPotentialDeletes);
+	sb.append("Total Potential Request Deletes: " + totalPotentialDeletes);
 	sb.append("\n");
 	sb.append("Total Requests Successfully Deleted: "
 		+ totalRequestsDeleted);
@@ -170,8 +202,8 @@ public class CCIReportSummary
 	sb.append("Total Requests Successfully Added: " + totalRequestsAdded);
 
 	// Build the list of projects
-	String listOfFailedValidations = buildList(failedValidationList);
-	String listOfFailedImports = buildList(failedValidationList);
+	String listOfFailedValidations = buildList(this.failedValidationList);
+	String listOfFailedImports = buildList(this.failedImportList);
 	
 	sb.append("\n");
 	sb.append("List of failed validations: " + listOfFailedValidations);
@@ -180,7 +212,7 @@ public class CCIReportSummary
 	
 	return sb.toString();
     }
-
+    
     /**
      * Builds a comma delimited list of project names
      * @param list of project names
@@ -189,13 +221,17 @@ public class CCIReportSummary
     private String buildList(List<String> list)
     {
 	StringBuilder sb= new StringBuilder();
-	for(String projectName : list)
+	for(int i=0; i < list.size(); i++)
 	{
+	    String projectName = list.get(i);
 	    sb.append(projectName);
-	    if(list.iterator().hasNext())
+	    if(i != list.size()-1)
 		sb.append(",");
 	}
 	
 	return sb.toString();
     }
+
+
+
 }

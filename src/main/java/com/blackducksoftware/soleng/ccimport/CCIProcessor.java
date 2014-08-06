@@ -9,6 +9,7 @@ All rights reserved. **/
 package com.blackducksoftware.soleng.ccimport;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -96,29 +97,57 @@ public abstract class CCIProcessor
 
 	List<CCIProject> userProjectList = codeCenterConfigManager.getProjectList();
 	if (userProjectList.size() == 0)
-	    return getAllProjects(protexWrapper);
-
-	log.info("Getting user supplied projects");
-	for (CCIProject project : userProjectList)
+	    projectList =  getAllProjects(protexWrapper);
+	else
 	{
-	    try
-	    {
-		// Retrieve the POJO from the SDK (this verifies that the project name is intact)
-		ProjectPojo projectPojo = protexWrapper.getProjectByName(project.getProjectName());
-		log.info("Found project: " + projectPojo.getProjectName());
-		
-		// If project came back, it is "valid", add it to our list and move on.
-		project.setProjectKey(projectPojo.getProjectKey());
-		projectList.add(project);
-	    } catch (Exception e)
-	    {
-		log.error("Unable to determine project with name: "
-			+ project);
-	    }
+        	log.info("Getting user supplied projects");
+        	for (CCIProject project : userProjectList)
+        	{
+        	    try
+        	    {
+        		// Retrieve the POJO from the SDK (this verifies that the project name is intact)
+        		ProjectPojo projectPojo = protexWrapper.getProjectByName(project.getProjectName());
+        		log.info("Found project: " + projectPojo.getProjectName());
+        		
+        		// If project came back, it is "valid", add it to our list and move on.
+        		project.setProjectKey(projectPojo.getProjectKey());
+        		projectList.add(project);
+        	    } catch (Exception e)
+        	    {
+        		log.error("Unable to determine project with name: "
+        			+ project);
+        	    }
+        	}
+	}
+	
+	if(codeCenterConfigManager.isPerformSmartValidate())
+	{
+	    log.info("Populating BOM refresh dates for all projects");
+	    populateBOMRefreshDate(projectList, protexWrapper);
 	}
 
 	return projectList;
 
+    }
+
+    /**
+     * Run through each project, and grab its last BOM refresh date
+     * @param projectList
+     * @param protexWrapper 
+     */
+    private void populateBOMRefreshDate(List<CCIProject> projectList, ProtexServerWrapper protexWrapper)
+    {
+	for(CCIProject project : projectList)
+	{
+	    try{
+		Date refreshDate = protexWrapper.getInternalApiWrapper().bomApi.getLastBomRefreshFinishDate(project.getProjectKey());
+		project.setLastBOMRefreshDate(refreshDate);
+	    } catch (Exception e)
+	    {
+		log.warn("Unable to get refresh date for project [{}]", project.getProjectName(), e);
+	    }
+	}
+	
     }
 
     /**

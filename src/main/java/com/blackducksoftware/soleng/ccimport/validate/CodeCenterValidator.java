@@ -100,8 +100,9 @@ public class CodeCenterValidator
 
 	    // Build a query that looks through the validate timestamp history
 	    // and returns us the timestamp for our application, sorted by most recent date first.
-	    String query = "select id,applicationid,serverid,projectid,timestamp from server_validation WHERE applicationid='"+ app_id +"' ORDER BY timestamp";
-
+	    // Limit to '1' as we are just interested in the first date sorted by Descending.
+	    String query = "select id,applicationid,serverid,projectid,timestamp from server_validation WHERE applicationid='"+ app_id +"' ORDER BY timestamp DESC limit 1";
+	    log.debug("Query to determine date: " + query);
 	    // Check to see if you have the Super User role, R401
 	    resultSet = statement.executeQuery(query);
 	    
@@ -110,9 +111,7 @@ public class CodeCenterValidator
 		String applicationid = resultSet.getString(applicationid_col);
 		String associatedProjectId  = resultSet.getString(projectid_col);
 		validatedDate = resultSet.getString(timestamp_col);
-		
-		log.info("Found time stamp: " + validatedDate);
-		
+
 		// Just as a safety check, make sure we got the same ID on the protex project
 		String protexProjId = this.protexProject.getProjectKey();
 		if(protexProjId.equals(associatedProjectId))

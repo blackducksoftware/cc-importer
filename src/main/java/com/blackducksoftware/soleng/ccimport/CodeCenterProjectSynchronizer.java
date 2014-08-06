@@ -19,7 +19,10 @@
  */
 package com.blackducksoftware.soleng.ccimport;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.apache.log4j.PropertyConfigurator;
@@ -102,11 +105,9 @@ public class CodeCenterProjectSynchronizer
     public void synchronize(List<CCIProject> projectList)
 
     {
-	Integer totalImportsFailed = 0;
-	Integer totalValidationsFailed = 0;
 
 	reportSummary.setTotalProtexProjects(projectList.size());
-	
+
 	for (CCIProject project : projectList)
 	{
 	    boolean importSuccess = false;
@@ -117,7 +118,6 @@ public class CodeCenterProjectSynchronizer
 		importSuccess = true;
 	    } catch (Exception e)
 	    {
-		totalImportsFailed++;
 		log.error("[{}] Unable to perform import: " + e.getMessage(),
 			project.getProjectName());
 	    }
@@ -132,18 +132,13 @@ public class CodeCenterProjectSynchronizer
 				reportSummary);
 		} catch (Exception e)
 		{
-		    totalValidationsFailed++;
 		    log.error(
 			    "[{}] Unable to perform validation: "
 				    + e.getMessage(), project.getProjectName());
 		}
 	    }
 	}
-
-	// Add up the totals
-	reportSummary.addTotalImportsFailed(totalImportsFailed);
-	reportSummary.addTotalValidationsFailed(totalValidationsFailed);
-
+	
 	// Here, we display the basic summary
 	log.info(reportSummary.toString());
     }
@@ -181,6 +176,7 @@ public class CodeCenterProjectSynchronizer
 	} catch (CodeCenterImportException ccie)
 	{
 	    log.error("[{}] IMPORT FAILED", project.getProjectName());
+	    reportSummary.addTotalImportsFailed();
 	    reportSummary.addToFailedImportList(project.getProjectName());
 	    throw new CodeCenterImportException(ccie.getMessage());
 	}
@@ -206,19 +202,54 @@ public class CodeCenterProjectSynchronizer
     private CCIReportSummary processValidation(CCIProject importedProject,
 	    CCIReportSummary summary) throws CodeCenterImportException
     {
-	
 	// VALIDATION CALL
 	Application app = importedProject.getApplication();
 	String applicationName = app.getName();
 	ApplicationIdToken appIdToken = app.getId();
 
-	// If user selected smart validate, then determine the last date of the application
-	if(this.configManager.isPerformSmartValidate())
+	// If user selected smart validate, then determine the last date of the
+	// application
+	try{
+        	if (this.configManager.isPerformSmartValidate())
+        	{
+        	    CodeCenterValidator validator = new CodeCenterValidator(
+        		    this.configManager, this.ccWrapper, app, importedProject);
+        	    
+        	    String lastValidatedDateStr = validator.getLastValidatedDate();
+        	    if(lastValidatedDateStr == null)
+        	    {
+        		throw new Exception("Could not determine last validate date for application: " + applicationName);
+        	    }
+        	    
+        	    Date lastRefreshDate = importedProject.getLastBOMRefreshDate();
+        	    
+        	    // Compare the two dates, if the validate date happened before the last refresh
+        	    // then proceed, otherwise get out.
+        	    SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        	    
+        	    try
+        	    {
+        		Date lastValidatedTime = formatter.parse(lastValidatedDateStr);
+        		boolean before = lastValidatedTime.before(lastRefreshDate);
+        		
+        		if(before)
+        		{
+        		    log.info("[{}] Validation date {} is before refresh date {} proceeding with validation",applicationName,lastValidatedTime.toString(), lastRefreshDate.toString());
+        		}
+        		else
+        		{
+        		    log.info("[{}] Validation date {} is after refresh date {}, skipping validation.",applicationName, lastValidatedTime.toString(), lastRefreshDate.toString());
+        		    summary.addToTotalValidatesSkipped();
+        		    return summary;
+        		}
+        	    } catch (ParseException e)
+        	    {
+        		log.warn("Unable to parse last validation date, proceeding with validation.", e);
+        	    }
+        	}
+	} catch(Exception e)
 	{
-        	CodeCenterValidator validator = new CodeCenterValidator(this.configManager, this.ccWrapper, app, importedProject);
-        	String lastValidatedDate = validator.getLastValidatedDate();
-        	
-        	// TODO: Compare with refresh date
+	    log.warn("Unexpected error during smart validation check:" + e.getMessage());
 	}
 	
 	log.info(
@@ -228,10 +259,13 @@ public class CodeCenterProjectSynchronizer
 	{
 	    ccWrapper.getInternalApiWrapper().applicationApi.validate(
 		    appIdToken, false, false);
-	    log.info("[{}] validation completed. ");
+	    reportSummary.addToTotalValidatesPerfomed();
+	    log.info("[{}] validation completed. ", applicationName);
 	} catch (Exception sfe)
 	{
-	    reportSummary.addToFailedValidationList(app.getName() + ":" + app.getVersion());
+	    reportSummary.addTotalValidationsFailed();
+	    reportSummary.addToFailedValidationList(app.getName() + ":"
+		    + app.getVersion());
 	    log.error("Unable to validate application {}", applicationName);
 	    throw new CodeCenterImportException("Error with validation:"
 		    + sfe.getMessage(), sfe);
@@ -281,7 +315,7 @@ public class CodeCenterProjectSynchronizer
 
 	    List<RequestIdToken> newRequests = new ArrayList<RequestIdToken>();
 
-	    log.info("User specified submit set to: "
+	    log.debug("User specified submit set to: "
 		    + configManager.isSubmit());
 
 	    int requestsAdded = 0;
@@ -324,7 +358,7 @@ public class CodeCenterProjectSynchronizer
 
     /**
      * Find the number of requests that no longer have any matches against
-     * Protex.  Delete those requests, honor user options.
+     * Protex. Delete those requests, honor user options.
      * 
      * @param app
      * @param summary

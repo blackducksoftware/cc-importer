@@ -8,6 +8,8 @@ All rights reserved. **/
  */
 package com.blackducksoftware.soleng.ccimporter.model;
 
+import java.util.Date;
+
 import com.blackducksoftware.sdk.codecenter.application.data.Application;
 
 import soleng.framework.standard.protex.ProtexProjectPojo;
@@ -23,6 +25,7 @@ public class CCIProject extends ProtexProjectPojo
 {
     private String projectVersion = null;
     private Application application = null;
+    private Date lastBOMRefreshDate = null;
     
     public CCIProject()
     {
@@ -62,5 +65,15 @@ public class CCIProject extends ProtexProjectPojo
     public void setApplication(Application application)
     {
 	this.application = application;
+    }
+
+    public Date getLastBOMRefreshDate()
+    {
+	return lastBOMRefreshDate;
+    }
+
+    public void setLastBOMRefreshDate(Date lastBOMRefreshDate)
+    {
+	this.lastBOMRefreshDate = lastBOMRefreshDate;
     }
 }
