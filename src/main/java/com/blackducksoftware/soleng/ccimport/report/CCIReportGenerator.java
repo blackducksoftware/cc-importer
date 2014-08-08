@@ -142,8 +142,11 @@ public class CCIReportGenerator {
 		
 		HashMap<String, String> processedAppnames = new HashMap<String, String>(apps.size());
 		// Go through each application and find corresponding Protex project
+		int appCount = apps.size();
+		int appIndex=0;
 		for(Application ccApp : apps)
 		{
+			log.info("Processing application " + ++appIndex + " of " + appCount + "...");
 			String appName = ccApp.getName();
 			String appVersion = ccApp.getVersion();
 			
