@@ -97,9 +97,12 @@ public class CCIConfigurationManager extends ConfigurationManager
 	 * Parse through the user specified list.
 	 */
 	String potentiaList = getOptionalProperty(CCIConstants.PROJECT_PROPERTY);
-	projectList = buildProjectList(Arrays.asList(StringUtils.split(
-		potentiaList, ",")));
-
+	if (potentiaList == null) {
+		projectList = new ArrayList<CCIProject>(0);
+	} else {
+		projectList = buildProjectList(Arrays.asList(StringUtils.split(
+			potentiaList, ",")));
+	}
     }
 
     /**
