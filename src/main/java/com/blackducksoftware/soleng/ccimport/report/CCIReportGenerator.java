@@ -95,6 +95,7 @@ public class CCIReportGenerator {
 		List<FieldDef> fields = new ArrayList<FieldDef>();
 		fields.add(new FieldDef("applicationName", FieldType.STRING, "Application Name"));
 		fields.add(new FieldDef("applicationVersion", FieldType.STRING, "Application Version"));
+		fields.add(new FieldDef("status", FieldType.STRING, "Status"));
 		fields.add(new FieldDef("foundInCc", FieldType.STRING, "Found in CC"));
 		fields.add(new FieldDef("foundInProtex", FieldType.STRING, "Found in Protex"));
 		fields.add(new FieldDef("compListsMatch", FieldType.STRING, "Component Lists Match"));
@@ -109,6 +110,7 @@ public class CCIReportGenerator {
 			Record record = new Record(recordDef);
 			record.setFieldValue("applicationName", project.getProjectName());
 			record.setFieldValue("applicationVersion", project.getProjectVersion());
+			record.setFieldValue("status", "Error");
 			record.setFieldValue("foundInCc", "N/A");
 			record.setFieldValue("foundInProtex", "No");
 			record.setFieldValue("compListsMatch", "N/A");
@@ -152,6 +154,7 @@ public class CCIReportGenerator {
 			record.setFieldValue("foundInCc", "Yes");
 			
 			// Defaults
+			record.setFieldValue("status", "Error");
 			record.setFieldValue("foundInProtex", "No");
 			record.setFieldValue("compListsMatch", "N/A");
 			
@@ -161,7 +164,7 @@ public class CCIReportGenerator {
 			// In this scenario: when we get to the second app, because we deleted it from protexProjectMap,
 			// it looks like the user just didn't specify it (but they did)
 			if (processedAppnames.containsKey(appName)) {
-				log.error("[" + appName + "] exists multiple times (multiple versions); in Code Center");
+				log.warn("[" + appName + "] exists multiple times (multiple versions); in Code Center");
 				record.setFieldValue("foundInProtex", "No");
 				record.setFieldValue("compListsMatch", "N/A");
 				dataTable.add(record);
@@ -176,13 +179,13 @@ public class CCIReportGenerator {
 				associatedProject = this.codeCenterWrapper.getInternalApiWrapper().applicationApi
 						.getAssociatedProtexProject(ccApp.getId());
 			} catch (com.blackducksoftware.sdk.codecenter.fault.SdkFault e) {
-				log.error("[" + appName + ":" + appVersion + "] no association found in CC (cause: " + e.getMessage() + ")");
+				log.warn("[" + appName + ":" + appVersion + "] no association found in CC (cause: " + e.getMessage() + ")");
 				record.setFieldValue("foundInProtex", "No");
 				record.setFieldValue("compListsMatch", "N/A");
 				dataTable.add(record);
 				continue;
 			} catch (Exception e2) {
-				log.error("Error: " + e2.getMessage());
+				log.warn("Error: " + e2.getMessage());
 				record.setFieldValue("foundInProtex", "No");
 				record.setFieldValue("compListsMatch", "N/A");
 				dataTable.add(record);
@@ -202,18 +205,19 @@ public class CCIReportGenerator {
 			    		log.info("[" + appName + ":" + appVersion + "] Code Center / Protex Component lists are identical");
 			    		
 						record.setFieldValue("compListsMatch", "Yes");
+						record.setFieldValue("status", "");
 			    	} else {
-			    		log.error("[" + appName + ":" + appVersion + "] Code Center / Protex Component lists are different");
+			    		log.warn("[" + appName + ":" + appVersion + "] Code Center / Protex Component lists are different");
 						record.setFieldValue("compListsMatch", "No");
 			    	}
 		    	} catch (Exception e) {
-		    		log.error("[" + appName + ":" + appVersion + "] Error reading components from Code Center / Protex", e);
+		    		log.warn("[" + appName + ":" + appVersion + "] Error reading components from Code Center / Protex", e);
 		    		record.setFieldValue("compListsMatch", "No");
 		    	}
 		    	
 		    } else {
 		    	if (projectListIsUserSpecifiedSubset) {
-		    		log.error("[" + appName + ":" + appVersion + "] exists in Code Center but does not exist in protexProjectMap");
+		    		log.warn("[" + appName + ":" + appVersion + "] exists in Code Center but does not exist in protexProjectMap");
 		    		record.setFieldValue("foundInProtex", "No");
 		    	}
 		    }			    
@@ -241,6 +245,7 @@ public class CCIReportGenerator {
 			Record record = new Record(recordDef);
 			record.setFieldValue("applicationName", project.getProjectName());
 			record.setFieldValue("applicationVersion", project.getProjectVersion());
+			record.setFieldValue("status", "Error");
 			record.setFieldValue("foundInCc", "No");
 			record.setFieldValue("foundInProtex", "Yes");
 			record.setFieldValue("compListsMatch", "N/A");
