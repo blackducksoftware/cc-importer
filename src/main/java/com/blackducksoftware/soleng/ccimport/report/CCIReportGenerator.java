@@ -44,6 +44,8 @@ public class CCIReportGenerator {
 	private static Logger log = LoggerFactory
 			    .getLogger(CCIReportGenerator.class.getName());
 
+	private final static int EXCEL_CELL_MAX_CHARS = 32767;
+	
 	private CodeCenterServerWrapper codeCenterWrapper = null;
 	private ProtexServerWrapper protexWrapper = null;
 	private CCIReportSummary reportSummary = new CCIReportSummary();
@@ -99,6 +101,7 @@ public class CCIReportGenerator {
 		fields.add(new FieldDef("foundInCc", FieldType.STRING, "Found in CC"));
 		fields.add(new FieldDef("foundInProtex", FieldType.STRING, "Found in Protex"));
 		fields.add(new FieldDef("compListsMatch", FieldType.STRING, "Component Lists Match"));
+		fields.add(new FieldDef("compLists", FieldType.STRING, "Component Lists"));
 		recordDef = new RecordDef(fields);
 		
 		// Create a new/empty DataSet that uses that RecordDef
@@ -114,6 +117,7 @@ public class CCIReportGenerator {
 			record.setFieldValue("foundInCc", "N/A");
 			record.setFieldValue("foundInProtex", "No");
 			record.setFieldValue("compListsMatch", "N/A");
+			record.setFieldValue("compLists", "");
 			dataTable.add(record);
 		}
 	}
@@ -157,6 +161,7 @@ public class CCIReportGenerator {
 			record.setFieldValue("status", "Error");
 			record.setFieldValue("foundInProtex", "No");
 			record.setFieldValue("compListsMatch", "N/A");
+			record.setFieldValue("compLists", "");
 			
 			// We need this check for this scenario:
 			// User has specified a list of project names to report on
@@ -200,8 +205,9 @@ public class CCIReportGenerator {
 		    	protexProjectMap.remove(appName);
 		    	record.setFieldValue("foundInProtex", "Yes");
 		    	
+		    	String compDiffString;
 		    	try {
-			    	if (compareComponentLists(protexProject, ccApp) == 0) {
+			    	if ((compDiffString = getComponentListDiffString(protexProject, ccApp, EXCEL_CELL_MAX_CHARS)) == null) {
 			    		log.info("[" + appName + ":" + appVersion + "] Code Center / Protex Component lists are identical");
 			    		
 						record.setFieldValue("compListsMatch", "Yes");
@@ -209,6 +215,7 @@ public class CCIReportGenerator {
 			    	} else {
 			    		log.warn("[" + appName + ":" + appVersion + "] Code Center / Protex Component lists are different");
 						record.setFieldValue("compListsMatch", "No");
+						record.setFieldValue("compLists", compDiffString);
 			    	}
 		    	} catch (Exception e) {
 		    		log.warn("[" + appName + ":" + appVersion + "] Error reading components from Code Center / Protex", e);
@@ -249,12 +256,13 @@ public class CCIReportGenerator {
 			record.setFieldValue("foundInCc", "No");
 			record.setFieldValue("foundInProtex", "Yes");
 			record.setFieldValue("compListsMatch", "N/A");
+			record.setFieldValue("compLists", "");
 			dataTable.add(record);
 		}
 	}
 	
 	
-	
+	// TODO: Obsolete
 	private int compareComponentLists(CCIProject protexProject, Application ccApp) throws Exception {
 		// Get / compare components
 		ComponentCollector protexComponentCollector = new ProtexComponentCollector(protexWrapper,
@@ -273,6 +281,54 @@ public class CCIReportGenerator {
     	int compareResult = protexComponentCollector.compareTo(ccComponentCollector);
     	System.out.println("Compare result: " + compareResult);
     	return compareResult;
+	}
+	
+	/**
+	 * returns null if the component lists are identical, a string with both lists if not.
+	 * @param protexProject
+	 * @param ccApp
+	 * @param maxLen
+	 * @return
+	 * @throws Exception
+	 */
+	private String getComponentListDiffString(CCIProject protexProject, Application ccApp, int maxLen) throws Exception {
+		String diffString=null;
+		
+		if (maxLen < 5) {
+			throw new IllegalArgumentException("maxLen must be at least 5");
+		}
+		
+		// Get / compare components
+		ComponentCollector protexComponentCollector = new ProtexComponentCollector(protexWrapper,
+				protexProject.getProjectKey());
+    	
+		ComponentCollector ccComponentCollector;
+		try {
+			ApplicationDataDao ccDao = new CodeCenter6_6_1Dao(codeCenterWrapper);
+			ccDao.setSkipNonKbComponents(false);
+	    	ccComponentCollector = new CodeCenterComponentCollector(ccDao, ccApp.getId().getId());
+		} catch (com.blackducksoftware.sdk.codecenter.fault.SdkFault e) {
+			throw new SdkFault(e.getMessage());
+		}
+
+		log.info("\tCode Center Component list: " + ccComponentCollector);
+		log.info("\tProtex      Component list: " + protexComponentCollector);
+    	int compareResult = protexComponentCollector.compareTo(ccComponentCollector);
+    	System.out.println("Compare result: " + compareResult);
+
+    	if (compareResult != 0) {
+    		StringBuilder builder = new StringBuilder();
+    		builder.append("Code Center Component list: ");
+    		builder.append(ccComponentCollector.toString());
+    		builder.append("\nProtex Component list: ");
+    		builder.append(protexComponentCollector.toString());
+    		if (builder.length() > maxLen) {
+    			diffString = builder.substring(0, maxLen-5) + "...";
+    		} else {
+    			diffString = builder.toString();
+    		}
+    	}
+    	return diffString; // null if lists are identical
 	}
 
 	private HashMap<String, Application> buildApplicationMap(
