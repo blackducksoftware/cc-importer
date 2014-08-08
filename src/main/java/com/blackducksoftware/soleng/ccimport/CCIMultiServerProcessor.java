@@ -107,7 +107,7 @@ public class CCIMultiServerProcessor extends CCIProcessor
      */
     private List<CCIProject> getAllProjects(ProtexServerWrapper protexWrapper) throws CodeCenterImportException
     {
-	return getProjects(protexWrapper);
+	return getProjects(protexWrapper).getList();
 	
     }
 

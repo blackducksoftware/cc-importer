@@ -24,6 +24,7 @@ import com.blackducksoftware.soleng.ccimport.report.CCIReportGenerator;
 import com.blackducksoftware.soleng.ccimporter.config.CodeCenterConfigManager;
 import com.blackducksoftware.soleng.ccimporter.config.ProtexConfigManager;
 import com.blackducksoftware.soleng.ccimporter.model.CCIProject;
+import com.blackducksoftware.soleng.ccimporter.model.CCIProjectList;
 
 /**
  * 
@@ -65,26 +66,25 @@ public class CCISingleServerProcessor extends CCIProcessor
 	CodeCenterProjectSynchronizer synchronizer = new CodeCenterProjectSynchronizer(
 		codeCenterWrapper, codeCenterConfigManager);
 
-	List<CCIProject> projectList = getProjects();
+	List<CCIProject> projectList = getProjects().getList();
 	log.info("Processing {} projects for synchronization", projectList);
 
 	synchronizer.synchronize(projectList);
 
     }
 
-    private List<CCIProject> getProjects() throws CodeCenterImportException
+    private CCIProjectList getProjects() throws CodeCenterImportException
     {
 	return getProjects(protexWrapper);
     }
 
-    @Override
-    public void runReport() throws CodeCenterImportException
-    {
-	CCIReportGenerator reportGen = new CCIReportGenerator(
-		codeCenterWrapper, protexWrapper);
-	List<CCIProject> projectList = getProjects();
-
-	log.info("Processing {} projects for reporting", projectList);
-	reportGen.generateReport(projectList);
-    }
+	@Override
+	public void runReport() throws CodeCenterImportException 
+	{
+		CCIReportGenerator reportGen = new CCIReportGenerator(codeCenterWrapper, protexWrapper);
+		CCIProjectList projectList = getProjects();
+		
+		log.info("Processing {} projects for reporting", projectList);
+		reportGen.generateReport(projectList);
+	}
 }

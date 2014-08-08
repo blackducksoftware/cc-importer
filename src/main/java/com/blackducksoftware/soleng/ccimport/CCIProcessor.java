@@ -24,6 +24,7 @@ import soleng.framework.standard.protex.ProtexServerWrapper;
 import com.blackducksoftware.soleng.ccimport.exception.CodeCenterImportException;
 import com.blackducksoftware.soleng.ccimporter.config.CodeCenterConfigManager;
 import com.blackducksoftware.soleng.ccimporter.model.CCIProject;
+import com.blackducksoftware.soleng.ccimporter.model.CCIProjectList;
 
 /**
  * Common functionality shared between the single and multi processors.
@@ -90,17 +91,34 @@ public abstract class CCIProcessor
      * @return
      * @throws Exception
      */
-    public List<CCIProject> getProjects(ProtexServerWrapper protexWrapper)
-	    throws CodeCenterImportException
+	/**
+     * Returns a list of projects based on either: - Supplied user list - All
+     * Projects belonging to that user (assuming supplied user list is empty)
+     * 
+     * @param protexWrapper
+     * @return
+     * @throws Exception
+     */
+	public CCIProjectList getProjects(ProtexServerWrapper protexWrapper)
+		    throws CodeCenterImportException
     {
 	List<CCIProject> projectList = new ArrayList<CCIProject>();
+	CCIProjectList listObject;
 
 	List<CCIProject> userProjectList = codeCenterConfigManager.getProjectList();
 	if (userProjectList.size() == 0)
-	    projectList =  getAllProjects(protexWrapper);
+	{
+		projectList = getAllProjects(protexWrapper);
+		listObject = new CCIProjectList(projectList);
+		listObject.setUserSpecifiedSubset(false);
+		return listObject;
+	}
 	else
 	{
         	log.info("Getting user supplied projects");
+        	listObject = new CCIProjectList();
+        	listObject.setUserSpecifiedSubset(true);
+        	
         	for (CCIProject project : userProjectList)
         	{
         	    try
@@ -116,6 +134,7 @@ public abstract class CCIProcessor
         	    {
         		log.error("Unable to determine project with name: "
         			+ project);
+        		listObject.addInvalidProject(project.getProjectName(), project.getProjectVersion());
         	    }
         	}
 	}
@@ -126,7 +145,8 @@ public abstract class CCIProcessor
 	    populateBOMRefreshDate(projectList, protexWrapper);
 	}
 
-	return projectList;
+	listObject.setList(projectList);
+	return listObject;
 
     }
 
@@ -149,6 +169,7 @@ public abstract class CCIProcessor
 	}
 	
     }
+
 
     /**
      * @param protexWrapper
