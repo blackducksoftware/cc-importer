@@ -22,6 +22,7 @@ import soleng.framework.standard.common.ProjectPojo;
 import soleng.framework.standard.protex.ProtexServerWrapper;
 
 import com.blackducksoftware.soleng.ccimport.exception.CodeCenterImportException;
+import com.blackducksoftware.soleng.ccimport.report.CCIReportGenerator;
 import com.blackducksoftware.soleng.ccimporter.config.CodeCenterConfigManager;
 import com.blackducksoftware.soleng.ccimporter.model.CCIProject;
 import com.blackducksoftware.soleng.ccimporter.model.CCIProjectList;
@@ -82,6 +83,11 @@ public abstract class CCIProcessor
      * @throws CodeCenterImportException
      */
 	public abstract void runReport() throws CodeCenterImportException;
+	
+	/**
+	 * Used by unit tests to get the report generator (for testing contents of report).
+	 */
+	public abstract CCIReportGenerator getReportGen();
 	
     /**
      * Returns a list of projects based on either: - Supplied user list - All

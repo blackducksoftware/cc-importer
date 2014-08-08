@@ -87,5 +87,4 @@ public class CCIProjectImporterHarness
 	    log.error("General failure: " + e.getMessage());
 	}
     }
-
 }

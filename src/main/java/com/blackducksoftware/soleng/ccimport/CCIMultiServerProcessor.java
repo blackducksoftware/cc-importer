@@ -17,6 +17,7 @@ import soleng.framework.standard.common.ProjectPojo;
 import soleng.framework.standard.protex.ProtexServerWrapper;
 
 import com.blackducksoftware.soleng.ccimport.exception.CodeCenterImportException;
+import com.blackducksoftware.soleng.ccimport.report.CCIReportGenerator;
 import com.blackducksoftware.soleng.ccimporter.config.CCIConstants;
 import com.blackducksoftware.soleng.ccimporter.config.CodeCenterConfigManager;
 import com.blackducksoftware.soleng.ccimporter.config.ProtexConfigManager;
@@ -110,6 +111,10 @@ public class CCIMultiServerProcessor extends CCIProcessor
 	return getProjects(protexWrapper).getList();
 	
     }
-
+    
+    // Used by unit tests
+ 	public CCIReportGenerator getReportGen() {
+ 		throw new UnsupportedOperationException("getReportGen() not implemented for CCIMultiServerProcessor");
+ 	}
 
 }

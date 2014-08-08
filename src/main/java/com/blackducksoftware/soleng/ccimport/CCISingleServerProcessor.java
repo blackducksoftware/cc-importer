@@ -37,8 +37,9 @@ public class CCISingleServerProcessor extends CCIProcessor
 
     private static Logger log = LoggerFactory
 	    .getLogger(CCISingleServerProcessor.class.getName());
-
+  
     private ProtexServerWrapper protexWrapper = null;
+    private CCIReportGenerator reportGen = null;
 
     /**
      * @param configManager
@@ -81,10 +82,16 @@ public class CCISingleServerProcessor extends CCIProcessor
 	@Override
 	public void runReport() throws CodeCenterImportException 
 	{
-		CCIReportGenerator reportGen = new CCIReportGenerator(codeCenterWrapper, protexWrapper);
+		reportGen = new CCIReportGenerator(codeCenterWrapper, protexWrapper);
 		CCIProjectList projectList = getProjects();
 		
 		log.info("Processing {} projects for reporting", projectList);
 		reportGen.generateReport(projectList);
 	}
+
+	// Used by unit tests
+	public CCIReportGenerator getReportGen() {
+		return reportGen;
+	}
+	
 }

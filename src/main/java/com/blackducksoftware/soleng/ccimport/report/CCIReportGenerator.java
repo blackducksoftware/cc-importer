@@ -76,7 +76,6 @@ public class CCIReportGenerator {
 		}	
 	}
 	
-	// TODO: This method is getting ugly... need to refactor it
 	private void generateReportInternal(CCIProjectList projectList) throws Exception
 	{
 		createDataTable();
@@ -117,6 +116,7 @@ public class CCIReportGenerator {
 		}
 	}
 	
+	// TODO: This method is too big / ugly... need to refactor it
 	private HashMap<String, CCIProject> processValidProjects(CCIProjectList projectList) throws Exception {
 		log.info("Project list: " + projectList);
 		
@@ -230,6 +230,10 @@ public class CCIReportGenerator {
 		return protexProjectMap;
 	}
 	
+	public DataTable getDataTable() {
+		return dataTable;
+	}
+
 	private void processLeftOverProjects(HashMap<String, CCIProject> leftOvers) throws Exception {
 		for (String key : leftOvers.keySet()) {
 			CCIProject project = leftOvers.get(key);
