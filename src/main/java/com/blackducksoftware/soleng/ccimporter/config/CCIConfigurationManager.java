@@ -42,7 +42,12 @@ public class CCIConfigurationManager extends ConfigurationManager
     private Boolean performAdd= true;
     private Boolean performSmartValidate = false;
     private String version = "undefined";
-
+    
+    // TODO:  Temporary workarounds for DB access
+    private String hostName = null;
+    private String timeZone = null;
+    private String dbString = null;
+    
     private Boolean runReport = false;
 
     private List<CCIProject> projectList = new ArrayList<CCIProject>();
@@ -92,6 +97,11 @@ public class CCIConfigurationManager extends ConfigurationManager
 
 	runReport = getOptionalProperty(CCIConstants.RUN_REPORT_PROPERTY,
 		false, Boolean.class);
+	
+	// TODO: Temporary workaround for the DB access
+	this.hostName = getOptionalProperty(CCIConstants.VALIDATE_SMART_HOST_NAME_PROPERTY);
+	this.timeZone = getOptionalProperty(CCIConstants.VALIDATE_SMART_TIMEZONE_PROPERTY);
+	this.dbString = getOptionalProperty(CCIConstants.VALIDATE_SMART_DB_PROPERTY);
 
 	/**
 	 * Parse through the user specified list.
@@ -383,5 +393,35 @@ public class CCIConfigurationManager extends ConfigurationManager
     public void setPerformSmartValidate(Boolean performSmartValidate)
     {
 	this.performSmartValidate = performSmartValidate;
+    }
+
+    public String getHostName()
+    {
+	return hostName;
+    }
+
+    public void setHostName(String hostName)
+    {
+	this.hostName = hostName;
+    }
+
+    public String getTimeZone()
+    {
+	return timeZone;
+    }
+
+    public void setTimeZone(String timeZone)
+    {
+	this.timeZone = timeZone;
+    }
+
+    public String getDbString()
+    {
+	return dbString;
+    }
+
+    public void setDbString(String dbString)
+    {
+	this.dbString = dbString;
     }
 }

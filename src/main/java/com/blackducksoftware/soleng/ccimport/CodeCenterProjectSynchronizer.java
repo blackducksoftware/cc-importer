@@ -22,18 +22,18 @@ package com.blackducksoftware.soleng.ccimport;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.TimeZone;
 
-import org.apache.log4j.PropertyConfigurator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import soleng.framework.standard.codecenter.CodeCenterServerWrapper;
-import soleng.framework.standard.protex.ProtexServerWrapper;
 
 import com.blackducksoftware.sdk.codecenter.administration.data.ServerNameToken;
-import com.blackducksoftware.sdk.codecenter.application.ApplicationApi;
 import com.blackducksoftware.sdk.codecenter.application.data.Application;
 import com.blackducksoftware.sdk.codecenter.application.data.ApplicationCreate;
 import com.blackducksoftware.sdk.codecenter.application.data.ApplicationIdToken;
@@ -41,30 +41,19 @@ import com.blackducksoftware.sdk.codecenter.application.data.ApplicationNameVers
 import com.blackducksoftware.sdk.codecenter.application.data.ProjectNameToken;
 import com.blackducksoftware.sdk.codecenter.application.data.ProtexRequest;
 import com.blackducksoftware.sdk.codecenter.approval.data.WorkflowNameToken;
-import com.blackducksoftware.sdk.codecenter.client.util.CodeCenterServerProxyV6_6_0;
-import com.blackducksoftware.sdk.codecenter.cola.ColaApi;
 import com.blackducksoftware.sdk.codecenter.fault.ErrorCode;
 import com.blackducksoftware.sdk.codecenter.fault.SdkFault;
-import com.blackducksoftware.sdk.codecenter.request.RequestApi;
 import com.blackducksoftware.sdk.codecenter.request.data.RequestApplicationComponentToken;
 import com.blackducksoftware.sdk.codecenter.request.data.RequestCreate;
 import com.blackducksoftware.sdk.codecenter.request.data.RequestIdToken;
 import com.blackducksoftware.sdk.codecenter.request.data.RequestSummary;
 import com.blackducksoftware.sdk.codecenter.user.data.RoleNameToken;
 import com.blackducksoftware.sdk.codecenter.user.data.UserNameToken;
-import com.blackducksoftware.sdk.protex.client.util.ProtexServerProxyV6_3;
-import com.blackducksoftware.sdk.protex.project.Project;
-import com.blackducksoftware.sdk.protex.project.ProjectApi;
-import com.blackducksoftware.sdk.protex.project.ProjectColumn;
-import com.blackducksoftware.sdk.protex.project.ProjectPageFilter;
-import com.blackducksoftware.sdk.protex.util.PageFilterFactory;
 import com.blackducksoftware.soleng.ccimport.exception.CodeCenterImportException;
 import com.blackducksoftware.soleng.ccimport.report.CCIReportSummary;
 import com.blackducksoftware.soleng.ccimport.validate.CodeCenterValidator;
 import com.blackducksoftware.soleng.ccimporter.config.CCIConfigurationManager;
 import com.blackducksoftware.soleng.ccimporter.config.CCIConstants;
-import com.blackducksoftware.soleng.ccimporter.config.CodeCenterConfigManager;
-import com.blackducksoftware.soleng.ccimporter.config.StringConstants;
 import com.blackducksoftware.soleng.ccimporter.model.CCIProject;
 
 /**
@@ -103,13 +92,13 @@ public class CodeCenterProjectSynchronizer
      * @throws CodeCenterImportException
      */
     public void synchronize(List<CCIProject> projectList)
-
     {
-
 	reportSummary.setTotalProtexProjects(projectList.size());
-
+	
+	int counter = 1;
 	for (CCIProject project : projectList)
 	{
+	    log.info("[{}/{}] Processing {}", counter++, projectList.size(), project.getProjectName());
 	    boolean importSuccess = false;
 	    CCIProject importedProject = null;
 	    try
@@ -138,7 +127,7 @@ public class CodeCenterProjectSynchronizer
 		}
 	    }
 	}
-	
+
 	// Here, we display the basic summary
 	log.info(reportSummary.toString());
     }
@@ -209,49 +198,82 @@ public class CodeCenterProjectSynchronizer
 
 	// If user selected smart validate, then determine the last date of the
 	// application
-	try{
-        	if (this.configManager.isPerformSmartValidate())
-        	{
-        	    CodeCenterValidator validator = new CodeCenterValidator(
-        		    this.configManager, this.ccWrapper, app, importedProject);
-        	    
-        	    String lastValidatedDateStr = validator.getLastValidatedDate();
-        	    if(lastValidatedDateStr == null)
-        	    {
-        		throw new Exception("Could not determine last validate date for application: " + applicationName);
-        	    }
-        	    
-        	    Date lastRefreshDate = importedProject.getLastBOMRefreshDate();
-        	    
-        	    // Compare the two dates, if the validate date happened before the last refresh
-        	    // then proceed, otherwise get out.
-        	    SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        	    
-        	    try
-        	    {
-        		Date lastValidatedTime = formatter.parse(lastValidatedDateStr);
-        		boolean before = lastValidatedTime.before(lastRefreshDate);
-        		
-        		if(before)
-        		{
-        		    log.info("[{}] Validation date {} is before refresh date {} proceeding with validation",applicationName,lastValidatedTime.toString(), lastRefreshDate.toString());
-        		}
-        		else
-        		{
-        		    log.info("[{}] Validation date {} is after refresh date {}, skipping validation.",applicationName, lastValidatedTime.toString(), lastRefreshDate.toString());
-        		    summary.addToTotalValidatesSkipped();
-        		    return summary;
-        		}
-        	    } catch (ParseException e)
-        	    {
-        		log.warn("Unable to parse last validation date, proceeding with validation.", e);
-        	    }
-        	}
-	} catch(Exception e)
+	try
 	{
-	    log.warn("Unexpected error during smart validation check:" + e.getMessage());
+	    if (this.configManager.isPerformSmartValidate())
+	    {
+		CodeCenterValidator validator = new CodeCenterValidator(
+			this.configManager, this.ccWrapper, app,
+			importedProject);
+
+		String lastValidatedDateStr = validator.getLastValidatedDate();
+		if (lastValidatedDateStr == null)
+		{
+		    throw new Exception(
+			    "Could not determine last validate date for application: "
+				    + applicationName);
+		}
+
+		Date lastRefreshDate = importedProject.getLastBOMRefreshDate();
+
+		// Compare the two dates, if the validate date happened before
+		// the last refresh
+		// then proceed, otherwise get out.
+		SimpleDateFormat formatter = new SimpleDateFormat(
+			"yyyy-MM-dd HH:mm:ss");
+
+		try
+		{
+		    // TODO:  Temporary workaround to provide timezones.  This handles the case whereby
+		    // utility is run against a server that is not in the same time zone.
+		    String userSpecifiedTimeZone = configManager.getTimeZone();
+		    TimeZone tz = null;
+		    if(userSpecifiedTimeZone != null && !userSpecifiedTimeZone.isEmpty())
+		    {
+			tz = TimeZone.getTimeZone(userSpecifiedTimeZone);
+			log.info("User specified time zone recognized, using: " + tz.getDisplayName());
+		    }
+		    else
+		    {
+			tz = TimeZone.getDefault();
+		    }
+		    
+		    formatter.setTimeZone(tz);
+		    
+		    Date lastValidatedTime = formatter
+			    .parse(lastValidatedDateStr);
+		    
+		  
+		    boolean before = lastValidatedTime.before(lastRefreshDate);
+
+		    if (before)
+		    {
+			log.info(
+				"[{}] Validation date {} is before refresh date {} proceeding with validation",
+				applicationName, lastValidatedTime.toString(),
+				lastRefreshDate.toString());
+		    } else
+		    {
+			log.info(
+				"[{}] Validation date {} is after refresh date {}, skipping validation.",
+				applicationName, lastValidatedTime.toString(),
+				lastRefreshDate.toString());
+			summary.addToTotalValidatesSkipped();
+			return summary;
+		    }
+		} catch (ParseException e)
+		{
+		    log.warn(
+			    "Unable to parse last validation date, proceeding with validation.",
+			    e);
+		}
+	    }
+	} catch (Exception e)
+	{
+	    log.warn("Unexpected error during smart validation check:"
+		    + e.getMessage());
 	}
-	
+
 	log.info(
 		"[{}] Attempting validation with Protex. This may take some time, depending on the number of components...",
 		applicationName);
@@ -401,7 +423,7 @@ public class CodeCenterProjectSynchronizer
 	    }
 
 	    summary.addRequestsDeleted(totalRequestsDeleted);
-	    log.info("[{}] completed deleing all requests", applicationName);
+	    log.info("[{}] completed deleting all requests", applicationName);
 
 	} else
 	{
@@ -583,7 +605,7 @@ public class CodeCenterProjectSynchronizer
 		if (e.getFaultInfo().getErrorCode() == ErrorCode.PROJECT_ALREADY_ASSOCIATED)
 		{
 		    throw new CodeCenterImportException(
-			    "Protex project is already associated to a different application.  Please remove association.");
+			    "Protex project is already associated to a different application.  Please remove association: " + e.getMessage());
 		} else
 		{
 		    throw new CodeCenterImportException(

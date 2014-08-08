@@ -60,11 +60,17 @@ public class CCIConstants {
 	// Option to make the validation "smart" - see Readme
 	public static final String VALIDATE_SMART_APPLICATION_PROPERTY = "validate.application.smart";
 	
+	// TODO: Temporary workaround, remove after API is established
+	public static final String VALIDATE_SMART_HOST_NAME_PROPERTY = "validate.host.name";
+	public static final String VALIDATE_SMART_TIMEZONE_PROPERTY = "validate.smart.timezone";
+	public static final String VALIDATE_SMART_DB_PROPERTY = "validate.smart.db.string";
+	
 	// Part of validate, should the requests be added?
 	public static final String SUBMIT_REQUESTS = "validate.requests.add";
 	
 	// Part of validate, should CC requests be deleted?
 	public static final String DELETE_REQUESTS = "validate.requests.delete";
+
 
 	
 	// Option to run the tool in report mode only.

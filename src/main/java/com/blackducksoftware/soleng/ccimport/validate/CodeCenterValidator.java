@@ -14,9 +14,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import org.apache.http.client.utils.URIBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import soleng.framework.core.config.ConfigurationManager.URL_INFORMATION;
 import soleng.framework.standard.codecenter.CodeCenterServerWrapper;
 
 import com.blackducksoftware.sdk.codecenter.application.data.Application;
@@ -78,15 +80,37 @@ public class CodeCenterValidator
 	
 	try
 	{
-	    String serverURL = configManager.getServerName();
-	    // Chop off the http
-	    String serverName = serverURL.split("//")[1];
-
-	    if(serverName.endsWith("/"))
-		serverName = serverName.substring(0, serverName.lastIndexOf('/'));
-	    
-	    String SQL_DB_url = "jdbc:postgresql://"
-		    + serverName + ":55433/bds_catalog";
+	    // Get the full db connection string from the user, if it is blank, then default
+	    String SQL_DB_url = configManager.getDbString();    
+	    if(SQL_DB_url == null)
+        	    {
+        	    String hostNameForDB = "";
+        	    // Grab the user provided hostname, or if none provided attempt to
+        	    // determine ourselves
+        	    String hostName = configManager.getHostName();
+        	    if (hostName != null)
+        	    {
+        		hostNameForDB = hostName;
+        	    } else
+        	    {
+        		String serverURL = configManager.getServerName();
+        		try
+        		{
+        		    URIBuilder builder = new URIBuilder(serverURL);
+        		    hostNameForDB = builder.getHost();
+        
+        		} catch (Exception e)
+        		{
+        		    log.warn("Tried to parse provided server URL '{}', but ran into a problem: {}", serverURL, e.getMessage());
+        		    throw new Exception("Failure during parsing, pass in host directly using 'validate.host.name' flag", e);
+        		}
+        	    }
+        	    
+        	    // Default
+        	    SQL_DB_url = "jdbc:postgresql://"
+        		    + hostNameForDB + ":55433/bds_catalog";
+            }
+	  
 	    String SQL_DB_user = "blackduck";
 	    String SQL_DB_password = "mallard";
 
