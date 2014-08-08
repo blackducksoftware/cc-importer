@@ -38,7 +38,6 @@ public class ProtexComponentCollector extends ComponentCollector {
 	public ProtexComponentCollector(ProtexServerWrapper protexWrapper, String protexProjectId) throws Exception {
 		this.protexProjectId = protexProjectId;
 		loadProjectComponents(protexWrapper, protexProjectId);
-		System.out.println("ProtexComponentCollector.getComponentList() has been implemented");
 	}
 	
 	/**
@@ -54,8 +53,6 @@ public class ProtexComponentCollector extends ComponentCollector {
 			throw new Exception("Unable to find project with ID: " + protexProjectId);
 
 		String projectIdFromProtex = protexProject.getProjectKey();
-
-		System.out.println("Project ID from CC: " + protexProjectId + "; Project ID from Protex: " + projectIdFromProtex);
 		
 		List<BomComponent> bomComps = protexWrapper.getInternalApiWrapper().bomApi.getBomComponents(protexProjectId);
 		compPojoList = new TreeSet<ComponentPojo>();
@@ -65,8 +62,8 @@ public class ProtexComponentCollector extends ComponentCollector {
 			Component component = protexWrapper.getInternalApiWrapper().projectApi.getComponentById(protexProjectId, 
 					bomcomponent.getComponentId());
 		
-			log.info("Comp " + component.getName() + ": Comp Type: " + component.getType());
-			log.info("Comp " + component.getName() + ": BomComp Type: " + bomcomponent.getType());
+			log.debug("Comp " + component.getName() + ": Comp Type: " + component.getType());
+			log.debug("Comp " + component.getName() + ": BomComp Type: " + bomcomponent.getType());
 			
 			if (component.getType() == ComponentType.PROJECT) {
 				continue;

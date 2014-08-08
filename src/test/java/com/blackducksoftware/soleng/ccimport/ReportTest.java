@@ -49,6 +49,6 @@ public class ReportTest
     		}
     	}
     	assertTrue(foundMatch);
-    	System.out.println("testReport() Done2");
+    	System.out.println("testReport() Done.");
     }
 }

@@ -87,8 +87,8 @@ public class CCIReportGenerator {
 		processLeftOverProjects(leftOvers);
 		
 		DataSetWriter writerExcel = new DataSetWriterExcel("sync_report.xlsx");
-		DataSetWriter writerStdOut = new DataSetWriterStdOut();
-		writerStdOut.write(dataTable);
+//		DataSetWriter writerStdOut = new DataSetWriterStdOut();
+//		writerStdOut.write(dataTable);
 		writerExcel.write(dataTable);
 	}
 	
@@ -276,10 +276,10 @@ public class CCIReportGenerator {
 		} catch (com.blackducksoftware.sdk.codecenter.fault.SdkFault e) {
 			throw new SdkFault(e.getMessage());
 		}
-		log.info("\tCode Center Component list: " + ccComponentCollector);
-		log.info("\tProtex      Component list: " + protexComponentCollector);
+		log.debug("\tCode Center Component list: " + ccComponentCollector);
+		log.debug("\tProtex      Component list: " + protexComponentCollector);
     	int compareResult = protexComponentCollector.compareTo(ccComponentCollector);
-    	System.out.println("Compare result: " + compareResult);
+
     	return compareResult;
 	}
 	
@@ -311,10 +311,9 @@ public class CCIReportGenerator {
 			throw new SdkFault(e.getMessage());
 		}
 
-		log.info("\tCode Center Component list: " + ccComponentCollector);
-		log.info("\tProtex      Component list: " + protexComponentCollector);
+		log.debug("\tCode Center Component list: " + ccComponentCollector);
+		log.debug("\tProtex      Component list: " + protexComponentCollector);
     	int compareResult = protexComponentCollector.compareTo(ccComponentCollector);
-    	System.out.println("Compare result: " + compareResult);
 
     	if (compareResult != 0) {
     		StringBuilder builder = new StringBuilder();

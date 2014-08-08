@@ -45,9 +45,6 @@ public abstract class ComponentCollector {
 			}
 			ComponentPojo otherComp = otherIterator.next();
 			
-			System.out.println("thisComp: " + thisComp.getName() + " / " + thisComp.getVersion());
-			System.out.println("otherComp: " + otherComp.getName() + " / " + otherComp.getVersion());
-			
 			if (!thisComp.getName().equals(otherComp.getName())) {
 				return 3;
 			}
@@ -70,7 +67,7 @@ public abstract class ComponentCollector {
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
 		for (ComponentPojo comp : compPojoList) {
-			builder.append("Comp ID: " + comp.getId() + "; ");
+			builder.append("ID: " + comp.getId() + "; ");
 			builder.append("name: " + comp.getName() + "; ");
 			builder.append("version: " + comp.getVersion());
 			builder.append("\n");

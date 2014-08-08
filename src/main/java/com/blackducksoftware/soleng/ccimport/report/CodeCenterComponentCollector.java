@@ -21,6 +21,5 @@ public class CodeCenterComponentCollector extends ComponentCollector {
 	public CodeCenterComponentCollector(ApplicationDataDao dao, String appId) throws SdkFault {
 		this.dao = dao;
 		compPojoList = dao.getComponents(appId);
-		System.out.println("CodeCenterComponentCollector.getComponentList() has been implemented");
 	}
 }
