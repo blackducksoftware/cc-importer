@@ -61,7 +61,7 @@ public class CCIConstants {
 	public static final String VALIDATE_SMART_APPLICATION_PROPERTY = "validate.application.smart";
 	
 	// TODO: Temporary workaround, remove after API is established
-	public static final String VALIDATE_SMART_HOST_NAME_PROPERTY = "validate.host.name";
+	public static final String VALIDATE_SMART_HOST_NAME_PROPERTY = "validate.smart.host.name";
 	public static final String VALIDATE_SMART_TIMEZONE_PROPERTY = "validate.smart.timezone";
 	public static final String VALIDATE_SMART_DB_PROPERTY = "validate.smart.db.string";
 	
