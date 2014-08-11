@@ -20,39 +20,56 @@ public abstract class ComponentCollector {
 		    .getLogger(ComponentCollector.class.getName());
 	protected SortedSet<ComponentPojo> compPojoList=null;
 	
-	public int compareTo(Object o) {
+	public String getDiffString(Object o) {
+		String diffString = null; // Null means they ComponentCollections are identical
 		if (o == null) {
-			return -2;
+			return "Compared component lists are not of the same class: " + this.getClass().getName() + " and " + o.getClass().getName();
 		}
 		if (! (o instanceof ComponentCollector)) {
-			return -1;
+			return "Compared component list should be of type ComponentCollector, but is type " + o.getClass().getName();
 		}
 		ComponentCollector otherComponentCollector = (ComponentCollector)o;
 		
-		log.info("Comparing two Component lists of size " + this.size() +
+		log.info("Comparing two component lists of size " + this.size() +
 				" and " + otherComponentCollector.size());
-		
-		if (this.size() != otherComponentCollector.size()) {
-			return 1;
-		}
 		
 		SortedSet<ComponentPojo> otherSortedSet = otherComponentCollector.getSortedSet();
 		Iterator<ComponentPojo> otherIterator = otherSortedSet.iterator();
 		
+		ComponentPojo otherComp;
 		for (ComponentPojo thisComp : this.compPojoList) {
+			
 			if (!otherIterator.hasNext()) {
-				return 2;
+				diffString = "The other component list has no more components, but this one has more, starting with: " +
+						thisComp.getName() + ":" + thisComp.getVersion();
+				log.warn(diffString);
+				return diffString;
 			}
-			ComponentPojo otherComp = otherIterator.next();
+			otherComp = otherIterator.next();
 			
 			if (!thisComp.getName().equals(otherComp.getName())) {
-				return 3;
+				diffString = "This component list component name is " + thisComp.getName() + 
+						", but the other's component name is " + otherComp.getName();
+				log.warn(diffString);
+				return diffString;
 			}
 			if (!thisComp.getVersion().equals(otherComp.getVersion())) {
-				return 4;
+				diffString = "This component list component version for component " + thisComp.getName() +
+						" is " + thisComp.getVersion() + 
+						", but the other's component version is " + otherComp.getVersion();
+				log.warn(diffString);
+				return diffString;
 			}
 		}
-		return 0;
+		
+		if (otherIterator.hasNext()) {
+			otherComp = otherIterator.next();
+			diffString = "This component list has no more components, but the other has more, starting with: " +
+					otherComp.getName() + ":" + otherComp.getVersion();
+			log.warn(diffString);
+			return diffString;
+		}
+		return null; // means compared ComponentCollectors are identical
 	}
 	
 	public SortedSet getSortedSet() {
@@ -67,9 +84,9 @@ public abstract class ComponentCollector {
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
 		for (ComponentPojo comp : compPojoList) {
-			builder.append("ID: " + comp.getId() + "; ");
 			builder.append("name: " + comp.getName() + "; ");
 			builder.append("version: " + comp.getVersion());
+			builder.append("ID: " + comp.getId() + "; ");
 			builder.append("\n");
 		}
 		return builder.toString();

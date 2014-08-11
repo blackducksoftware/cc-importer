@@ -264,28 +264,6 @@ public class CCIReportGenerator {
 		}
 	}
 	
-	
-	// TODO: Obsolete
-	private int compareComponentLists(CCIProject protexProject, Application ccApp) throws Exception {
-		// Get / compare components
-		ComponentCollector protexComponentCollector = new ProtexComponentCollector(protexWrapper,
-				protexProject.getProjectKey());
-    	
-		ComponentCollector ccComponentCollector;
-		try {
-			ApplicationDataDao ccDao = new CodeCenter6_6_1Dao(codeCenterWrapper);
-			ccDao.setSkipNonKbComponents(false);
-	    	ccComponentCollector = new CodeCenterComponentCollector(ccDao, ccApp.getId().getId());
-		} catch (com.blackducksoftware.sdk.codecenter.fault.SdkFault e) {
-			throw new SdkFault(e.getMessage());
-		}
-		log.debug("\tCode Center Component list: " + ccComponentCollector);
-		log.debug("\tProtex      Component list: " + protexComponentCollector);
-    	int compareResult = protexComponentCollector.compareTo(ccComponentCollector);
-
-    	return compareResult;
-	}
-	
 	/**
 	 * returns null if the component lists are identical, a string with both lists if not.
 	 * @param protexProject
@@ -295,7 +273,6 @@ public class CCIReportGenerator {
 	 * @throws Exception
 	 */
 	private String getComponentListDiffString(CCIProject protexProject, Application ccApp, int maxLen) throws Exception {
-		String diffString=null;
 		
 		if (maxLen < 5) {
 			throw new IllegalArgumentException("maxLen must be at least 5");
@@ -316,20 +293,21 @@ public class CCIReportGenerator {
 
 		log.debug("\tCode Center Component list: " + ccComponentCollector);
 		log.debug("\tProtex      Component list: " + protexComponentCollector);
-    	int compareResult = protexComponentCollector.compareTo(ccComponentCollector);
+    	String diffString = protexComponentCollector.getDiffString(ccComponentCollector);
 
-    	if (compareResult != 0) {
-    		StringBuilder builder = new StringBuilder();
-    		builder.append("Code Center Component list: ");
-    		builder.append(ccComponentCollector.toString());
-    		builder.append("\nProtex Component list: ");
-    		builder.append(protexComponentCollector.toString());
-    		if (builder.length() > maxLen) {
-    			diffString = builder.substring(0, maxLen-5) + "...";
-    		} else {
-    			diffString = builder.toString();
-    		}
-    	}
+    	// TODO obsolete
+//    	if (diffString != null) {
+//    		StringBuilder builder = new StringBuilder();
+//    		builder.append("Code Center Component list: ");
+//    		builder.append(ccComponentCollector.toString());
+//    		builder.append("\nProtex Component list: ");
+//    		builder.append(protexComponentCollector.toString());
+//    		if (builder.length() > maxLen) {
+//    			diffString = builder.substring(0, maxLen-5) + "...";
+//    		} else {
+//    			diffString = builder.toString();
+//    		}
+//    	}
     	return diffString; // null if lists are identical
 	}
 

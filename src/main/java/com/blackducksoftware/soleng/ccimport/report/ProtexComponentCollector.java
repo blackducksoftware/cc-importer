@@ -20,6 +20,7 @@ import soleng.framework.standard.protex.ProtexServerWrapper;
 import com.blackducksoftware.sdk.fault.SdkFault;
 import com.blackducksoftware.sdk.protex.common.Component;
 import com.blackducksoftware.sdk.protex.common.ComponentType;
+import com.blackducksoftware.sdk.protex.common.UsageLevel;
 import com.blackducksoftware.sdk.protex.component.custom.CustomComponent;
 import com.blackducksoftware.sdk.protex.component.standard.StandardComponent;
 import com.blackducksoftware.sdk.protex.component.version.ComponentVersion;
@@ -45,7 +46,7 @@ public class ProtexComponentCollector extends ComponentCollector {
 	 * @return
 	 * @throws Exception
 	 */
-	public void loadProjectComponents(ProtexServerWrapper protexWrapper, String protexProjectId) throws Exception
+	private void loadProjectComponents(ProtexServerWrapper protexWrapper, String protexProjectId) throws Exception
 	{
 		
 		ProjectPojo protexProject = protexWrapper.getProjectByID(protexProjectId);
@@ -64,6 +65,18 @@ public class ProtexComponentCollector extends ComponentCollector {
 		
 			log.debug("Comp " + component.getName() + ": Comp Type: " + component.getType());
 			log.debug("Comp " + component.getName() + ": BomComp Type: " + bomcomponent.getType());
+			
+			// TODO TBD new
+			log.debug("\tBomComp approval state: " + bomcomponent.getApprovalInfo().getApproved().name());
+			log.debug("\tBomComp file count identified: " + bomcomponent.getFileCountIdentified());
+			log.debug("\tBomComp file count rapidId identified: " + bomcomponent.getFileCountRapidIdIdentifications());
+			
+			List<UsageLevel> usageLevels = bomcomponent.getUsageLevels();
+//			log.debug("\tBomComp number of usage levels: " + bomcomponent.getUsageLevels().size());
+			for (UsageLevel usageLevel : usageLevels) {
+				log.debug("\tBomComp usage level: " + usageLevel.name());
+			}
+			
 			
 			if (component.getType() == ComponentType.PROJECT) {
 				continue;

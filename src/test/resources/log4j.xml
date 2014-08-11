@@ -34,6 +34,9 @@
     </appender>
  
  
+    <category name="com.blackducksoftware.soleng.ccimport.report">
+        <priority value="DEBUG" />
+    </category>
          
     <!-- ** -->
      
