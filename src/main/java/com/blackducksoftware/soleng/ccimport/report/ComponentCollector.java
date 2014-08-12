@@ -49,10 +49,21 @@ public abstract class ComponentCollector {
 			
 			if (!thisComp.getName().equals(otherComp.getName())) {
 				diffString = "This component list component name is " + thisComp.getName() + 
-						", but the other's component name is " + otherComp.getName();
+						", but the other's component name is " + otherComp.getName() +
+						" (this might be OK, it's the ID that must match)";
+				log.debug(diffString);
+				// Keep going; name mismatches can be OK. It's the KB ID that counts
+			}
+			
+			if (!thisComp.getKbComponentId().equals(otherComp.getKbComponentId())) {
+				diffString = "This component list KB ID for " + thisComp.getName() +
+						" is " + thisComp.getKbComponentId() + 
+						", but the other's KB ID for " + otherComp.getName() +
+						" is " + otherComp.getKbComponentId();
 				log.warn(diffString);
 				return diffString;
 			}
+			
 			if (!thisComp.getVersion().equals(otherComp.getVersion())) {
 				diffString = "This component list component version for component " + thisComp.getName() +
 						" is " + thisComp.getVersion() + 
@@ -85,8 +96,8 @@ public abstract class ComponentCollector {
 		StringBuilder builder = new StringBuilder();
 		for (ComponentPojo comp : compPojoList) {
 			builder.append("name: " + comp.getName() + "; ");
-			builder.append("version: " + comp.getVersion());
-			builder.append("ID: " + comp.getId() + "; ");
+			builder.append("; version: " + comp.getVersion());
+			builder.append("; KB ID: " + comp.getKbComponentId() + "; ");
 			builder.append("\n");
 		}
 		return builder.toString();

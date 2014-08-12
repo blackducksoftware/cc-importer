@@ -293,6 +293,7 @@ public class CCIReportGenerator {
 
 		log.debug("\tCode Center Component list: " + ccComponentCollector);
 		log.debug("\tProtex      Component list: " + protexComponentCollector);
+		log.info("Comparing Protex component list (\"this\") to Code Center component list (\"other\")");
     	String diffString = protexComponentCollector.getDiffString(ccComponentCollector);
 
     	// TODO obsolete

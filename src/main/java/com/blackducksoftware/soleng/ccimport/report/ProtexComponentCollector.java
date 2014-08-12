@@ -63,10 +63,12 @@ public class ProtexComponentCollector extends ComponentCollector {
 			Component component = protexWrapper.getInternalApiWrapper().projectApi.getComponentById(protexProjectId, 
 					bomcomponent.getComponentId());
 		
+			// TODO This is overkill
 			log.debug("Comp " + component.getName() + ": Comp Type: " + component.getType());
 			log.debug("Comp " + component.getName() + ": BomComp Type: " + bomcomponent.getType());
+			log.debug("Comp " + component.getName() + ": BomComp VersionID: " + bomcomponent.getVersionId());
 			
-			// TODO TBD new
+			// TODO This is overkill
 			log.debug("\tBomComp approval state: " + bomcomponent.getApprovalInfo().getApproved().name());
 			log.debug("\tBomComp file count identified: " + bomcomponent.getFileCountIdentified());
 			log.debug("\tBomComp file count rapidId identified: " + bomcomponent.getFileCountRapidIdIdentifications());
@@ -83,7 +85,8 @@ public class ProtexComponentCollector extends ComponentCollector {
 			}
 			ComponentPojo compPojo = new ComponentPojo(bomcomponent.getComponentId(),
 					component.getName(),
-					bomcomponent.getBomVersionName());
+					bomcomponent.getBomVersionName(),
+					bomcomponent.getComponentId());
 			compPojoList.add(compPojo);
 		}
 	}
