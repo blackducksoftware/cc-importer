@@ -11,8 +11,8 @@ import soleng.framework.core.config.server.ServerBean;
 
 import com.blackducksoftware.soleng.ccimporter.config.CodeCenterConfigManager;
 import com.blackducksoftware.soleng.ccimporter.config.ProtexConfigManager;
-import com.blackducksoftware.soleng.ccreport.datatable.DataTable;
-import com.blackducksoftware.soleng.ccreport.datatable.Record;
+import soleng.framework.standard.datatable.DataTable;
+import soleng.framework.standard.datatable.Record;
 
 public class ReportTest
 {

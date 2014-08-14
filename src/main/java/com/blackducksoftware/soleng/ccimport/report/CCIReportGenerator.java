@@ -23,14 +23,14 @@ import com.blackducksoftware.soleng.ccimporter.model.CCIProjectList;
 import com.blackducksoftware.soleng.ccreport.ComponentPojo;
 import com.blackducksoftware.soleng.ccreport.datasource.ApplicationDataDao;
 import com.blackducksoftware.soleng.ccreport.datasource.CodeCenter6_6_1Dao;
-import com.blackducksoftware.soleng.ccreport.datatable.DataTable;
-import com.blackducksoftware.soleng.ccreport.datatable.FieldDef;
-import com.blackducksoftware.soleng.ccreport.datatable.FieldType;
-import com.blackducksoftware.soleng.ccreport.datatable.Record;
-import com.blackducksoftware.soleng.ccreport.datatable.RecordDef;
-import com.blackducksoftware.soleng.ccreport.datatable.writer.DataSetWriter;
-import com.blackducksoftware.soleng.ccreport.datatable.writer.DataSetWriterExcel;
-import com.blackducksoftware.soleng.ccreport.datatable.writer.DataSetWriterStdOut;
+import soleng.framework.standard.datatable.DataTable;
+import soleng.framework.standard.datatable.FieldDef;
+import soleng.framework.standard.datatable.FieldType;
+import soleng.framework.standard.datatable.Record;
+import soleng.framework.standard.datatable.RecordDef;
+import soleng.framework.standard.datatable.writer.DataSetWriter;
+import soleng.framework.standard.datatable.writer.DataSetWriterExcel;
+import soleng.framework.standard.datatable.writer.DataSetWriterStdOut;
 
 /**
  * Class responsible for the report generation portion of the CCI.
