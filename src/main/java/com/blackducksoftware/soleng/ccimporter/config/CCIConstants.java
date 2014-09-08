@@ -54,6 +54,10 @@ public class CCIConstants {
 	// Project
 	public static final String PROJECT_PROPERTY = "protex.project.list";
 	
+	
+	// This switch ignores the existing associations
+	public static final String IGNORE_ASSOCIATIONS = "cc.ignore.associations";
+	
 	// Validate Step
 	public static final String VALIDATE_APPLICATION_PROPERTY = "validate.application";
 

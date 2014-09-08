@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.HashMap;
 import java.util.List;
 import java.util.TimeZone;
 
@@ -72,6 +73,9 @@ public class CodeCenterProjectSynchronizer
     private CCIConfigurationManager configManager = null;
     private CCIReportSummary reportSummary = new CCIReportSummary();
 
+    // Keep track of project id/app id mappings
+    HashMap<String, String> projectAssociationMap  = null;
+    
     public CodeCenterProjectSynchronizer(
 	    CodeCenterServerWrapper codeCenterWrapper,
 	    CCIConfigurationManager config)
@@ -94,11 +98,12 @@ public class CodeCenterProjectSynchronizer
     public void synchronize(List<CCIProject> projectList)
     {
 	reportSummary.setTotalProtexProjects(projectList.size());
-	
+
 	int counter = 1;
 	for (CCIProject project : projectList)
 	{
-	    log.info("[{}/{}] Processing {}", counter++, projectList.size(), project.getProjectName());
+	    log.info("[{}/{}] Processing {}", counter++, projectList.size(),
+		    project.getProjectName());
 	    boolean importSuccess = false;
 	    CCIProject importedProject = null;
 	    try
@@ -149,15 +154,56 @@ public class CodeCenterProjectSynchronizer
 	    log.info("[{}] Attempting Protex project import. (version: {})",
 		    project.getProjectName(), project.getProjectVersion());
 
-	    // This will return an existing application, or create a new
-	    // one. This is generic and not import specific.
-	    Application app = createApplication(project);
+	    Application app = null;
+	    if (configManager.isIgnoreAssociations())
+	    {
+		log.info("**Ignore association mode.***");
+		// If the user has elected to ignore associations, then we will look up
+		// the DB to see if a project ID is associated with anything.
+		// If it is, then we use the app of that association.
+		if (projectAssociationMap == null)
+		{
+		    CodeCenterAssociationLookup cal = new CodeCenterAssociationLookup(
+			    configManager, ccWrapper);
+		    projectAssociationMap = cal.getAssociationMap();
+		}
+	
+		String correspondingApplicationID = projectAssociationMap.get(project.getProjectKey());
+		if(correspondingApplicationID == null)
+		{
+		    	log.info("No association found for project ID: " + project.getProjectKey());
+		    	// This will return an existing application, or create a new
+			// one. This is generic and not import specific.
+			app = createApplication(project);
 
-	    // This takes the Code Center app and attempts to associate it
-	    // with a Protex project. We do not need to return anything because
-	    // the return object is useless to us. Any failure to obtain an
-	    // object signifies an error and thus the failure of the import.
-	    associateApplicationToProtexProject(project, app);
+			// This takes the Code Center app and attempts to associate it
+			// with a Protex project. We do not need to return anything
+			// because the return object is useless to us. Any failure to obtain an
+			// object signifies an error and thus the failure of the import.
+			associateApplicationToProtexProject(project, app);
+			
+			log.info("[{}] IMPORT SUCCESSFUL!", project.getProjectName());
+			log.info("-----------------------------");
+		}
+		else
+		{
+		    log.info("Found association of application ID [{}] for project ID [{}]", correspondingApplicationID, project.getProjectKey());
+		    ApplicationIdToken token = new ApplicationIdToken();
+		    token.setId(correspondingApplicationID);
+		    
+		    try
+		    {
+			app = ccWrapper.getInternalApiWrapper().applicationApi.getApplication(token);
+			
+			log.info("[{}] LOOKUP SUCCESSFUL for Application [{}]:[{}]!", project.getProjectName(), app.getName(), app.getVersion());
+			log.info("-----------------------------");
+			
+		    } catch (SdkFault e)
+		    {
+			throw new CodeCenterImportException("Unable to look up application using id: "+  correspondingApplicationID, e);
+		    }
+		}		
+	    } 
 
 	    // If everything goes well, set the application name for
 	    // potential validation down the road.
@@ -169,9 +215,6 @@ public class CodeCenterProjectSynchronizer
 	    reportSummary.addToFailedImportList(project.getProjectName());
 	    throw new CodeCenterImportException(ccie.getMessage());
 	}
-
-	log.info("[{}] IMPORT SUCCESSFUL!", project.getProjectName());
-	log.info("-----------------------------");
 
 	return project;
     }
@@ -224,26 +267,28 @@ public class CodeCenterProjectSynchronizer
 
 		try
 		{
-		    // TODO:  Temporary workaround to provide timezones.  This handles the case whereby
-		    // utility is run against a server that is not in the same time zone.
+		    // TODO: Temporary workaround to provide timezones. This
+		    // handles the case whereby
+		    // utility is run against a server that is not in the same
+		    // time zone.
 		    String userSpecifiedTimeZone = configManager.getTimeZone();
 		    TimeZone tz = null;
-		    if(userSpecifiedTimeZone != null && !userSpecifiedTimeZone.isEmpty())
+		    if (userSpecifiedTimeZone != null
+			    && !userSpecifiedTimeZone.isEmpty())
 		    {
 			tz = TimeZone.getTimeZone(userSpecifiedTimeZone);
-			log.info("User specified time zone recognized, using: " + tz.getDisplayName());
-		    }
-		    else
+			log.info("User specified time zone recognized, using: "
+				+ tz.getDisplayName());
+		    } else
 		    {
 			tz = TimeZone.getDefault();
 		    }
-		    
+
 		    formatter.setTimeZone(tz);
-		    
+
 		    Date lastValidatedTime = formatter
 			    .parse(lastValidatedDateStr);
-		    
-		  
+
 		    boolean before = lastValidatedTime.before(lastRefreshDate);
 
 		    if (before)
@@ -605,7 +650,8 @@ public class CodeCenterProjectSynchronizer
 		if (e.getFaultInfo().getErrorCode() == ErrorCode.PROJECT_ALREADY_ASSOCIATED)
 		{
 		    throw new CodeCenterImportException(
-			    "Protex project is already associated to a different application.  Please remove association: " + e.getMessage());
+			    "Protex project is already associated to a different application.  Please remove association: "
+				    + e.getMessage());
 		} else
 		{
 		    throw new CodeCenterImportException(

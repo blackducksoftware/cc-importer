@@ -23,6 +23,7 @@ import soleng.framework.standard.codecenter.CodeCenterServerWrapper;
 
 import com.blackducksoftware.sdk.codecenter.application.data.Application;
 import com.blackducksoftware.soleng.ccimport.CodeCenterProjectSynchronizer;
+import com.blackducksoftware.soleng.ccimport.db.CodeCenterDBConnector;
 import com.blackducksoftware.soleng.ccimporter.config.CCIConfigurationManager;
 import com.blackducksoftware.soleng.ccimporter.model.CCIProject;
 
@@ -33,7 +34,7 @@ import com.blackducksoftware.soleng.ccimporter.model.CCIProject;
  * @date Aug 5, 2014
  * 
  */
-public class CodeCenterValidator
+public class CodeCenterValidator extends CodeCenterDBConnector
 {
     private static Logger log = LoggerFactory
 	    .getLogger(CodeCenterValidator.class.getName());
@@ -46,8 +47,7 @@ public class CodeCenterValidator
     public CodeCenterValidator(CCIConfigurationManager configManager,
 	    CodeCenterServerWrapper ccWrapper, Application app, CCIProject importedProject)
     {
-	this.ccWrapper = ccWrapper;
-	this.configManager = configManager;
+	super(configManager, ccWrapper);
 	protexProject = importedProject;
 	application = app;
     }
@@ -80,44 +80,7 @@ public class CodeCenterValidator
 	
 	try
 	{
-	    // Get the full db connection string from the user, if it is blank, then default
-	    String SQL_DB_url = configManager.getDbString();    
-	    if(SQL_DB_url == null)
-        	    {
-        	    String hostNameForDB = "";
-        	    // Grab the user provided hostname, or if none provided attempt to
-        	    // determine ourselves
-        	    String hostName = configManager.getHostName();
-        	    if (hostName != null)
-        	    {
-        		hostNameForDB = hostName;
-        	    } else
-        	    {
-        		String serverURL = configManager.getServerName();
-        		try
-        		{
-        		    URIBuilder builder = new URIBuilder(serverURL);
-        		    hostNameForDB = builder.getHost();
-        
-        		} catch (Exception e)
-        		{
-        		    log.warn("Tried to parse provided server URL '{}', but ran into a problem: {}", serverURL, e.getMessage());
-        		    throw new Exception("Failure during parsing, pass in host directly using 'validate.host.name' flag", e);
-        		}
-        	    }
-        	    
-        	    // Default
-        	    SQL_DB_url = "jdbc:postgresql://"
-        		    + hostNameForDB + ":55433/bds_catalog";
-            }
-	  
-	    String SQL_DB_user = "blackduck";
-	    String SQL_DB_password = "mallard";
-
-	    log.info("Connecting to DB: " + SQL_DB_url);
-	    
-	    connection = DriverManager.getConnection(SQL_DB_url, SQL_DB_user,
-		    SQL_DB_password);
+	    connection = super.establishConnection();
 	    statement = connection.createStatement(
 		    ResultSet.TYPE_SCROLL_INSENSITIVE,
 		    ResultSet.CONCUR_READ_ONLY);

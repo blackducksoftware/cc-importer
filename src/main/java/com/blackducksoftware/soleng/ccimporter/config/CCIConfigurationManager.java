@@ -42,6 +42,7 @@ public class CCIConfigurationManager extends ConfigurationManager
     private Boolean performAdd= true;
     private Boolean performSmartValidate = false;
     private String version = "undefined";
+    private Boolean ignoreAssociations = false;
     
     // TODO:  Temporary workarounds for DB access
     private String hostName = null;
@@ -95,6 +96,10 @@ public class CCIConfigurationManager extends ConfigurationManager
 		CCIConstants.DELETE_REQUESTS, false,
 		Boolean.class);
 
+	ignoreAssociations = getOptionalProperty(
+		CCIConstants.IGNORE_ASSOCIATIONS, false,
+		Boolean.class);
+	
 	runReport = getOptionalProperty(CCIConstants.RUN_REPORT_PROPERTY,
 		false, Boolean.class);
 	
@@ -423,5 +428,15 @@ public class CCIConfigurationManager extends ConfigurationManager
     public void setDbString(String dbString)
     {
 	this.dbString = dbString;
+    }
+
+    public Boolean isIgnoreAssociations()
+    {
+	return ignoreAssociations;
+    }
+
+    private void setIgnoreAssociations(Boolean ignoreAssociations)
+    {
+	this.ignoreAssociations = ignoreAssociations;
     }
 }
