@@ -23,6 +23,7 @@ import soleng.framework.standard.protex.ProtexServerWrapper;
 
 import com.blackducksoftware.soleng.ccimport.exception.CodeCenterImportException;
 import com.blackducksoftware.soleng.ccimport.report.CCIReportGenerator;
+import com.blackducksoftware.soleng.ccimport.report.CCIReportSummary;
 import com.blackducksoftware.soleng.ccimporter.config.CodeCenterConfigManager;
 import com.blackducksoftware.soleng.ccimporter.model.CCIProject;
 import com.blackducksoftware.soleng.ccimporter.model.CCIProjectList;
@@ -42,6 +43,10 @@ public abstract class CCIProcessor
     protected CodeCenterConfigManager codeCenterConfigManager = null;
     protected CodeCenterServerWrapper codeCenterWrapper = null;
 
+
+    protected List<CCIReportSummary> reportSummaryList = new ArrayList<CCIReportSummary>();
+    
+    
     /**
      * Establish the Code Center connection.
      * 
@@ -226,4 +231,9 @@ public abstract class CCIProcessor
     }
 
 
+    protected List<CCIReportSummary> getReportSummaryList()
+    {
+	return this.reportSummaryList;
+    }
+    
 }

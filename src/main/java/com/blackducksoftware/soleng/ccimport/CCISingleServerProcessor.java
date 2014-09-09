@@ -21,6 +21,7 @@ import soleng.framework.standard.protex.ProtexServerWrapper;
 
 import com.blackducksoftware.soleng.ccimport.exception.CodeCenterImportException;
 import com.blackducksoftware.soleng.ccimport.report.CCIReportGenerator;
+import com.blackducksoftware.soleng.ccimport.report.CCIReportSummary;
 import com.blackducksoftware.soleng.ccimporter.config.CodeCenterConfigManager;
 import com.blackducksoftware.soleng.ccimporter.config.ProtexConfigManager;
 import com.blackducksoftware.soleng.ccimporter.model.CCIProject;
@@ -71,6 +72,7 @@ public class CCISingleServerProcessor extends CCIProcessor
 	log.info("Processing {} projects for synchronization", projectList);
 
 	synchronizer.synchronize(projectList);
+	reportSummaryList.add(synchronizer.getReportSummary());
 
     }
 

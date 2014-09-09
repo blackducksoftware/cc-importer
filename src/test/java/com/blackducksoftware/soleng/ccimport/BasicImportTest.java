@@ -1,5 +1,6 @@
 package com.blackducksoftware.soleng.ccimport;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import junit.framework.Assert;
@@ -13,10 +14,12 @@ import org.slf4j.LoggerFactory;
 
 import com.blackducksoftware.sdk.codecenter.application.data.Application;
 import com.blackducksoftware.sdk.codecenter.application.data.ApplicationIdToken;
+import com.blackducksoftware.sdk.codecenter.application.data.ApplicationNameVersionToken;
 import com.blackducksoftware.sdk.codecenter.application.data.ApplicationPageFilter;
 import com.blackducksoftware.sdk.codecenter.application.data.Project;
 import com.blackducksoftware.sdk.codecenter.fault.SdkFault;
 import com.blackducksoftware.soleng.ccimport.exception.CodeCenterImportException;
+import com.blackducksoftware.soleng.ccimport.report.CCIReportSummary;
 import com.blackducksoftware.soleng.ccimporter.config.CodeCenterConfigManager;
 import com.blackducksoftware.soleng.ccimporter.config.ProtexConfigManager;
 import com.blackducksoftware.soleng.ccimporter.model.CCIProject;
@@ -42,9 +45,14 @@ public class BasicImportTest
 	    .getName());
 
     public static String testPropsForBasicImport = "importer_test.properties";
-    public static String fullLocation = ClassLoader.getSystemResource(
+    public static String testPropsForIgnoreAssociations = "importer_test_ignore_assoc.properties";
+    
+    public static String fullLocationBasicImport = ClassLoader.getSystemResource(
 	    testPropsForBasicImport).getFile();
 
+    public static String fullLocationIgnoreAssoc = ClassLoader.getSystemResource(
+	    testPropsForIgnoreAssociations).getFile();
+    
     private static CodeCenterConfigManager ccConfig = null;
     private static CodeCenterServerWrapper ccsw = null;
     private static ProtexConfigManager pConfig = null;
@@ -61,8 +69,8 @@ public class BasicImportTest
 	try
 	{
 
-	    ccConfig = new CodeCenterConfigManager(fullLocation);
-	    pConfig = new ProtexConfigManager(fullLocation);
+	    ccConfig = new CodeCenterConfigManager(fullLocationBasicImport);
+	    pConfig = new ProtexConfigManager(fullLocationBasicImport);
 
 	    // Create cc wrapper so that we can peform cleanup tasks
 	    ccsw = new CodeCenterServerWrapper(ccConfig.getServerBean(),
@@ -80,7 +88,7 @@ public class BasicImportTest
     public void testBasicImport()
     {
 	// This is the config case
-	String[] args = new String[]{ fullLocation };
+	String[] args = new String[]{ fullLocationBasicImport };
 	
 	try
 	{
@@ -101,6 +109,43 @@ public class BasicImportTest
 	}
     }
 
+    /**
+     * Attempts to perform a validation against an already associated project
+     * Using the ignore association flag
+     */
+    @Test
+    public void testIgnoreAssociation()
+    {
+	try
+	{
+	    ccConfig = new CodeCenterConfigManager(fullLocationIgnoreAssoc);
+	    // Create cc wrapper so that we can peform cleanup tasks
+	    ccsw = new CodeCenterServerWrapper(ccConfig.getServerBean(),
+		    ccConfig);
+	    processor = new CCISingleServerProcessor(ccConfig, pConfig);
+	} catch (Exception e)
+	{
+	    Assert.fail(e.getMessage());
+	}
+
+	try
+	{
+	    // Run the sync
+	    processor.performSynchronize();
+
+	    List<CCIReportSummary> summaries = processor.getReportSummaryList();
+	    
+	    CCIReportSummary singleProcessor = summaries.get(0);
+	    
+	    // Check the report summary to make sure validation was a success
+	    Assert.assertEquals(0, singleProcessor.getFailedValidationList().size());
+
+	} catch (CodeCenterImportException e)
+	{
+	    Assert.fail(e.getMessage());
+	}
+    }
+    
     /**
      * CHecks to see if that list of applications exist and have associations.
      * @param projects
@@ -134,7 +179,7 @@ public class BasicImportTest
 	    exists = true;
 	} catch (Exception e)
 	{
-	    log.error("Error during application exist verification", e);
+	    log.error("Error during application verification: " + e.getMessage());
 	}
 
 	return exists;
@@ -151,22 +196,19 @@ public class BasicImportTest
 	try
 	{
 	 
-	    ApplicationPageFilter apf = new ApplicationPageFilter();
-	    apf.setFirstRowIndex(0);
-	    apf.setLastRowIndex(1);
 	    for (CCIProject project : projects)
 	    {
-		List<Application> applications = ccsw.getInternalApiWrapper().applicationApi
-			.searchApplications(project.getProjectName(), apf);
+		ApplicationNameVersionToken token = new ApplicationNameVersionToken();
+		token.setName(project.getProjectName());
+		token.setVersion(project.getProjectVersion());
+		Application appToDelete = ccsw.getInternalApiWrapper().applicationApi.getApplication(token);
 
-		if (applications.size() == 0)
+		if (appToDelete == null)
 		{
 		    log.info("Nothing to cleanup!");
 		    return;
 		} else
 		{
-
-		    Application appToDelete = applications.get(0);
 		    // Delete it
 		    ccsw.getInternalApiWrapper().applicationApi
 			    .deleteApplication(appToDelete.getId());
@@ -177,8 +219,7 @@ public class BasicImportTest
 
 	} catch (Exception e)
 	{
-	    log.error("Failure during cleanup!", e);
-	    Assert.fail();
+	    log.warn("Failure during cleanup!: " + e.getMessage());
 	}
 
     }

@@ -435,7 +435,7 @@ public class CCIConfigurationManager extends ConfigurationManager
 	return ignoreAssociations;
     }
 
-    private void setIgnoreAssociations(Boolean ignoreAssociations)
+    public void setIgnoreAssociations(Boolean ignoreAssociations)
     {
 	this.ignoreAssociations = ignoreAssociations;
     }

@@ -665,4 +665,9 @@ public class CodeCenterProjectSynchronizer
 	return associatedProject;
     }
 
+    public CCIReportSummary getReportSummary()
+    {
+	return this.reportSummary;
+    }
+    
 }
