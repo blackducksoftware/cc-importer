@@ -77,10 +77,22 @@ public class CCIConfigurationManager extends ConfigurationManager
 	    log.debug("Could not determine version", t);
 	}
 
-	protexServerName = getProperty(CCIConstants.PROTEX_NAME_PROPERTY);
+	List<ServerBean> servers = super.getServerList();
+	
+	/**
+	 * We use server list to determine whether certain properties are required or optional.
+	 */
+	if(servers.size() == 0)
+	{
+	    // This is only needed in single server mode
+	    protexServerName = getProperty(CCIConstants.PROTEX_NAME_PROPERTY);
+	
+	}
+	
+	owner = getProperty(CCIConstants.OWNER_PROPERTY);
 	appVersion = getProperty(CCIConstants.VERSION_PROPERTY);
 	workflow = getProperty(CCIConstants.WORKFLOW_PROPERTY);
-	owner = getProperty(CCIConstants.OWNER_PROPERTY);
+	
 	submit = getOptionalProperty(CCIConstants.SUBMIT_PROPERTY, false,
 		Boolean.class);
 	validate = getOptionalProperty(
@@ -280,6 +292,11 @@ public class CCIConfigurationManager extends ConfigurationManager
     public void setProtexServerName(String protexAlias)
     {
 	protexServerName = protexAlias;
+    }
+    
+    public void setOwner(String ownerName)
+    {
+	owner = ownerName;
     }
 
     public String getAppVersion()

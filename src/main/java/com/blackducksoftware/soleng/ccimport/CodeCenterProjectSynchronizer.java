@@ -155,23 +155,12 @@ public class CodeCenterProjectSynchronizer
 		    project.getProjectName(), project.getProjectVersion());
 
 	    Application app = null;
-	    if (configManager.isIgnoreAssociations())
+	    String correspondingApplicationID = lookUpCorrespondingApplication(project);	  
+		
+	    // Creates the application (if needed) and then perform the association	 
+	    if (correspondingApplicationID == null)
 	    {
-		log.info("**Ignore association mode.***");
-		// If the user has elected to ignore associations, then we will look up
-		// the DB to see if a project ID is associated with anything.
-		// If it is, then we use the app of that association.
-		if (projectAssociationMap == null)
-		{
-		    CodeCenterAssociationLookup cal = new CodeCenterAssociationLookup(
-			    configManager, ccWrapper);
-		    projectAssociationMap = cal.getAssociationMap();
-		}
-	
-		String correspondingApplicationID = projectAssociationMap.get(project.getProjectKey());
-		if(correspondingApplicationID == null)
-		{
-		    	log.info("No association found for project ID: " + project.getProjectKey());
+		    	log.info("No association found for project ID [{}], will attempt to create one", project.getProjectKey());
 		    	// This will return an existing application, or create a new
 			// one. This is generic and not import specific.
 			app = createApplication(project);
@@ -184,39 +173,79 @@ public class CodeCenterProjectSynchronizer
 			
 			log.info("[{}] IMPORT SUCCESSFUL!", project.getProjectName());
 			log.info("-----------------------------");
-		}
-		else
+	    }
+	    // Otherwise, use the information to perform the lookup
+	    else
+	    {
+		log.info(
+			"Found existing association of application ID [{}] for project ID [{}]",
+			correspondingApplicationID, project.getProjectKey());
+		ApplicationIdToken token = new ApplicationIdToken();
+		token.setId(correspondingApplicationID);
+
+		try
 		{
-		    log.info("Found association of application ID [{}] for project ID [{}]", correspondingApplicationID, project.getProjectKey());
-		    ApplicationIdToken token = new ApplicationIdToken();
-		    token.setId(correspondingApplicationID);
-		    
-		    try
-		    {
-			app = ccWrapper.getInternalApiWrapper().applicationApi.getApplication(token);
-			
-			log.info("[{}] LOOKUP SUCCESSFUL for Application [{}]:[{}]!", project.getProjectName(), app.getName(), app.getVersion());
-			log.info("-----------------------------");
-			
-		    } catch (SdkFault e)
-		    {
-			throw new CodeCenterImportException("Unable to look up application using id: "+  correspondingApplicationID, e);
-		    }
-		}		
-	    } 
+		    app = ccWrapper.getInternalApiWrapper().applicationApi
+			    .getApplication(token);
+
+		    log.info(
+			    "[{}] LOOKUP SUCCESSFUL for project [{}]:[{}]!",
+			    project.getProjectName(), app.getName(),
+			    app.getVersion());
+		    log.info("-----------------------------");
+
+		} catch (SdkFault e)
+		{
+		    throw new CodeCenterImportException(
+			    "Unable to look up application using id: "
+				    + correspondingApplicationID, e);
+		}
+	    }	
+	   
 
 	    // If everything goes well, set the application name for
 	    // potential validation down the road.
 	    project.setApplication(app);
 	} catch (CodeCenterImportException ccie)
 	{
-	    log.error("[{}] IMPORT FAILED", project.getProjectName());
+	    log.error("[{}] IMPORT FAILED, reason: [{}]", project.getProjectName(), ccie.getMessage());
 	    reportSummary.addTotalImportsFailed();
 	    reportSummary.addToFailedImportList(project.getProjectName());
 	    throw new CodeCenterImportException(ccie.getMessage());
 	}
 
 	return project;
+    }
+
+    /**
+     * Perform a DB lookup, and determines based on Protex project ID 
+     * the ID of the associated CC Application.
+     * 
+     * @param project
+     * @return
+     */
+    private String lookUpCorrespondingApplication(CCIProject project)
+    {
+	String correspondingApplicationID = null;
+	if (configManager.isIgnoreAssociations())
+	{
+	    log.info("**Ignore association mode.***");
+	    // If the user has elected to ignore associations, then we will look
+	    // up
+	    // the DB to see if a project ID is associated with anything.
+	    // If it is, then we use the app of that association.
+	    if (projectAssociationMap == null)
+	    {
+		CodeCenterAssociationLookup cal = new CodeCenterAssociationLookup(
+			configManager, ccWrapper);
+		projectAssociationMap = cal.getAssociationMap();
+	    }
+
+	    correspondingApplicationID = projectAssociationMap.get(project
+		    .getProjectKey());
+	}
+
+	return correspondingApplicationID;
     }
 
     /**

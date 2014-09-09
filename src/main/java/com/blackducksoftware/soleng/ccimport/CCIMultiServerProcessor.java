@@ -66,27 +66,35 @@ public class CCIMultiServerProcessor extends CCIProcessor
 	}
 
 	// For every server bean we have, create a new protexWrapper
-	// Use the supplied alias to set the Protex Server name
+	// Use the supplied alias to set the:
+	// - Protex Server Name / Alias
+	// - Owner
 	// Grab the projects and process import
 	for(ServerBean protexServer : protexServers)
 	{
 	    log.info("Performing synchronization against:" + protexServer);
 	    String protexAlias = protexServer.getAlias();
-	    
-	    if(protexAlias.isEmpty())
-		throw new CodeCenterImportException("Protex alias cannot be empty!");
+
+	    if (protexAlias.isEmpty())
+		throw new CodeCenterImportException(
+			"Protex alias cannot be empty!");
 	    else
 	    {
-		log.info("Setting {} to {}", CCIConstants.PROTEX_SERVER_URL_PROPERTY,protexAlias);
+		log.info("Setting {} to {}",
+			CCIConstants.PROTEX_SERVER_URL_PROPERTY, protexAlias);
 		codeCenterConfigManager.setProtexServerName(protexAlias);
 	    }
+
 	    ProtexServerWrapper wrapper = null;
 	    try
 	    {
-		wrapper = new ProtexServerWrapper(protexServer, protexConfig, true);		
+		wrapper = new ProtexServerWrapper(protexServer, protexConfig,
+			true);
 	    } catch (Exception e)
 	    {
-		throw new CodeCenterImportException("Unable to establish connection against: " + protexServer);
+		throw new CodeCenterImportException(
+			"Unable to establish connection against: "
+				+ protexServer);
 	    }
 	    
 	    List<CCIProject> projectList = getAllProjects(wrapper);
