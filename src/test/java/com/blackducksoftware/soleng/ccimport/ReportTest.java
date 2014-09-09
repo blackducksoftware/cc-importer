@@ -26,29 +26,34 @@ public class ReportTest
 
     @Test
     public void testReport() throws Exception
-    { 	
-    	String configPath = "src/test/resources/report.properties";
+    {
+	String configPath = "src/test/resources/report.properties";
 
-		ccConfigManager = new CodeCenterConfigManager(configPath);
-	    protexConfigManager = new ProtexConfigManager(configPath);
-	    
-	    CCIProcessor processor = new CCISingleServerProcessor(ccConfigManager, protexConfigManager);
-	    processor.runReport();
+	ccConfigManager = new CodeCenterConfigManager(configPath);
+	protexConfigManager = new ProtexConfigManager(configPath);
 
-	    // TODO: make these checks more rigorous
-	    
-    	DataTable report = processor.getReportGen().getDataTable();
-    	assertEquals(29, report.size());
-    	
-    	boolean foundMatch=false;
-    	for (Record rec : report) {
-    		if ("BestMatchId_Reference".equals(rec.getStringFieldValue("applicationName"))) {
-    			assertEquals("Yes", rec.getStringFieldValue("compListsMatch"));
-    			foundMatch=true;
-    			break;
-    		}
-    	}
-    	assertTrue(foundMatch);
-    	System.out.println("testReport() Done.");
+	CCIProcessor processor = new CCISingleServerProcessor(ccConfigManager,
+		protexConfigManager);
+	processor.runReport();
+
+	// TODO: make these checks more rigorous
+
+	DataTable report = processor.getReportGen().getDataTable();
+	// TODO:  AK -- This is not a good test!  The application counts change on that server randomly, so this will fail more often than not.
+	assertEquals(34, report.size());
+
+	boolean foundMatch = false;
+	for (Record rec : report)
+	{
+	    if ("BestMatchId_Reference".equals(rec
+		    .getStringFieldValue("applicationName")))
+	    {
+		assertEquals("Yes", rec.getStringFieldValue("compListsMatch"));
+		foundMatch = true;
+		break;
+	    }
+	}
+	assertTrue(foundMatch);
+	System.out.println("testReport() Done.");
     }
 }
