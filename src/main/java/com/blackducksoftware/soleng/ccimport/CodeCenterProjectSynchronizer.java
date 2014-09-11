@@ -278,18 +278,15 @@ public class CodeCenterProjectSynchronizer
 	    {
 		if (this.configManager.isPerformSmartValidate())
 		{
+		    // Our formatter
+		    SimpleDateFormat formatter = new SimpleDateFormat(
+			    "yyyy-MM-dd HH:mm:ss");
+		    
 		    CodeCenterValidator validator = new CodeCenterValidator(
 			    this.configManager, this.ccWrapper, app,
 			    importedProject);
 
-		    String lastValidatedDateStr = validator
-			    .getLastValidatedDate();
-		    if (lastValidatedDateStr == null)
-		    {
-			throw new Exception(
-				"Could not determine last validate date for application: "
-					+ applicationName);
-		    }
+		    // Grab the BOM Refresh date
 
 		    Date lastRefreshDate = importedProject
 			    .getLastBOMRefreshDate();
@@ -297,13 +294,20 @@ public class CodeCenterProjectSynchronizer
 		    if (lastRefreshDate == null)
 			throw new Exception(
 				"The last BOM refresh date is null, cannot perfom smart validate");
+		    
+		    // Grab the validation date
+		    String lastValidatedDateStr = validator
+			    .getLastValidatedDate();
+		    if (lastValidatedDateStr == null)
+		    {
+			log.warn("Could not determine last validate date for application: [{}] using BOM refresh date",applicationName);
+			lastValidatedDateStr = formatter.format(lastRefreshDate);
+		    }
+		    
 		    // Compare the two dates, if the validate date happened
 		    // before
 		    // the last refresh
 		    // then proceed, otherwise get out.
-		    SimpleDateFormat formatter = new SimpleDateFormat(
-			    "yyyy-MM-dd HH:mm:ss");
-
 		    // TODO: Temporary workaround to provide timezones. This
 		    // handles the case whereby
 		    // utility is run against a server that is not in the same
@@ -326,7 +330,8 @@ public class CodeCenterProjectSynchronizer
 		    Date lastValidatedTime = formatter
 			    .parse(lastValidatedDateStr);
 
-		    boolean before = lastValidatedTime.before(lastRefreshDate);
+		    // We want to check before or equals, since identical dates will return false on just a 'before' check.
+		    boolean before = lastValidatedTime.before(lastRefreshDate) || lastValidatedTime.equals(lastRefreshDate);
 
 		    if (before)
 		    {
