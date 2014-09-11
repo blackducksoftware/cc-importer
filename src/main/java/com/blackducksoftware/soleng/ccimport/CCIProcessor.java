@@ -66,6 +66,8 @@ public abstract class CCIProcessor
 		throw new Exception(
 			"No valid Code Center server configurations found");
 
+	    log.info("Using Code Center URL [{}]", ccBean.getServerName());
+	    
 	    codeCenterWrapper = new CodeCenterServerWrapper(ccBean,
 		    configManager);
 

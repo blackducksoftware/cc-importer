@@ -69,7 +69,8 @@ public class CCIProjectImporterHarness
 		log.info("Single-Protex mode started");
 		processor = new CCISingleServerProcessor(ccConfigManager, protexConfigManager);
 	    }
-
+   
+	    
 	    if(ccConfigManager.isRunReport())
 	    {
 	    	log.info("Generate Report mode activated");

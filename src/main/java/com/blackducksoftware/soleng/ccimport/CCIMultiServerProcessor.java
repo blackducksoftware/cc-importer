@@ -42,6 +42,8 @@ public class CCIMultiServerProcessor extends CCIProcessor
 	super(configManager);
 	
 	this.protexConfig = protexConfigManager;
+	
+	log.info("Using Protex URL [{}]", protexConfig.getServerBean().getServerName());
     }
 
     /**

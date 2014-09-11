@@ -55,6 +55,8 @@ public class CCISingleServerProcessor extends CCIProcessor
 	// There will only be one in the single instance
 	ServerBean protexBean = protexConfigManager.getServerBean();
 
+	log.info("Using Protex URL [{}]", protexBean.getServerName());
+	
 	// Set up the local Protex config.
 	protexWrapper = new ProtexServerWrapper(protexBean,
 		protexConfigManager, true);
