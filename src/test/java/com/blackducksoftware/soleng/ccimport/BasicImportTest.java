@@ -46,12 +46,17 @@ public class BasicImportTest
 
     public static String testPropsForBasicImport = "importer_test.properties";
     public static String testPropsForIgnoreAssociations = "importer_test_ignore_assoc.properties";
+    public static String testPropsForAllProjects = "importer_test_all_projects.properties";
+    
     
     public static String fullLocationBasicImport = ClassLoader.getSystemResource(
 	    testPropsForBasicImport).getFile();
 
     public static String fullLocationIgnoreAssoc = ClassLoader.getSystemResource(
 	    testPropsForIgnoreAssociations).getFile();
+    
+    public static String fullLocationtestPropsForAllProjects = ClassLoader.getSystemResource(
+	    testPropsForAllProjects).getFile();
     
     private static CodeCenterConfigManager ccConfig = null;
     private static CodeCenterServerWrapper ccsw = null;
@@ -119,6 +124,42 @@ public class BasicImportTest
 	try
 	{
 	    ccConfig = new CodeCenterConfigManager(fullLocationIgnoreAssoc);
+	    // Create cc wrapper so that we can peform cleanup tasks
+	    ccsw = new CodeCenterServerWrapper(ccConfig.getServerBean(),
+		    ccConfig);
+	    processor = new CCISingleServerProcessor(ccConfig, pConfig);
+	} catch (Exception e)
+	{
+	    Assert.fail(e.getMessage());
+	}
+
+	try
+	{
+	    // Run the sync
+	    processor.performSynchronize();
+
+	    List<CCIReportSummary> summaries = processor.getReportSummaryList();
+	    
+	    CCIReportSummary singleProcessor = summaries.get(0);
+	    
+	    // Check the report summary to make sure validation was a success
+	    Assert.assertEquals(0, singleProcessor.getFailedValidationList().size());
+
+	} catch (CodeCenterImportException e)
+	{
+	    Assert.fail(e.getMessage());
+	}
+    }
+    
+    /**
+     * Tests all the projects that belong to our user
+     */
+    @Test 
+    public void testAllProjectsForUser()
+    {
+	try
+	{
+	    ccConfig = new CodeCenterConfigManager(fullLocationtestPropsForAllProjects);
 	    // Create cc wrapper so that we can peform cleanup tasks
 	    ccsw = new CodeCenterServerWrapper(ccConfig.getServerBean(),
 		    ccConfig);

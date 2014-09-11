@@ -19,6 +19,7 @@ import soleng.framework.core.config.ConfigConstants.APPLICATION;
 import soleng.framework.core.config.server.ServerBean;
 import soleng.framework.standard.codecenter.CodeCenterServerWrapper;
 import soleng.framework.standard.common.ProjectPojo;
+import soleng.framework.standard.protex.ProtexProjectPojo;
 import soleng.framework.standard.protex.ProtexServerWrapper;
 
 import com.blackducksoftware.soleng.ccimport.exception.CodeCenterImportException;
@@ -122,7 +123,6 @@ public abstract class CCIProcessor
 		projectList = getAllProjects(protexWrapper);
 		listObject = new CCIProjectList(projectList);
 		listObject.setUserSpecifiedSubset(false);
-		return listObject;
 	}
 	else
 	{

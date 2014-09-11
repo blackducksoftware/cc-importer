@@ -271,31 +271,39 @@ public class CodeCenterProjectSynchronizer
 	// If user selected smart validate, then determine the last date of the
 	// application
 	try
+	// validate
 	{
-	    if (this.configManager.isPerformSmartValidate())
+	    try
+	    // smart validate
 	    {
-		CodeCenterValidator validator = new CodeCenterValidator(
-			this.configManager, this.ccWrapper, app,
-			importedProject);
-
-		String lastValidatedDateStr = validator.getLastValidatedDate();
-		if (lastValidatedDateStr == null)
+		if (this.configManager.isPerformSmartValidate())
 		{
-		    throw new Exception(
-			    "Could not determine last validate date for application: "
-				    + applicationName);
-		}
+		    CodeCenterValidator validator = new CodeCenterValidator(
+			    this.configManager, this.ccWrapper, app,
+			    importedProject);
 
-		Date lastRefreshDate = importedProject.getLastBOMRefreshDate();
+		    String lastValidatedDateStr = validator
+			    .getLastValidatedDate();
+		    if (lastValidatedDateStr == null)
+		    {
+			throw new Exception(
+				"Could not determine last validate date for application: "
+					+ applicationName);
+		    }
 
-		// Compare the two dates, if the validate date happened before
-		// the last refresh
-		// then proceed, otherwise get out.
-		SimpleDateFormat formatter = new SimpleDateFormat(
-			"yyyy-MM-dd HH:mm:ss");
+		    Date lastRefreshDate = importedProject
+			    .getLastBOMRefreshDate();
 
-		try
-		{
+		    if (lastRefreshDate == null)
+			throw new Exception(
+				"The last BOM refresh date is null, cannot perfom smart validate");
+		    // Compare the two dates, if the validate date happened
+		    // before
+		    // the last refresh
+		    // then proceed, otherwise get out.
+		    SimpleDateFormat formatter = new SimpleDateFormat(
+			    "yyyy-MM-dd HH:mm:ss");
+
 		    // TODO: Temporary workaround to provide timezones. This
 		    // handles the case whereby
 		    // utility is run against a server that is not in the same
@@ -335,24 +343,19 @@ public class CodeCenterProjectSynchronizer
 			summary.addToTotalValidatesSkipped();
 			return summary;
 		    }
-		} catch (ParseException e)
-		{
-		    log.warn(
-			    "Unable to parse last validation date, proceeding with validation.",
-			    e);
 		}
+	    } catch (Exception e)
+	    {
+		log.error("Unexpected error during smart validation check:"
+			+ e.getMessage());
+		throw new Exception("Smart validation failed: "
+			+ e.getMessage());
 	    }
-	} catch (Exception e)
-	{
-	    log.warn("Unexpected error during smart validation check:"
-		    + e.getMessage());
-	}
 
-	log.info(
-		"[{}] Attempting validation with Protex. This may take some time, depending on the number of components...",
-		applicationName);
-	try
-	{
+	    log.info(
+		    "[{}] Attempting validation with Protex. This may take some time, depending on the number of components...",
+		    applicationName);
+
 	    ccWrapper.getInternalApiWrapper().applicationApi.validate(
 		    appIdToken, false, false);
 	    reportSummary.addToTotalValidatesPerfomed();
