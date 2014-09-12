@@ -63,22 +63,13 @@ public class ProtexComponentCollector extends ComponentCollector {
 			Component component = protexWrapper.getInternalApiWrapper().projectApi.getComponentById(protexProjectId, 
 					bomcomponent.getComponentId());
 		
-			// TODO This is overkill
 			log.debug("Comp " + component.getName() + ": Comp Type: " + component.getType());
 			log.debug("Comp " + component.getName() + ": BomComp Type: " + bomcomponent.getType());
 			log.debug("Comp " + component.getName() + ": BomComp VersionID: " + bomcomponent.getVersionId());
 			
-			// TODO This is overkill
 			log.debug("\tBomComp approval state: " + bomcomponent.getApprovalInfo().getApproved().name());
 			log.debug("\tBomComp file count identified: " + bomcomponent.getFileCountIdentified());
-			log.debug("\tBomComp file count rapidId identified: " + bomcomponent.getFileCountRapidIdIdentifications());
-			
-			List<UsageLevel> usageLevels = bomcomponent.getUsageLevels();
-//			log.debug("\tBomComp number of usage levels: " + bomcomponent.getUsageLevels().size());
-			for (UsageLevel usageLevel : usageLevels) {
-				log.debug("\tBomComp usage level: " + usageLevel.name());
-			}
-			
+			log.debug("\tBomComp file count rapidId identified: " + bomcomponent.getFileCountRapidIdIdentifications());	
 			
 			if (component.getType() == ComponentType.PROJECT) {
 				continue;

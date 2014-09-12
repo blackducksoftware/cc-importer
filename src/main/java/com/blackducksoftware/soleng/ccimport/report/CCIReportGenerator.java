@@ -122,13 +122,12 @@ public class CCIReportGenerator {
 		}
 	}
 	
-	// TODO: This method is too big / ugly... need to refactor it
+	// TODO: This method is too big / ugly... need to refactor it, but it would be nice to have a comprehensive test first
 	private HashMap<String, CCIProject> processValidProjects(CCIProjectList projectList) throws Exception {
 		log.info("Project list: " + projectList);
 		
 		HashMap<String, CCIProject> protexProjectMap = getProjectMap(projectList);
 		boolean projectListIsUserSpecifiedSubset = projectList.isUserSpecifiedSubset();
-		
 		
 		// We already have all projects, time to get all the applications.
 		// Request all applications that belong to the user
@@ -234,13 +233,6 @@ public class CCIReportGenerator {
 		    dataTable.add(record);
 		}
 		
-		
-		
-		// Set summary basics
-//		reportSummary.setTotalProtexProjects(projectList.size());
-//		reportSummary.setTotalCCApplications(apps.size());
-//		log.info("Summary so far: " + reportSummary.toString());
-		
 		return protexProjectMap;
 	}
 	
@@ -296,19 +288,6 @@ public class CCIReportGenerator {
 		log.info("Comparing Protex component list (\"this\") to Code Center component list (\"other\")");
     	String diffString = protexComponentCollector.getDiffString(ccComponentCollector);
 
-    	// TODO obsolete
-//    	if (diffString != null) {
-//    		StringBuilder builder = new StringBuilder();
-//    		builder.append("Code Center Component list: ");
-//    		builder.append(ccComponentCollector.toString());
-//    		builder.append("\nProtex Component list: ");
-//    		builder.append(protexComponentCollector.toString());
-//    		if (builder.length() > maxLen) {
-//    			diffString = builder.substring(0, maxLen-5) + "...";
-//    		} else {
-//    			diffString = builder.toString();
-//    		}
-//    	}
     	return diffString; // null if lists are identical
 	}
 
