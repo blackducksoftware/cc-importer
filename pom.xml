@@ -192,7 +192,7 @@
 		<repository>
 			<id>soleng</id>
 			<name>BlackDuck SolEng Repo</name>
-			<url>http://lame.blackducksoftware.com:8081/artifactory/soleng/</url>
+			<url>http://artifactory.blackducksoftware.com:8081/artifactory/soleng/</url>
 		</repository>
 
 	</repositories>
