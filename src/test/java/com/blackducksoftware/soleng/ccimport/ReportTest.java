@@ -22,9 +22,9 @@ import soleng.framework.standard.datatable.writer.DataSetWriterStdOut;
 
 public class ReportTest
 {
-	private static final String CC_URL = "http://satemplatecc1/";
-	public static final String SUPERUSER_USERNAME = "sbillings@blackducksoftware.com";
-	public static final String SUPERUSER_PASSWORD = "blackduck";
+	private static final String CC_URL = "http://cc-integration.blackducksoftware.com/";
+	public static final String SUPERUSER_USERNAME = "super";
+	public static final String SUPERUSER_PASSWORD = "super";
 	private static String APPLICATION0_NAME = "ccImporterReportTestApp1";
 	private static String APPLICATION_VERSION = "v123";
 	private static String USER1_USERNAME = "JUnit_ccimporter_report_user1";
