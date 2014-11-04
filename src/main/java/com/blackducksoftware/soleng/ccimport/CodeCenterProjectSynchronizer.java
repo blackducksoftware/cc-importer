@@ -19,6 +19,8 @@
  */
 package com.blackducksoftware.soleng.ccimport;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -50,6 +52,7 @@ import com.blackducksoftware.sdk.codecenter.request.data.RequestIdToken;
 import com.blackducksoftware.sdk.codecenter.request.data.RequestSummary;
 import com.blackducksoftware.sdk.codecenter.user.data.RoleNameToken;
 import com.blackducksoftware.sdk.codecenter.user.data.UserNameToken;
+import com.blackducksoftware.soleng.ccimport.appadjuster.AppAdjuster;
 import com.blackducksoftware.soleng.ccimport.exception.CodeCenterImportException;
 import com.blackducksoftware.soleng.ccimport.report.CCIReportSummary;
 import com.blackducksoftware.soleng.ccimport.validate.CodeCenterValidator;
@@ -69,6 +72,8 @@ public class CodeCenterProjectSynchronizer
     private static Logger log = LoggerFactory
 	    .getLogger(CodeCenterProjectSynchronizer.class.getName());
 
+    private Object appAdjusterObject = null;
+    private Method appAdjusterMethod = null; 	    // TODO: add mechanism to supply a custom adjuster
     private CodeCenterServerWrapper ccWrapper = null;
     private CCIConfigurationManager configManager = null;
     private CCIReportSummary reportSummary = new CCIReportSummary();
@@ -78,10 +83,43 @@ public class CodeCenterProjectSynchronizer
     
     public CodeCenterProjectSynchronizer(
 	    CodeCenterServerWrapper codeCenterWrapper,
-	    CCIConfigurationManager config)
+	    CCIConfigurationManager config) throws CodeCenterImportException
     {
 	this.ccWrapper = codeCenterWrapper;
 	this.configManager = config;
+	setAppAdjusterMethod(config);
+    }
+    
+    private void setAppAdjusterMethod(CCIConfigurationManager config) throws CodeCenterImportException {
+    	String appAdjusterClassname = config.getOptionalProperty("app.adjuster.classname");
+    	if (appAdjusterClassname == null) {
+    		return;
+    	}
+    	Class sourceClass = null;
+    	try {
+    		sourceClass = Class.forName(appAdjusterClassname);
+    	} catch (ClassNotFoundException e) {
+    		String msg = "Unable to convert name to class for custom app adjuster: Class not found: " + appAdjusterClassname;
+    		throw new CodeCenterImportException(msg);
+    	}
+    	
+    	try {
+    		appAdjusterObject = sourceClass.newInstance();
+    	} catch (IllegalAccessException e) {
+    		String msg = "Unable to create instance of app adjuster: Illegal access: " + appAdjusterClassname;
+    		throw new CodeCenterImportException(msg);
+    	} catch (InstantiationException e) {
+    		String msg = "Unable to create instance of app adjuster: Instantiation exception: " + appAdjusterClassname;
+    		throw new CodeCenterImportException(msg);
+    	}
+    	
+    	Class[] initMethodArgTypes = { CCIConfigurationManager.class, Application.class, CCIProject.class };
+    	try {
+    		appAdjusterMethod = sourceClass.getDeclaredMethod("adjustApp", initMethodArgTypes);
+    	} catch (NoSuchMethodException e) {
+    		String msg = "Unable to get app adjuster method: No such method exception: " + appAdjusterClassname;
+    		throw new CodeCenterImportException(msg);
+    	}
     }
 
     /**
@@ -203,9 +241,15 @@ public class CodeCenterProjectSynchronizer
 	    }	
 	   
 
+	    invokeAppAdjuster(configManager, app, project);
+	    
 	    // If everything goes well, set the application name for
 	    // potential validation down the road.
 	    project.setApplication(app);
+	    
+	    
+	    
+	    
 	} catch (CodeCenterImportException ccie)
 	{
 	    log.error("[{}] IMPORT FAILED, reason: [{}]", project.getProjectName(), ccie.getMessage());
@@ -215,6 +259,20 @@ public class CodeCenterProjectSynchronizer
 	}
 
 	return project;
+    }
+    
+    private void invokeAppAdjuster(CCIConfigurationManager configManager, Application app, CCIProject project) throws CodeCenterImportException {
+    	if (appAdjusterMethod != null) {
+	    	try {
+	    		appAdjusterMethod.invoke(appAdjusterObject, configManager, app, project);
+	    	} catch (InvocationTargetException e) {
+	    		String msg = "Error during post-import application metadata adjustment: InvocationTargetException: " + e.getMessage();
+	    		throw new CodeCenterImportException(msg);
+	    	} catch (IllegalAccessException e) {
+	    		String msg = "Error during post-import application metadata adjustment: IllegalAccessException: " + e.getMessage();
+	    		throw new CodeCenterImportException(msg);
+	    	}
+	    }
     }
 
     /**
