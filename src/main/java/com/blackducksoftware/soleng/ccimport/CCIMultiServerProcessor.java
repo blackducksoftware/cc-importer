@@ -100,6 +100,7 @@ public class CCIMultiServerProcessor extends CCIProcessor
 	    }
 	    
 	    List<CCIProject> projectList = getAllProjects(wrapper);
+	    CCISingleServerProcessor.setLastAnalyzedDates(wrapper, projectList);
 	    synchronizer.synchronize(projectList);
 	}
     }

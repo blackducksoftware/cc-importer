@@ -79,7 +79,9 @@ public class CodeCenterProjectSynchronizer
     private CCIReportSummary reportSummary = new CCIReportSummary();
 
     // Keep track of project id/app id mappings
-    HashMap<String, String> projectAssociationMap  = null;
+    private HashMap<String, String> projectAssociationMap  = null;
+    
+    private TimeZone tz = null; // User-provided: the timezone of the server
     
     public CodeCenterProjectSynchronizer(
 	    CodeCenterServerWrapper codeCenterWrapper,
@@ -88,10 +90,30 @@ public class CodeCenterProjectSynchronizer
 	this.ccWrapper = codeCenterWrapper;
 	this.configManager = config;
 	setAppAdjusterMethod(config);
+	setTimeZone(config);
+    }
+    
+    private void setTimeZone(CCIConfigurationManager config) {
+    	// TODO: Temporary workaround to provide timezones. This
+	    // handles the case whereby
+	    // utility is run against a server that is not in the same
+	    // time zone.
+	    String userSpecifiedTimeZone = configManager.getTimeZone();
+	    
+	    if (userSpecifiedTimeZone != null
+		    && !userSpecifiedTimeZone.isEmpty())
+	    {
+		tz = TimeZone.getTimeZone(userSpecifiedTimeZone);
+		log.info("User specified time zone recognized, using: "
+			+ tz.getDisplayName());
+	    } else
+	    {
+		tz = TimeZone.getDefault();
+	    }
     }
     
     private void setAppAdjusterMethod(CCIConfigurationManager config) throws CodeCenterImportException {
-    	String appAdjusterClassname = config.getOptionalProperty("app.adjuster.classname");
+    	String appAdjusterClassname = config.getAppAdjusterClassname();
     	if (appAdjusterClassname == null) {
     		return;
     	}
@@ -366,22 +388,7 @@ public class CodeCenterProjectSynchronizer
 		    // before
 		    // the last refresh
 		    // then proceed, otherwise get out.
-		    // TODO: Temporary workaround to provide timezones. This
-		    // handles the case whereby
-		    // utility is run against a server that is not in the same
-		    // time zone.
-		    String userSpecifiedTimeZone = configManager.getTimeZone();
-		    TimeZone tz = null;
-		    if (userSpecifiedTimeZone != null
-			    && !userSpecifiedTimeZone.isEmpty())
-		    {
-			tz = TimeZone.getTimeZone(userSpecifiedTimeZone);
-			log.info("User specified time zone recognized, using: "
-				+ tz.getDisplayName());
-		    } else
-		    {
-			tz = TimeZone.getDefault();
-		    }
+		    
 
 		    formatter.setTimeZone(tz);
 

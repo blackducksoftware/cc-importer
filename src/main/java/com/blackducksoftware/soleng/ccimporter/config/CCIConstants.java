@@ -54,6 +54,7 @@ public class CCIConstants {
 	// Project
 	public static final String PROJECT_PROPERTY = "protex.project.list";
 	
+	public static final String APP_ADJUSTER_CLASSNAME = "app.adjuster.classname";
 	
 	// This switch ignores the existing associations
 	public static final String IGNORE_ASSOCIATIONS = "cc.ignore.associations";

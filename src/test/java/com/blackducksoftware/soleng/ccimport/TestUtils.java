@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
+import com.blackducksoftware.sdk.codecenter.application.data.Application;
 import com.blackducksoftware.sdk.codecenter.application.data.ApplicationCreate;
 import com.blackducksoftware.sdk.codecenter.application.data.ApplicationIdToken;
 import com.blackducksoftware.sdk.codecenter.application.data.ApplicationNameVersionToken;
@@ -62,6 +63,10 @@ public class TestUtils {
 		appCreateBean.setOwnerRoleId(roleToken);
 		
 		return cc.getApplicationApi().createApplication(appCreateBean);
+	}
+	
+	public static Application getApplication(CodeCenterServerProxyV6_6_0 cc, ApplicationIdToken idToken) throws SdkFault {
+		return cc.getApplicationApi().getApplication(idToken);
 	}
 	
 //	static void setAppCustomAttributeTextField(CodeCenterServerProxyV6_6_0 cc, Application app, String attrValue)

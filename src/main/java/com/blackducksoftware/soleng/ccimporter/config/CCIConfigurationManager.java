@@ -43,6 +43,7 @@ public class CCIConfigurationManager extends ConfigurationManager
     private Boolean performSmartValidate = false;
     private String version = "undefined";
     private Boolean ignoreAssociations = false;
+    private String appAdjusterClassname = null;
     
     // TODO:  Temporary workarounds for DB access
     private String hostName = null;
@@ -92,6 +93,7 @@ public class CCIConfigurationManager extends ConfigurationManager
 	owner = getProperty(CCIConstants.OWNER_PROPERTY);
 	appVersion = getProperty(CCIConstants.VERSION_PROPERTY);
 	workflow = getProperty(CCIConstants.WORKFLOW_PROPERTY);
+	appAdjusterClassname = getOptionalProperty(CCIConstants.APP_ADJUSTER_CLASSNAME);
 	
 	submit = getOptionalProperty(CCIConstants.SUBMIT_PROPERTY, false,
 		Boolean.class);
@@ -456,4 +458,10 @@ public class CCIConfigurationManager extends ConfigurationManager
     {
 	this.ignoreAssociations = ignoreAssociations;
     }
+
+	public String getAppAdjusterClassname() {
+		return appAdjusterClassname;
+	}
+    
+    
 }

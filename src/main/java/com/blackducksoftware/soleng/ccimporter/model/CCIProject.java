@@ -26,6 +26,7 @@ public class CCIProject extends ProtexProjectPojo
     private String projectVersion = null;
     private Application application = null;
     private Date lastBOMRefreshDate = null;
+    private Date analyzedDateValue = null;
     
     public CCIProject()
     {
@@ -76,4 +77,13 @@ public class CCIProject extends ProtexProjectPojo
     {
 	this.lastBOMRefreshDate = lastBOMRefreshDate;
     }
+
+	public Date getAnalyzedDateValue() {
+		return analyzedDateValue;
+	}
+
+	public void setAnalyzedDateValue(Date analyzedDateValue) {
+		this.analyzedDateValue = analyzedDateValue;
+	}
+    
 }

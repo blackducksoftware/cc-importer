@@ -16,9 +16,12 @@ import org.slf4j.LoggerFactory;
 
 import soleng.framework.core.config.ConfigConstants.APPLICATION;
 import soleng.framework.core.config.server.ServerBean;
+import soleng.framework.core.exception.CommonFrameworkException;
 import soleng.framework.standard.common.ProjectPojo;
 import soleng.framework.standard.protex.ProtexServerWrapper;
 
+import com.blackducksoftware.sdk.fault.SdkFault;
+import com.blackducksoftware.sdk.protex.project.Project;
 import com.blackducksoftware.soleng.ccimport.exception.CodeCenterImportException;
 import com.blackducksoftware.soleng.ccimport.report.CCIReportGenerator;
 import com.blackducksoftware.soleng.ccimport.report.CCIReportSummary;
@@ -73,9 +76,22 @@ public class CCISingleServerProcessor extends CCIProcessor
 	List<CCIProject> projectList = getProjects().getList();
 	log.info("Processing {} projects for synchronization", projectList);
 
+	setLastAnalyzedDates(protexWrapper, projectList);
 	synchronizer.synchronize(projectList);
 	reportSummaryList.add(synchronizer.getReportSummary());
 
+    }
+    
+    public static void setLastAnalyzedDates(ProtexServerWrapper protexWrapper, List<CCIProject> projectList) throws CodeCenterImportException {
+    	for (CCIProject project : projectList) {
+    		Project sdkProject = null;
+    		try {
+    			sdkProject = protexWrapper.getInternalApiWrapper().getProjectApi().getProjectById(project.getProjectKey());
+    		} catch (SdkFault e) {
+    			throw new CodeCenterImportException("Error getting project: " + project.getProjectName() + " in order to get lastAnalyzedDate: " + e.getMessage());
+    		}
+    		project.setAnalyzedDateValue(sdkProject.getLastAnalyzedDate());
+    	}
     }
 
     private CCIProjectList getProjects() throws CodeCenterImportException
