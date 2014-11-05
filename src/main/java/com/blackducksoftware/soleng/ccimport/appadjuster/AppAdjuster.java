@@ -11,5 +11,6 @@ import com.blackducksoftware.soleng.ccimporter.config.CCIConfigurationManager;
 import com.blackducksoftware.soleng.ccimporter.model.CCIProject;
 
 public interface AppAdjuster {
-	public void adjustApp(CCIConfigurationManager config, Application app, CCIProject project) throws CodeCenterImportException;
+	public void init(CCIConfigurationManager config);
+	public void adjustApp(Application app, CCIProject project) throws CodeCenterImportException;
 }

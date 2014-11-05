@@ -3,7 +3,7 @@ Copyright (C)2014 Black Duck Software Inc.
 http://www.blackducksoftware.com/
 All rights reserved. **/
 
-package com.blackducksoftware.soleng.ccimport;
+package com.blackducksoftware.soleng.ccimport.appadjuster.custom;
 
 import static org.junit.Assert.*;
 
@@ -24,6 +24,9 @@ import soleng.framework.standard.datatable.writer.DataSetWriterStdOut;
 import com.blackducksoftware.sdk.codecenter.application.data.Application;
 import com.blackducksoftware.sdk.codecenter.application.data.ApplicationIdToken;
 import com.blackducksoftware.sdk.codecenter.client.util.CodeCenterServerProxyV6_6_0;
+import com.blackducksoftware.soleng.ccimport.CCIProcessor;
+import com.blackducksoftware.soleng.ccimport.CCISingleServerProcessor;
+import com.blackducksoftware.soleng.ccimport.TestUtils;
 import com.blackducksoftware.soleng.ccimport.appadjuster.custom.JpmcAppAdjuster;
 import com.blackducksoftware.soleng.ccimporter.config.CodeCenterConfigManager;
 import com.blackducksoftware.soleng.ccimporter.config.ProtexConfigManager;
@@ -87,7 +90,8 @@ public class JpmcAppAdjusterIT {
 		Application app = TestUtils.getApplication(cc, appIdToken);
 		
 		JpmcAppAdjuster appAdjuster = new JpmcAppAdjuster();
-		appAdjuster.adjustApp(ccConfigManager, app, project);
+		appAdjuster.init(ccConfigManager);
+		appAdjuster.adjustApp(app, project);
     }
 
 }

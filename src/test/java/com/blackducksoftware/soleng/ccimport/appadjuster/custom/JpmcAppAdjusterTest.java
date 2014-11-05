@@ -7,35 +7,87 @@ package com.blackducksoftware.soleng.ccimport.appadjuster.custom;
 
 import static org.junit.Assert.*;
 
+import java.util.Properties;
+
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Test;
 
+import soleng.framework.core.config.ConfigConstants.APPLICATION;
+
+import com.blackducksoftware.soleng.ccimporter.config.CCIConfigurationManager;
+
 public class JpmcAppAdjusterTest {
 
 	@Test
-	public void test() throws Exception {
+	public void testDefaultPatterns() throws Exception {
 		JpmcAppMetadata metadata;
 		
-		metadata = JpmcAppAdjuster.parse("123-some application-PROD-current");
+		Properties props = new Properties();
+		props.setProperty("cc.user.name", "notused");
+		props.setProperty("cc.server.name", "notused");
+		props.setProperty("cc.password", "notused");
+		
+		CCIConfigurationManager config = new CCIConfigurationManager(props, APPLICATION.CODECENTER);
+		JpmcAppAdjuster adjuster = new JpmcAppAdjuster();
+		adjuster.init(config);
+		
+		metadata = adjuster.parse("123-some application-PROD-current");
 		assertEquals("123", metadata.getSealId());
 		assertEquals("some application", metadata.getAppNameString());
 		assertEquals("PROD", metadata.getWorkStream());
 		
-		metadata = JpmcAppAdjuster.parse("1234--PROD-current");
+		metadata = adjuster.parse("1234--PROD-current");
 		assertEquals("1234", metadata.getSealId());
 		assertEquals("", metadata.getAppNameString());
 		assertEquals("PROD", metadata.getWorkStream());
 		
-		metadata = JpmcAppAdjuster.parse("12345-some application-RC1-current");
+		metadata = adjuster.parse("12345-some application-RC1-current");
 		assertEquals("12345", metadata.getSealId());
 		assertEquals("some application", metadata.getAppNameString());
 		assertEquals("RC1", metadata.getWorkStream());
 		
-		metadata = JpmcAppAdjuster.parse("123-some application.;;/-RC5");
+		metadata = adjuster.parse("123-some application.;;/-RC5");
 		assertEquals("123", metadata.getSealId());
 		assertEquals("some application.;;/", metadata.getAppNameString());
 		assertEquals("RC5", metadata.getWorkStream());
+	}
+	
+	@Test
+	public void testConfiguredPatterns() throws Exception {
+		JpmcAppMetadata metadata;
+		
+		Properties props = new Properties();
+		props.setProperty("cc.user.name", "notused");
+		props.setProperty("cc.server.name", "notused");
+		props.setProperty("cc.password", "notused");
+		props.setProperty("jpmc.appname.pattern.separator", "_");
+		props.setProperty("jpmc.appname.pattern.sealid", "[a-z][a-z][a-z]+");
+		props.setProperty("jpmc.appname.pattern.workstream", "(PPPP|RCA|RCB|RCC|RCD|RCE)");
+		
+		CCIConfigurationManager config = new CCIConfigurationManager(props, APPLICATION.CODECENTER);
+		JpmcAppAdjuster adjuster = new JpmcAppAdjuster();
+		adjuster.init(config);
+		
+		metadata = adjuster.parse("abc_some application_PPPP_current");
+		assertEquals("abc", metadata.getSealId());
+		assertEquals("some application", metadata.getAppNameString());
+		assertEquals("PPPP", metadata.getWorkStream());
+		
+		metadata = adjuster.parse("abcd__PPPP_current");
+		assertEquals("abcd", metadata.getSealId());
+		assertEquals("", metadata.getAppNameString());
+		assertEquals("PPPP", metadata.getWorkStream());
+		
+		metadata = adjuster.parse("abcde_some application_RCA_current");
+		assertEquals("abcde", metadata.getSealId());
+		assertEquals("some application", metadata.getAppNameString());
+		assertEquals("RCA", metadata.getWorkStream());
+		
+		metadata = adjuster.parse("abc_some application.;;/_RCE");
+		assertEquals("abc", metadata.getSealId());
+		assertEquals("some application.;;/", metadata.getAppNameString());
+		assertEquals("RCE", metadata.getWorkStream());
 	}
 
 }

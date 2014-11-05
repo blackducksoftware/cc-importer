@@ -112,11 +112,19 @@ public class CodeCenterProjectSynchronizer
 	    }
     }
     
+    /**
+     * If a custom app adjuster (to modify app metadata after sync) has been configured, initialize it.
+     * @param config
+     * @throws CodeCenterImportException
+     */
     private void setAppAdjusterMethod(CCIConfigurationManager config) throws CodeCenterImportException {
+    	
+    	// See if the user has configured a custom app adjuster
     	String appAdjusterClassname = config.getAppAdjusterClassname();
     	if (appAdjusterClassname == null) {
-    		return;
+    		return;  // No custom app adjuster has been configured
     	}
+    	// Get the user-configured custom app adjuster class
     	Class sourceClass = null;
     	try {
     		sourceClass = Class.forName(appAdjusterClassname);
@@ -125,6 +133,7 @@ public class CodeCenterProjectSynchronizer
     		throw new CodeCenterImportException(msg);
     	}
     	
+    	// Create an instance of the custom app adjuster class
     	try {
     		appAdjusterObject = sourceClass.newInstance();
     	} catch (IllegalAccessException e) {
@@ -135,11 +144,33 @@ public class CodeCenterProjectSynchronizer
     		throw new CodeCenterImportException(msg);
     	}
     	
-    	Class[] initMethodArgTypes = { CCIConfigurationManager.class, Application.class, CCIProject.class };
+    	// Get the init method on the custom app adjuster class
+    	Method initMethod=null;
+    	Class[] initMethodArgTypes = { CCIConfigurationManager.class };
     	try {
-    		appAdjusterMethod = sourceClass.getDeclaredMethod("adjustApp", initMethodArgTypes);
+    		initMethod = sourceClass.getDeclaredMethod("init", initMethodArgTypes);
+    	} catch (NoSuchMethodException e) {
+    		String msg = "Unable to get init method: No such method exception: " + appAdjusterClassname;
+    		throw new CodeCenterImportException(msg);
+    	}
+    	
+    	// Get the adjustApp method on the custom app adjuster class
+    	Class[] adjustAppMethodArgTypes = { Application.class, CCIProject.class };
+    	try {
+    		appAdjusterMethod = sourceClass.getDeclaredMethod("adjustApp", adjustAppMethodArgTypes);
     	} catch (NoSuchMethodException e) {
     		String msg = "Unable to get app adjuster method: No such method exception: " + appAdjusterClassname;
+    		throw new CodeCenterImportException(msg);
+    	}
+    	
+    	// Call the init method to initialize the custom app adjuster
+    	try {
+    		initMethod.invoke(appAdjusterObject, configManager);
+    	} catch (InvocationTargetException e) {
+    		String msg = "Error initializing custom app adjuster: InvocationTargetException: " + e.getMessage();
+    		throw new CodeCenterImportException(msg);
+    	} catch (IllegalAccessException e) {
+    		String msg = "Error initializing custom app adjuster: IllegalAccessException: " + e.getMessage();
     		throw new CodeCenterImportException(msg);
     	}
     }
@@ -286,7 +317,7 @@ public class CodeCenterProjectSynchronizer
     private void invokeAppAdjuster(CCIConfigurationManager configManager, Application app, CCIProject project) throws CodeCenterImportException {
     	if (appAdjusterMethod != null) {
 	    	try {
-	    		appAdjusterMethod.invoke(appAdjusterObject, configManager, app, project);
+	    		appAdjusterMethod.invoke(appAdjusterObject, app, project);
 	    	} catch (InvocationTargetException e) {
 	    		String msg = "Error during post-import application metadata adjustment: InvocationTargetException: " + e.getMessage();
 	    		throw new CodeCenterImportException(msg);
