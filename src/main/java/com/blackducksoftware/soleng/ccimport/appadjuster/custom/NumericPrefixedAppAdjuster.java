@@ -10,6 +10,7 @@ import static org.junit.Assert.assertEquals;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Scanner;
 import java.util.TimeZone;
@@ -153,8 +154,10 @@ public class NumericPrefixedAppAdjuster implements AppAdjuster {
         try {
         	ccWrapper.getInternalApiWrapper().getProxy().getApplicationApi().updateApplication(appUpdate);
         } catch (SdkFault e) {
-        	throw new CodeCenterImportException("Error setting value of app attr " + attrName + " on app " + app.getName() + 
-        			": " + e.getMessage());
+        	String msg = "Error setting value of app attr " + attrName + " on app " + app.getName() + 
+        			": " + e.getMessage();
+        	log.error(msg);
+        	throw new CodeCenterImportException(msg);
         }
         log.info("Updated app=" + app.getName() + ", attr: " + attrName + ", value=" + attrValue);
 	}
@@ -166,17 +169,33 @@ public class NumericPrefixedAppAdjuster implements AppAdjuster {
 		try {
 			
 			if (!scanner.hasNext(numericPrefixPattern)) {
-				throw new CodeCenterImportException("Error parsing numeric prefix from app name " + appName);
+				String msg = "Error parsing numeric prefix from app name " + appName;
+				log.error(msg);
+				throw new CodeCenterImportException(msg);
 			}
 			String numericPrefix = scanner.next(numericPrefixPattern);
 			metadata.setNumericPrefix(numericPrefix);
 
 			if (!scanner.hasNext(workStreamPattern)) {
-				String appNameString = scanner.next();
+				String appNameString;
+				try {
+					appNameString = scanner.next();
+				} catch (InputMismatchException e) {
+					String msg = "Error parsing work stream from app name " + appName;
+					log.error(msg);
+					throw new CodeCenterImportException(msg);
+				}
 				metadata.setAppNameString(appNameString);
 			}
 			
-			String workStream = scanner.next(workStreamPattern);
+			String workStream;
+			try {
+				workStream = scanner.next(workStreamPattern);
+			} catch (InputMismatchException e) {
+				String msg = "Error parsing work stream from app name " + appName;
+				log.error(msg);
+				throw new CodeCenterImportException(msg);
+			}
 			metadata.setWorkStream(workStream);
 		
 		} finally {

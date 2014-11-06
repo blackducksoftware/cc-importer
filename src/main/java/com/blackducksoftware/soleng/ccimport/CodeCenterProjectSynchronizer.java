@@ -321,7 +321,7 @@ public class CodeCenterProjectSynchronizer
 	    		appAdjusterMethod.invoke(appAdjusterObject, app, project);
 	    	} catch (InvocationTargetException e) {
 	    		String msg = "Error during post-import application metadata adjustment: InvocationTargetException: " + e.getTargetException().getMessage(); 
-	    		log.error(msg, e);
+//	    		log.error(msg, e);
 	    		throw new CodeCenterImportException(msg);
 	    	} catch (IllegalAccessException e) {
 	    		String msg = "Error during post-import application metadata adjustment: IllegalAccessException: " + e.getMessage(); 

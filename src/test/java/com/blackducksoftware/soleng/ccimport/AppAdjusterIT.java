@@ -80,7 +80,7 @@ public class AppAdjusterIT {
 		
 		CodeCenterServerWrapper ccWrapper = new CodeCenterServerWrapper(bean, ccConfigManager);
 		CodeCenterServerProxyV6_6_0 cc = ccWrapper.getInternalApiWrapper().getProxy();
-    	// TODO remove protex project
+    	
 		ProtexServerWrapper protexServerWrapper = ProtexTestUtils.initProtexServerWrapper(protexConfigManager);
 		ProtexTestUtils.deleteProjectById(protexServerWrapper, protexProjectIdOrig);
 		TestUtils.removeApplication(cc, APPLICATION1_NAME, APPLICATION_VERSION);
