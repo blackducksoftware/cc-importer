@@ -27,12 +27,12 @@ import com.blackducksoftware.sdk.codecenter.attribute.data.AttributeIdToken;
 import com.blackducksoftware.sdk.codecenter.client.util.CodeCenterServerProxyV6_6_0;
 import com.blackducksoftware.sdk.codecenter.common.data.AttributeValue;
 import com.blackducksoftware.soleng.ccimport.TestUtils;
-import com.blackducksoftware.soleng.ccimport.appadjuster.custom.JpmcAppAdjuster;
+import com.blackducksoftware.soleng.ccimport.appadjuster.custom.NumericPrefixedAppAdjuster;
 import com.blackducksoftware.soleng.ccimporter.config.CodeCenterConfigManager;
 import com.blackducksoftware.soleng.ccimporter.config.ProtexConfigManager;
 import com.blackducksoftware.soleng.ccimporter.model.CCIProject;
 
-public class JpmcAppAdjusterIT {
+public class NumericPrefixedAppAdjusterIT {
 	private static final long TIME_VALUE_OF_JAN1_2000 = 946702800000L;
 	private static final String CUSTOM_ATTR_NAME = "Sample Textfield";
 	
@@ -40,13 +40,13 @@ public class JpmcAppAdjusterIT {
 	public static final String SUPERUSER_USERNAME = "super";
 	public static final String SUPERUSER_PASSWORD = "super";
 	
-	private static final String SEALID1_ATTR_VALUE = "123";
+	private static final String NUMPREFIX1_ATTR_VALUE = "123";
 	private static final String APP_NAME_STRING = "some application";
 	private static final String WORK_STREAM = "PROD";
-	private static String APPLICATION1_NAME = SEALID1_ATTR_VALUE + "-" + APP_NAME_STRING + "-" + WORK_STREAM + "-current";
+	private static String APPLICATION1_NAME = NUMPREFIX1_ATTR_VALUE + "-" + APP_NAME_STRING + "-" + WORK_STREAM + "-current";
 	
-	private static final String SEALID2_ATTR_VALUE = "123456";
-	private static String APPLICATION2_NAME = SEALID2_ATTR_VALUE + "-" + APP_NAME_STRING + "-" + WORK_STREAM + "-current";
+	private static final String NUMPREFIX2_ATTR_VALUE = "123456";
+	private static String APPLICATION2_NAME = NUMPREFIX2_ATTR_VALUE + "-" + APP_NAME_STRING + "-" + WORK_STREAM + "-current";
 	
 	private static String APPLICATION_VERSION = "v123";
 	private static String USER1_USERNAME = "JUnit_ccimporter_report_user3";
@@ -60,7 +60,7 @@ public class JpmcAppAdjusterIT {
 
 	@AfterClass
 	public static void tearDownAfterClass() throws Exception {
-		String configPath = "src/test/resources/jpmc_sealid.properties";
+		String configPath = "src/test/resources/numprefixed_numprefix.properties";
 
         CodeCenterConfigManager ccConfigManager = ccConfigManager = new CodeCenterConfigManager(configPath);
         ProtexConfigManager protexConfigManager = protexConfigManager = new ProtexConfigManager(configPath);
@@ -81,9 +81,9 @@ public class JpmcAppAdjusterIT {
 	
 
     @Test
-    public void testSealId() throws Exception
+    public void testNumPrefix() throws Exception
     {
-    	String configPath = "src/test/resources/jpmc_sealid.properties";
+    	String configPath = "src/test/resources/numprefixed_numprefix.properties";
 
         CodeCenterConfigManager ccConfigManager = ccConfigManager = new CodeCenterConfigManager(configPath);
         ProtexConfigManager protexConfigManager = protexConfigManager = new ProtexConfigManager(configPath);
@@ -105,13 +105,12 @@ public class JpmcAppAdjusterIT {
 		Date testDateValue = new Date();
 		project.setAnalyzedDateValue(testDateValue);
 
-		JpmcAppAdjuster appAdjuster = new JpmcAppAdjuster();
+		NumericPrefixedAppAdjuster appAdjuster = new NumericPrefixedAppAdjuster();
 		TimeZone tz = TimeZone.getDefault();
 		appAdjuster.init(ccWrapper, ccConfigManager, tz);
 		appAdjuster.adjustApp(app, project);
 		
-		boolean foundSealIdAttr = false;
-		System.out.println("==============\nGetting attr values:");
+		boolean foundNumPrefixAttr = false;
 		Application app2 = cc.getApplicationApi().getApplication(appIdToken); // Not sure why we have to get it again... weird
 		List<AttributeValue> attrValues = app2.getAttributeValues();
 		for (AttributeValue attrValue : attrValues) {
@@ -122,17 +121,17 @@ public class JpmcAppAdjusterIT {
 				"; value: " + curAttrValue);
 			
 			if (CUSTOM_ATTR_NAME.equals(curAttrName)) {
-				foundSealIdAttr = true;
-				assertEquals(SEALID1_ATTR_VALUE, curAttrValue);
+				foundNumPrefixAttr = true;
+				assertEquals(NUMPREFIX1_ATTR_VALUE, curAttrValue);
 			}
 		}
-		assertTrue(foundSealIdAttr);
+		assertTrue(foundNumPrefixAttr);
     }
     
     @Test
     public void testAnalyzedDate() throws Exception
     {
-    	String configPath = "src/test/resources/jpmc_analyzeddate.properties";
+    	String configPath = "src/test/resources/numprefixed_analyzeddate.properties";
     	
     	CodeCenterConfigManager ccConfigManager = ccConfigManager = new CodeCenterConfigManager(configPath);
         ProtexConfigManager protexConfigManager = protexConfigManager = new ProtexConfigManager(configPath);
@@ -154,12 +153,12 @@ public class JpmcAppAdjusterIT {
 		Date testDateValue = new Date(TIME_VALUE_OF_JAN1_2000);
 		project.setAnalyzedDateValue(testDateValue);
 
-		JpmcAppAdjuster appAdjuster = new JpmcAppAdjuster();
+		NumericPrefixedAppAdjuster appAdjuster = new NumericPrefixedAppAdjuster();
 		TimeZone tz = TimeZone.getDefault();
 		appAdjuster.init(ccWrapper, ccConfigManager, tz);
 		appAdjuster.adjustApp(app, project);
 		
-		boolean foundSealIdAttr = false;
+		boolean foundNumPrefixAttr = false;
 		System.out.println("==============\nGetting attr values:");
 		Application app2 = cc.getApplicationApi().getApplication(appIdToken); // Not sure why we have to get it again... weird
 		List<AttributeValue> attrValues = app2.getAttributeValues();
@@ -171,11 +170,11 @@ public class JpmcAppAdjusterIT {
 				"; value: " + curAttrValue);
 			
 			if (CUSTOM_ATTR_NAME.equals(curAttrName)) {
-				foundSealIdAttr = true;
+				foundNumPrefixAttr = true;
 				assertEquals("01-01-2000", curAttrValue);
 			}
 		}
-		assertTrue(foundSealIdAttr);
+		assertTrue(foundNumPrefixAttr);
     }
 
 }

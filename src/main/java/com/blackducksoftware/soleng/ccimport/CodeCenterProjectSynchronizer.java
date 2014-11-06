@@ -168,7 +168,7 @@ public class CodeCenterProjectSynchronizer
     	try {
     		initMethod.invoke(appAdjusterObject, ccWrapper, configManager, tz);
     	} catch (InvocationTargetException e) {
-    		String msg = "Error initializing custom app adjuster: InvocationTargetException: " + e.getMessage();
+    		String msg = "Error initializing custom app adjuster: InvocationTargetException: " + e.getTargetException().getMessage();
     		throw new CodeCenterImportException(msg);
     	} catch (IllegalAccessException e) {
     		String msg = "Error initializing custom app adjuster: IllegalAccessException: " + e.getMessage();

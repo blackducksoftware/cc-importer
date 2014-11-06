@@ -34,28 +34,28 @@ import com.blackducksoftware.soleng.ccimport.exception.CodeCenterImportException
 import com.blackducksoftware.soleng.ccimporter.config.CCIConfigurationManager;
 import com.blackducksoftware.soleng.ccimporter.model.CCIProject;
 
-public class JpmcAppAdjuster implements AppAdjuster {
-	private static Logger log = LoggerFactory.getLogger(JpmcAppAdjuster.class.getName());
+public class NumericPrefixedAppAdjuster implements AppAdjuster {
+	private static Logger log = LoggerFactory.getLogger(NumericPrefixedAppAdjuster.class.getName());
 	
-	private static final String SEAL_ID_PATTERN_STRING_PROPERTY = "jpmc.appname.pattern.sealid";
-	private static final String SEPARATOR_PATTERN_STRING_PROPERTY = "jpmc.appname.pattern.separator";
-	private static final String WORK_STREAM_PATTERN_STRING_PROPERTY = "jpmc.appname.pattern.workstream";
+	private static final String NUMERIC_PREFIX_PATTERN_STRING_PROPERTY = "numprefixed.appname.pattern.numericprefix";
+	private static final String SEPARATOR_PATTERN_STRING_PROPERTY = "numprefixed.appname.pattern.separator";
+	private static final String WORK_STREAM_PATTERN_STRING_PROPERTY = "numprefixed.appname.pattern.workstream";
 	
-	private static final String DATE_FORMAT_STRING_PROPERTY = "jpmc.analyzed.date.format";
+	private static final String DATE_FORMAT_STRING_PROPERTY = "numprefixed.analyzed.date.format";
 	
-	private static final String SEAL_ID_ATTRNAME_PROPERTY = "jpmc.app.attribute.sealid";
-	private static final String ANALYZED_DATE_ATTRNAME_PROPERTY = "jpmc.app.attribute.analyzeddate";
-	private static final String WORK_STREAM_ATTRNAME_PROPERTY = "jpmc.app.attribute.workstream";
+	private static final String NUMERIC_PREFIX_ATTRNAME_PROPERTY = "numprefixed.app.attribute.numericprefix";
+	private static final String ANALYZED_DATE_ATTRNAME_PROPERTY = "numprefixed.app.attribute.analyzeddate";
+	private static final String WORK_STREAM_ATTRNAME_PROPERTY = "numprefixed.app.attribute.workstream";
 	
-	private static final String SEAL_ID_PATTERN_STRING_DEFAULT = "[0-9][0-9][0-9]+";
+	private static final String NUMERIC_PREFIX_PATTERN_STRING_DEFAULT = "[0-9][0-9][0-9]+";
 	private static final String SEPARATOR_PATTERN_STRING_DEFAULT = "-";
 	private static final String WORK_STREAM_PATTERN_STRING_DEFAULT = "(PROD|RC1|RC2|RC3|RC4|RC5)";
 	
-	private Pattern sealIdPattern=null;
+	private Pattern numericPrefixPattern=null;
 	private Pattern separatorPattern=null;
 	private Pattern workStreamPattern=null;
 	
-	private String sealIdAttrName=null;
+	private String numericPrefixAttrName=null;
 	private String analyzedDateAttrName=null;
 	private String workStreamAttrName=null;
 	
@@ -68,9 +68,9 @@ public class JpmcAppAdjuster implements AppAdjuster {
 		this.ccWrapper = ccWrapper;
 		this.tz = tz;
 
-		String sealIdPatternString = config.getOptionalProperty(SEAL_ID_PATTERN_STRING_PROPERTY);
-		if (sealIdPatternString == null) {
-			sealIdPatternString = SEAL_ID_PATTERN_STRING_DEFAULT;
+		String numericPrefixPatternString = config.getOptionalProperty(NUMERIC_PREFIX_PATTERN_STRING_PROPERTY);
+		if (numericPrefixPatternString == null) {
+			numericPrefixPatternString = NUMERIC_PREFIX_PATTERN_STRING_DEFAULT;
 		}
 		
 		String separatorPatternString = config.getOptionalProperty(SEPARATOR_PATTERN_STRING_PROPERTY);
@@ -83,11 +83,11 @@ public class JpmcAppAdjuster implements AppAdjuster {
 			workStreamPatternString = WORK_STREAM_PATTERN_STRING_DEFAULT;
 		}
 		
-		sealIdPattern = Pattern.compile(sealIdPatternString);
+		numericPrefixPattern = Pattern.compile(numericPrefixPatternString);
 		separatorPattern = Pattern.compile(separatorPatternString);
 		workStreamPattern = Pattern.compile(workStreamPatternString);
 		
-		sealIdAttrName = config.getProperty(SEAL_ID_ATTRNAME_PROPERTY);
+		numericPrefixAttrName = config.getProperty(NUMERIC_PREFIX_ATTRNAME_PROPERTY);
 		analyzedDateAttrName = config.getProperty(ANALYZED_DATE_ATTRNAME_PROPERTY);
 		workStreamAttrName = config.getProperty(WORK_STREAM_ATTRNAME_PROPERTY);
 		
@@ -97,12 +97,12 @@ public class JpmcAppAdjuster implements AppAdjuster {
 	public void adjustApp(Application app,
 			CCIProject project) throws CodeCenterImportException {
 
-		JpmcAppMetadata metadata = parse(app.getName());
+		NumericPrefixedAppMetadata metadata = parse(app.getName());
 		setAttributes(app, project, metadata);
 	}
 	
-	private void setAttributes(Application app, CCIProject project, JpmcAppMetadata metadata) throws CodeCenterImportException {
-		setAttribute(app, metadata, "SEAL ID", sealIdAttrName, metadata.getSealId());
+	private void setAttributes(Application app, CCIProject project, NumericPrefixedAppMetadata metadata) throws CodeCenterImportException {
+		setAttribute(app, metadata, "numeric prefix", numericPrefixAttrName, metadata.getNumericPrefix());
 		setAttribute(app, metadata, "work stream", workStreamAttrName, metadata.getWorkStream());
 		
 		String analyzedDateString = getDateString(project.getAnalyzedDateValue(), tz, dateFormatString);
@@ -116,7 +116,7 @@ public class JpmcAppAdjuster implements AppAdjuster {
 		return formatter.format(date);
 	}
 	
-	private void setAttribute(Application app, JpmcAppMetadata metadata, String attrPurpose, String attrName, String attrValue) throws CodeCenterImportException {
+	private void setAttribute(Application app, NumericPrefixedAppMetadata metadata, String attrPurpose, String attrName, String attrValue) throws CodeCenterImportException {
 		if ((attrName == null) || (attrName.length() == 0) || (attrName.equals("null"))) {
 			log.warn("The " + attrPurpose + " custom attribute is not configured, so it has not been set.");
 			return;
@@ -144,17 +144,17 @@ public class JpmcAppAdjuster implements AppAdjuster {
         log.info("Updated app=" + app.getName() + ", attr: " + attrName + ", value=" + attrValue);
 	}
 	
-	JpmcAppMetadata parse(String appName) throws CodeCenterImportException {
-		JpmcAppMetadata metadata = new JpmcAppMetadata();
+	NumericPrefixedAppMetadata parse(String appName) throws CodeCenterImportException {
+		NumericPrefixedAppMetadata metadata = new NumericPrefixedAppMetadata();
 		Scanner scanner = new Scanner(appName);
 		scanner.useDelimiter(separatorPattern);
 		try {
 			
-			if (!scanner.hasNext(sealIdPattern)) {
-				throw new CodeCenterImportException("Error parsing SEAL ID from app name " + appName);
+			if (!scanner.hasNext(numericPrefixPattern)) {
+				throw new CodeCenterImportException("Error parsing numeric prefix from app name " + appName);
 			}
-			String sealId = scanner.next(sealIdPattern);
-			metadata.setSealId(sealId);
+			String numericPrefix = scanner.next(numericPrefixPattern);
+			metadata.setNumericPrefix(numericPrefix);
 
 			if (!scanner.hasNext(workStreamPattern)) {
 				String appNameString = scanner.next();

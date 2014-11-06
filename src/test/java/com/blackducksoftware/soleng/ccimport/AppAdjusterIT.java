@@ -48,10 +48,10 @@ public class AppAdjusterIT {
 	public static final String SUPERUSER_USERNAME = "super";
 	public static final String SUPERUSER_PASSWORD = "super";
 	
-	private static final String SEALID1_ATTR_VALUE = "123456";
+	private static final String NUMPREFIX1_ATTR_VALUE = "123456";
 	private static final String APP_NAME_STRING = "my application";
 	private static final String WORK_STREAM = "RC3";
-	private static String APPLICATION1_NAME = SEALID1_ATTR_VALUE + "-" + APP_NAME_STRING + "-" + WORK_STREAM + "-current";
+	private static String APPLICATION1_NAME = NUMPREFIX1_ATTR_VALUE + "-" + APP_NAME_STRING + "-" + WORK_STREAM + "-current";
 	
 	private static String APPLICATION_VERSION = "TestVersion";
 	private static Logger log = LoggerFactory.getLogger(AppAdjusterIT.class.getName());

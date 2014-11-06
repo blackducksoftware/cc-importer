@@ -5,15 +5,16 @@ All rights reserved. **/
 
 package com.blackducksoftware.soleng.ccimport.appadjuster.custom;
 
-public class JpmcAppMetadata {
-	private String sealId;
+public class NumericPrefixedAppMetadata {
+	private String numericPrefix;
 	private String appNameString;
 	private String workStream;
-	public String getSealId() {
-		return sealId;
+	
+	public String getNumericPrefix() {
+		return numericPrefix;
 	}
-	public void setSealId(String sealId) {
-		this.sealId = sealId;
+	public void setNumericPrefix(String numericPrefix) {
+		this.numericPrefix = numericPrefix;
 	}
 	public String getAppNameString() {
 		return appNameString;
