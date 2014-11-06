@@ -145,7 +145,7 @@ public abstract class CCIProcessor
         		projectList.add(project);
         	    } catch (Exception e)
         	    {
-        		log.error("Unable to determine project with name: "
+        		log.error("Unable to find Protex project with name: "
         			+ project);
         		listObject.addInvalidProject(project.getProjectName(), project.getProjectVersion());
         	    }
