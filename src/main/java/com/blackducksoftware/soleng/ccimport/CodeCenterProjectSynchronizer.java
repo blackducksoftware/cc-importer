@@ -44,6 +44,7 @@ import com.blackducksoftware.sdk.codecenter.application.data.ApplicationNameVers
 import com.blackducksoftware.sdk.codecenter.application.data.ProjectNameToken;
 import com.blackducksoftware.sdk.codecenter.application.data.ProtexRequest;
 import com.blackducksoftware.sdk.codecenter.approval.data.WorkflowNameToken;
+import com.blackducksoftware.sdk.codecenter.client.util.CodeCenterServerProxyV6_6_0;
 import com.blackducksoftware.sdk.codecenter.fault.ErrorCode;
 import com.blackducksoftware.sdk.codecenter.fault.SdkFault;
 import com.blackducksoftware.sdk.codecenter.request.data.RequestApplicationComponentToken;
@@ -89,8 +90,8 @@ public class CodeCenterProjectSynchronizer
     {
 	this.ccWrapper = codeCenterWrapper;
 	this.configManager = config;
-	setAppAdjusterMethod(config);
 	setTimeZone(config);
+	setAppAdjusterMethod(config);
     }
     
     private void setTimeZone(CCIConfigurationManager config) {
@@ -146,7 +147,7 @@ public class CodeCenterProjectSynchronizer
     	
     	// Get the init method on the custom app adjuster class
     	Method initMethod=null;
-    	Class[] initMethodArgTypes = { CCIConfigurationManager.class };
+    	Class[] initMethodArgTypes = { CodeCenterServerWrapper.class, CCIConfigurationManager.class, TimeZone.class };
     	try {
     		initMethod = sourceClass.getDeclaredMethod("init", initMethodArgTypes);
     	} catch (NoSuchMethodException e) {
@@ -165,7 +166,7 @@ public class CodeCenterProjectSynchronizer
     	
     	// Call the init method to initialize the custom app adjuster
     	try {
-    		initMethod.invoke(appAdjusterObject, configManager);
+    		initMethod.invoke(appAdjusterObject, ccWrapper, configManager, tz);
     	} catch (InvocationTargetException e) {
     		String msg = "Error initializing custom app adjuster: InvocationTargetException: " + e.getMessage();
     		throw new CodeCenterImportException(msg);

@@ -16,7 +16,13 @@ import com.blackducksoftware.sdk.codecenter.application.data.Application;
 import com.blackducksoftware.sdk.codecenter.application.data.ApplicationCreate;
 import com.blackducksoftware.sdk.codecenter.application.data.ApplicationIdToken;
 import com.blackducksoftware.sdk.codecenter.application.data.ApplicationNameVersionToken;
+import com.blackducksoftware.sdk.codecenter.application.data.ApplicationUpdate;
+import com.blackducksoftware.sdk.codecenter.attribute.data.AbstractAttribute;
+import com.blackducksoftware.sdk.codecenter.attribute.data.AttributeGroup;
+import com.blackducksoftware.sdk.codecenter.attribute.data.AttributeGroupPageFilter;
+import com.blackducksoftware.sdk.codecenter.attribute.data.AttributeGroupTypeEnum;
 import com.blackducksoftware.sdk.codecenter.attribute.data.AttributeNameToken;
+import com.blackducksoftware.sdk.codecenter.attribute.data.AttributePageFilter;
 import com.blackducksoftware.sdk.codecenter.client.util.CodeCenterServerProxyV6_6_0;
 import com.blackducksoftware.sdk.codecenter.common.data.AttributeValue;
 import com.blackducksoftware.sdk.codecenter.common.data.UserRolePageFilter;
@@ -30,20 +36,8 @@ import com.blackducksoftware.sdk.codecenter.user.data.UserNameOrIdToken;
 import com.blackducksoftware.sdk.codecenter.user.data.UserNameToken;
 
 public class TestUtils {
-	
-//	public static final String CC_URL = "http://cc-integration.blackducksoftware.com";
-//	public static final String SUPERUSER_USERNAME = "super";
-//	public static final String SUPERUSER_PASSWORD = "super";
-	
-//	public static final String CC_URL = "http://salescc.blackducksoftware.com";
-//	public static final String SUPERUSER_USERNAME = "sbillings@blackducksoftware.com";
-//	public static final String SUPERUSER_PASSWORD = "blackduck";
-	
 	public static final Long CONNECTION_TIMEOUT = 120 * 1000L;
-	
 
-	
-	
 	public static ApplicationIdToken createApplication(CodeCenterServerProxyV6_6_0 cc, String appName,
 			String appVersion, 
 			String applicationOwner,
@@ -69,17 +63,45 @@ public class TestUtils {
 		return cc.getApplicationApi().getApplication(idToken);
 	}
 	
-//	static void setAppCustomAttributeTextField(CodeCenterServerProxyV6_6_0 cc, Application app, String attrValue)
-//			 throws SdkFault {
-//		
-//		System.out.println("Setting app custom attr text field");
+	public static void setAppCustomAttributeTextField(CodeCenterServerProxyV6_6_0 cc, Application app, String attrName, String attrValue)
+			 throws SdkFault {
+		
+		System.out.println("Setting app custom attr text field");
 //		AttributeGroupPageFilter attrGroupPageFilter = new AttributeGroupPageFilter();
 //		List<AttributeGroup> attrGroups =
 //				cc.getAttributeApi().searchAttributeGroups("HasTextField", 
 //						AttributeGroupTypeEnum.APPLICATION, attrGroupPageFilter);
-//		
 //		System.out.println("*** Found " + attrGroups.size() + " matching attribute groups");
-//	}
+//		AttributePageFilter attrPageFilter = new AttributePageFilter();
+//		attrPageFilter.setFirstRowIndex(0);
+//		attrPageFilter.setLastRowIndex(Integer.MAX_VALUE);
+//		List<AbstractAttribute> attrs = cc.getAttributeApi().searchAttributes("Sample Textfield", attrPageFilter);
+//		for (AbstractAttribute attr : attrs) {
+//			System.out.println("attr: " + attr.getName());
+//			if (attr.getName().equals(attrName)) {
+//				System.out.println("*** Found attr");
+////				AttributeValue attrValue = new AttributeValue();
+////				attrValue.
+////				app.getAttributeValues().add(attrValue);
+//			}
+//		}
+		
+		List<AttributeValue> attributesValues = new ArrayList<AttributeValue>();
+        AttributeValue attrValueObject = new AttributeValue();
+        AttributeNameToken nameToken1 = new AttributeNameToken();
+        nameToken1.setName(attrName);
+        attrValueObject.setAttributeId(nameToken1);
+        attrValueObject.getValues().add(attrValue);
+        attributesValues.add(attrValueObject);
+        
+        ApplicationUpdate appUpdate = new ApplicationUpdate();
+        appUpdate.setId(app.getId());
+        appUpdate.getAttributeValues().addAll(attributesValues);
+        
+        cc.getApplicationApi().updateApplication(appUpdate);
+        System.out.println("Updated app " + app.getName() + " with attr " + attrName + " value " + attrValue);
+        
+	}
 	
 	public static void removeApplication(CodeCenterServerProxyV6_6_0 cc, String appName, String appVersion) {
 		System.out.println("Removing application " + appName + " / " + appVersion);
