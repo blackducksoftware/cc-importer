@@ -41,6 +41,8 @@ public class NumericPrefixedAppAdjuster implements AppAdjuster {
 	private static final String SEPARATOR_PATTERN_STRING_PROPERTY = "numprefixed.appname.pattern.separator";
 	private static final String WORK_STREAM_PATTERN_STRING_PROPERTY = "numprefixed.appname.pattern.workstream";
 	
+	private static final String ANALYZED_DATE_NEVER_ANALYZED = "numprefixed.analyzeddate.never";
+	
 	private static final String DATE_FORMAT_STRING_PROPERTY = "numprefixed.analyzed.date.format";
 	
 	private static final String NUMERIC_PREFIX_ATTRNAME_PROPERTY = "numprefixed.app.attribute.numericprefix";
@@ -50,6 +52,8 @@ public class NumericPrefixedAppAdjuster implements AppAdjuster {
 	private static final String NUMERIC_PREFIX_PATTERN_STRING_DEFAULT = "[0-9][0-9][0-9]+";
 	private static final String SEPARATOR_PATTERN_STRING_DEFAULT = "-";
 	private static final String WORK_STREAM_PATTERN_STRING_DEFAULT = "(PROD|RC1|RC2|RC3|RC4|RC5)";
+	
+	private static final String ANALYZED_DATE_NEVER_ANALYZED_DEFAULT = "Protex project has never been analyzed";
 	
 	private Pattern numericPrefixPattern=null;
 	private Pattern separatorPattern=null;
@@ -63,6 +67,8 @@ public class NumericPrefixedAppAdjuster implements AppAdjuster {
 	
 	private CodeCenterServerWrapper ccWrapper;
 	private TimeZone tz;
+	
+	private String analyzedDateNeverString=null;
 
 	public void init(CodeCenterServerWrapper ccWrapper, CCIConfigurationManager config, TimeZone tz) {
 		this.ccWrapper = ccWrapper;
@@ -82,6 +88,12 @@ public class NumericPrefixedAppAdjuster implements AppAdjuster {
 		if (workStreamPatternString == null) {
 			workStreamPatternString = WORK_STREAM_PATTERN_STRING_DEFAULT;
 		}
+		
+		String analyzedDateNeverString = config.getOptionalProperty(ANALYZED_DATE_NEVER_ANALYZED);
+		if (analyzedDateNeverString == null) {
+			analyzedDateNeverString = ANALYZED_DATE_NEVER_ANALYZED_DEFAULT;
+		}
+		this.analyzedDateNeverString = analyzedDateNeverString;
 		
 		numericPrefixPattern = Pattern.compile(numericPrefixPatternString);
 		separatorPattern = Pattern.compile(separatorPatternString);
@@ -111,6 +123,9 @@ public class NumericPrefixedAppAdjuster implements AppAdjuster {
 	}
 	
 	String getDateString(Date date, TimeZone tz, String dateFormatString) {
+		if (date == null) {
+			return analyzedDateNeverString;
+		}
 		SimpleDateFormat formatter = new SimpleDateFormat(dateFormatString);
 		formatter.setTimeZone(tz);
 		return formatter.format(date);
