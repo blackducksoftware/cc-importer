@@ -180,7 +180,7 @@ public class NumericPrefixedAppAdjuster implements AppAdjuster {
 				String appNameString;
 				try {
 					appNameString = scanner.next();
-				} catch (InputMismatchException e) {
+				} catch (Exception e) { // Some parsing exceptions (like there's no more input) are runtime exceptions
 					String msg = "Error parsing work stream from app name " + appName;
 					log.error(msg);
 					throw new CodeCenterImportException(msg);
@@ -191,7 +191,7 @@ public class NumericPrefixedAppAdjuster implements AppAdjuster {
 			String workStream;
 			try {
 				workStream = scanner.next(workStreamPattern);
-			} catch (InputMismatchException e) {
+			} catch (Exception e) { // Some parsing exceptions (like there's no more input) are runtime exceptions
 				String msg = "Error parsing work stream from app name " + appName;
 				log.error(msg);
 				throw new CodeCenterImportException(msg);

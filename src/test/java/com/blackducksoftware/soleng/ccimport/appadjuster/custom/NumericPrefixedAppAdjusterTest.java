@@ -126,5 +126,30 @@ public class NumericPrefixedAppAdjusterTest {
 		String generatedDate = adjuster.getDateString(new Date(TIME_VALUE_OF_JAN1_2000), TimeZone.getDefault(), dateFormat);
 		assertEquals("2000-01-01 00:00:00", generatedDate);
 	}
+	
+	@Test
+	public void testOnNonConformingAppNames() throws Exception {
+		NumericPrefixedAppMetadata metadata;
+		
+		Properties props = new Properties();
+		props.setProperty("cc.user.name", "notused");
+		props.setProperty("cc.server.name", "notused");
+		props.setProperty("cc.password", "notused");
+		props.setProperty("numprefixed.app.attribute.numericprefix", "notused");
+		props.setProperty("numprefixed.app.attribute.workstream", "notused");
+		props.setProperty("numprefixed.app.attribute.analyzeddate", "notused");
+		props.setProperty("numprefixed.analyzed.date.format", "yyyy-mm-dd");
+		CCIConfigurationManager config = new CCIConfigurationManager(props, APPLICATION.CODECENTER);
+		NumericPrefixedAppAdjuster adjuster = new NumericPrefixedAppAdjuster();
+		TimeZone tz = TimeZone.getDefault();
+		adjuster.init(null, config, tz);
+		
+		try {
+			metadata = adjuster.parse("30165-Chargeback imaging system");
+			fail("adjuster.parse should have thrown an exception");
+		} catch (Exception e) {
+			// expected
+		}
+	}
 
 }
