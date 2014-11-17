@@ -34,6 +34,8 @@ public class NumericPrefixedAppAdjusterTest {
 		props.setProperty("numprefixed.app.attribute.workstream", "notused");
 		props.setProperty("numprefixed.app.attribute.analyzeddate", "notused");
 		props.setProperty("numprefixed.analyzed.date.format", "yyyy-mm-dd");
+		props.setProperty("numprefixed.app.attribute.projectstatus", "null");
+		props.setProperty("numprefixed.app.value.projectstatus", "CURRENT");
 		CCIConfigurationManager config = new CCIConfigurationManager(props, APPLICATION.CODECENTER);
 		NumericPrefixedAppAdjuster adjuster = new NumericPrefixedAppAdjuster();
 		TimeZone tz = TimeZone.getDefault();
@@ -75,6 +77,8 @@ public class NumericPrefixedAppAdjusterTest {
 		props.setProperty("numprefixed.app.attribute.workstream", "notused");
 		props.setProperty("numprefixed.app.attribute.analyzeddate", "notused");
 		props.setProperty("numprefixed.analyzed.date.format", "yyyy-mm-dd");
+		props.setProperty("numprefixed.app.attribute.projectstatus", "null");
+		props.setProperty("numprefixed.app.value.projectstatus", "CURRENT");
 		
 		CCIConfigurationManager config = new CCIConfigurationManager(props, APPLICATION.CODECENTER);
 		NumericPrefixedAppAdjuster adjuster = new NumericPrefixedAppAdjuster();
@@ -117,6 +121,8 @@ public class NumericPrefixedAppAdjusterTest {
 		props.setProperty("numprefixed.app.attribute.workstream", "notused");
 		props.setProperty("numprefixed.app.attribute.analyzeddate", "notused");
 		props.setProperty("numprefixed.analyzed.date.format", dateFormat);
+		props.setProperty("numprefixed.app.attribute.projectstatus", "null");
+		props.setProperty("numprefixed.app.value.projectstatus", "CURRENT");
 		
 		CCIConfigurationManager config = new CCIConfigurationManager(props, APPLICATION.CODECENTER);
 		NumericPrefixedAppAdjuster adjuster = new NumericPrefixedAppAdjuster();
@@ -139,6 +145,8 @@ public class NumericPrefixedAppAdjusterTest {
 		props.setProperty("numprefixed.app.attribute.workstream", "notused");
 		props.setProperty("numprefixed.app.attribute.analyzeddate", "notused");
 		props.setProperty("numprefixed.analyzed.date.format", "yyyy-mm-dd");
+		props.setProperty("numprefixed.app.attribute.projectstatus", "null");
+		props.setProperty("numprefixed.app.value.projectstatus", "CURRENT");
 		CCIConfigurationManager config = new CCIConfigurationManager(props, APPLICATION.CODECENTER);
 		NumericPrefixedAppAdjuster adjuster = new NumericPrefixedAppAdjuster();
 		TimeZone tz = TimeZone.getDefault();

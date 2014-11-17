@@ -56,6 +56,10 @@ public class NumericPrefixedAppAdjuster implements AppAdjuster {
 	
 	private static final String ANALYZED_DATE_NEVER_ANALYZED_DEFAULT = "Protex project has never been analyzed";
 	
+	private static final String PROJECT_STATUS_ATTRNAME_PROPERTY = "numprefixed.app.attribute.projectstatus";
+	private static final String PROJECT_STATUS_VALUE_PROPERTY = "numprefixed.app.value.projectstatus";
+	private static final String PROJECT_STATUS_VALUE_DEFAULT = "CURRENT";
+	
 	private Pattern numericPrefixPattern=null;
 	private Pattern separatorPattern=null;
 	private Pattern workStreamPattern=null;
@@ -63,6 +67,8 @@ public class NumericPrefixedAppAdjuster implements AppAdjuster {
 	private String numericPrefixAttrName=null;
 	private String analyzedDateAttrName=null;
 	private String workStreamAttrName=null;
+	private String projectStatusAttrName=null;
+	private String projectStatusValue=null;
 	
 	private String dateFormatString;
 	
@@ -103,6 +109,13 @@ public class NumericPrefixedAppAdjuster implements AppAdjuster {
 		numericPrefixAttrName = config.getProperty(NUMERIC_PREFIX_ATTRNAME_PROPERTY);
 		analyzedDateAttrName = config.getProperty(ANALYZED_DATE_ATTRNAME_PROPERTY);
 		workStreamAttrName = config.getProperty(WORK_STREAM_ATTRNAME_PROPERTY);
+		projectStatusAttrName = config.getProperty(PROJECT_STATUS_ATTRNAME_PROPERTY);
+		
+		String projectStatusValue = config.getOptionalProperty(ANALYZED_DATE_NEVER_ANALYZED);
+		if (projectStatusValue == null) {
+			projectStatusValue = PROJECT_STATUS_VALUE_DEFAULT;
+		}
+		this.projectStatusValue = projectStatusValue;
 		
 		dateFormatString = config.getProperty(DATE_FORMAT_STRING_PROPERTY);
 	}
@@ -120,7 +133,7 @@ public class NumericPrefixedAppAdjuster implements AppAdjuster {
 		
 		String analyzedDateString = getDateString(project.getAnalyzedDateValue(), tz, dateFormatString);
 		setAttribute(app, metadata, "analyzed date", analyzedDateAttrName, analyzedDateString);
-
+		setAttribute(app, metadata, "project status", projectStatusAttrName, projectStatusValue);
 	}
 	
 	String getDateString(Date date, TimeZone tz, String dateFormatString) {

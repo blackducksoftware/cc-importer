@@ -47,10 +47,14 @@ public class NumericPrefixedAppAdjusterIT {
 	
 	private static final String NUMPREFIX2_ATTR_VALUE = "123456";
 	private static String APPLICATION2_NAME = NUMPREFIX2_ATTR_VALUE + "-" + APP_NAME_STRING + "-" + WORK_STREAM + "-current";
+	private static final String NUMPREFIX3_ATTR_VALUE = "2468";
+	private static String APPLICATION3_NAME = NUMPREFIX3_ATTR_VALUE + "-" + APP_NAME_STRING + "-" + WORK_STREAM + "-current";
+	private static String EXPECTED_PROJECT_STATUS_VALUE = "CURRENT";
 	
 	private static String APPLICATION_VERSION = "v123";
 	private static String USER1_USERNAME = "JUnit_ccimporter_report_user3";
 	private static String USER2_USERNAME = "JUnit_ccimporter_report_user3a";
+	private static String USER3_USERNAME = "JUnit_ccimporter_report_user3b";
 	private static String USER_PASSWORD = "password";
 	private static final String USER_ROLE1 = "Application Developer";
 
@@ -75,8 +79,10 @@ public class NumericPrefixedAppAdjusterIT {
     	
 		TestUtils.removeApplication(cc, APPLICATION1_NAME, APPLICATION_VERSION);
 		TestUtils.removeApplication(cc, APPLICATION2_NAME, APPLICATION_VERSION);
+		TestUtils.removeApplication(cc, APPLICATION3_NAME, APPLICATION_VERSION);
 		TestUtils.removeUserFromCc(cc, USER1_USERNAME);
 		TestUtils.removeUserFromCc(cc, USER2_USERNAME);
+		TestUtils.removeUserFromCc(cc, USER3_USERNAME);
 	}
 	
 
@@ -175,6 +181,55 @@ public class NumericPrefixedAppAdjusterIT {
 			}
 		}
 		assertTrue(foundNumPrefixAttr);
+    }
+    
+    @Test
+    public void testProjectStatus() throws Exception
+    {
+    	String configPath = "src/test/resources/numprefixed_projectstatus.properties";
+    	
+    	CodeCenterConfigManager ccConfigManager = ccConfigManager = new CodeCenterConfigManager(configPath);
+        ProtexConfigManager protexConfigManager = protexConfigManager = new ProtexConfigManager(configPath);
+		
+    	ServerBean bean = new ServerBean();
+		bean.setServerName(CC_URL);
+		bean.setUserName(SUPERUSER_USERNAME);
+		bean.setPassword(SUPERUSER_PASSWORD);
+		
+		CodeCenterServerWrapper ccWrapper = new CodeCenterServerWrapper(bean, ccConfigManager);
+		CodeCenterServerProxyV6_6_0 cc = ccWrapper.getInternalApiWrapper().getProxy();
+    	
+    	TestUtils.createUser(cc, USER3_USERNAME, USER_PASSWORD);
+    	ApplicationIdToken appIdToken = TestUtils.createApplication(cc, APPLICATION3_NAME, APPLICATION_VERSION, USER3_USERNAME, USER_ROLE1);
+    	Application app = TestUtils.getApplication(cc, appIdToken);
+		
+		CCIProject project = new CCIProject();
+		project.setProjectName(APPLICATION3_NAME);
+		Date testDateValue = new Date(TIME_VALUE_OF_JAN1_2000);
+		project.setAnalyzedDateValue(testDateValue);
+
+		NumericPrefixedAppAdjuster appAdjuster = new NumericPrefixedAppAdjuster();
+		TimeZone tz = TimeZone.getDefault();
+		appAdjuster.init(ccWrapper, ccConfigManager, tz);
+		appAdjuster.adjustApp(app, project);
+		
+		boolean foundProjectStatus = false;
+		System.out.println("==============\nGetting attr values:");
+		Application app2 = cc.getApplicationApi().getApplication(appIdToken); // Not sure why we have to get it again... weird
+		List<AttributeValue> attrValues = app2.getAttributeValues();
+		for (AttributeValue attrValue : attrValues) {
+			AttributeIdToken a = (AttributeIdToken) attrValue.getAttributeId();
+			String curAttrName = cc.getAttributeApi().getAttribute(a).getName();
+			String curAttrValue = attrValue.getValues().get(0);
+			System.out.println("attr name: " + curAttrName + 
+				"; value: " + curAttrValue);
+			
+			if (CUSTOM_ATTR_NAME.equals(curAttrName)) {
+				foundProjectStatus = true;
+				assertEquals(EXPECTED_PROJECT_STATUS_VALUE, curAttrValue);
+			}
+		}
+		assertTrue(foundProjectStatus);
     }
 
 }
