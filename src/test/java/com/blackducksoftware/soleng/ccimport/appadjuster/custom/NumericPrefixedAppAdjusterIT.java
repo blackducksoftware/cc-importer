@@ -49,7 +49,7 @@ public class NumericPrefixedAppAdjusterIT {
 	private static String APPLICATION2_NAME = NUMPREFIX2_ATTR_VALUE + "-" + APP_NAME_STRING + "-" + WORK_STREAM + "-current";
 	private static final String NUMPREFIX3_ATTR_VALUE = "2468";
 	private static String APPLICATION3_NAME = NUMPREFIX3_ATTR_VALUE + "-" + APP_NAME_STRING + "-" + WORK_STREAM + "-current";
-	private static String EXPECTED_PROJECT_STATUS_VALUE = "CURRENT";
+	private static String EXPECTED_PROJECT_STATUS_VALUE = "cur";
 	
 	private static String APPLICATION_VERSION = "v123";
 	private static String USER1_USERNAME = "JUnit_ccimporter_report_user3";
