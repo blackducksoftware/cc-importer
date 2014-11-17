@@ -111,7 +111,7 @@ public class NumericPrefixedAppAdjuster implements AppAdjuster {
 		workStreamAttrName = config.getProperty(WORK_STREAM_ATTRNAME_PROPERTY);
 		projectStatusAttrName = config.getProperty(PROJECT_STATUS_ATTRNAME_PROPERTY);
 		
-		String projectStatusValue = config.getOptionalProperty(ANALYZED_DATE_NEVER_ANALYZED);
+		String projectStatusValue = config.getOptionalProperty(PROJECT_STATUS_VALUE_DEFAULT);
 		if (projectStatusValue == null) {
 			projectStatusValue = PROJECT_STATUS_VALUE_DEFAULT;
 		}
