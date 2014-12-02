@@ -187,47 +187,67 @@ public class CodeCenterProjectSynchronizer
      * @param projectList
      * @throws CodeCenterImportException
      */
-    public void synchronize(List<CCIProject> projectList)
-    {
-	reportSummary.setTotalProtexProjects(projectList.size());
+	public void synchronize(List<CCIProject> projectList) {
+		reportSummary.setTotalProtexProjects(projectList.size());
 
-	int counter = 1;
-	for (CCIProject project : projectList)
-	{
-	    log.info("[{}/{}] Processing {}", counter++, projectList.size(),
-		    project.getProjectName());
-	    boolean importSuccess = false;
-	    CCIProject importedProject = null;
-	    try
-	    {
-		importedProject = processImport(project);
-		importSuccess = true;
-	    } catch (Exception e)
-	    {
-		log.error("[{}] Unable to perform import: " + e.getMessage(),
-			project.getProjectName());
-	    }
+		int counter = 1;
+		for (CCIProject project : projectList) {
+			boolean retry = false;
+			int retryCount = 0;
+			do {
+				log.info("[{}/{}] Processing {}", counter++,
+						projectList.size(), project.getProjectName());
+				retry = false;
+				boolean importSuccess = false;
+				CCIProject importedProject = null;
+				try {
+					importedProject = processImport(project);
+					importSuccess = true;
+				} catch (Exception e) {
+					log.error(
+							"[{}] Unable to perform import: " + e.getMessage(),
+							project.getProjectName());
+				}
 
-	    if (importSuccess)
-	    {
-		try
-		{
-		    boolean performValidate = configManager.isValidate();
-		    if (performValidate)
-			reportSummary = processValidation(importedProject,
-				reportSummary);
-		} catch (Exception e)
-		{
-		    log.error(
-			    "[{}] Unable to perform validation: "
-				    + e.getMessage(), project.getProjectName());
+				if (importSuccess) {
+					try {
+						boolean performValidate = configManager.isValidate();
+						if (performValidate)
+							reportSummary = processValidation(importedProject,
+									reportSummary);
+					} catch (Exception e) {
+						String exceptionMessage = e.getMessage();
+						log.error(
+								"[{}] Unable to perform validation: "
+										+ exceptionMessage,
+								project.getProjectName());
+						// If we got NoRemoteProjectFoundException, app may be associated with wrong projex server
+						// clear the assoc and retry (up to a couple times)
+						if ((exceptionMessage.contains("NoRemoteProjectFoundException")) && 
+								(configManager.isAttemptToFixInvalidAssociation())) {
+							if (++retryCount < 2) {
+								ApplicationNameVersionToken appToken = new ApplicationNameVersionToken();
+								appToken.setName(project.getProjectName());
+								appToken.setVersion(project.getProjectVersion());
+								try {
+									ccWrapper.getInternalApiWrapper().applicationApi.disassociateProtexProject(appToken);
+									retry = true;
+								} catch (SdkFault sdkFault) {
+									log.error("Disassociate on app " + project.getProjectName() +
+											" / " + project.getProjectVersion() + 
+											" failed: " + sdkFault.getMessage());
+									retry = false;
+								}
+							}
+						}
+					}
+				}
+			} while (retry);
 		}
-	    }
-	}
 
-	// Here, we display the basic summary
-	log.info(reportSummary.toString());
-    }
+		// Here, we display the basic summary
+		log.info(reportSummary.toString());
+	}
 
     /**
      * An import consists of two steps. First creating and/or finding an

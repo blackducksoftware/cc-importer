@@ -43,6 +43,7 @@ public class CCIConfigurationManager extends ConfigurationManager {
 	private Boolean performSmartValidate = false;
 	private String version = "undefined";
 	private Boolean ignoreAssociations = false;
+	private boolean attemptToFixInvalidAssociation = false;
 	private String appAdjusterClassname = null;
 
 	// TODO: Temporary workarounds for DB access
@@ -117,6 +118,11 @@ public class CCIConfigurationManager extends ConfigurationManager {
 		this.hostName = getOptionalProperty(CCIConstants.VALIDATE_SMART_HOST_NAME_PROPERTY);
 		this.timeZone = getOptionalProperty(CCIConstants.VALIDATE_SMART_TIMEZONE_PROPERTY);
 		this.dbString = getOptionalProperty(CCIConstants.VALIDATE_SMART_DB_PROPERTY);
+		
+		String attemptToFixInvalidAssociationString = getOptionalProperty(CCIConstants.ATTEMPT_TO_FIX_INVALID_ASSOCIATION_PROPERTY);
+		if ("true".equalsIgnoreCase(attemptToFixInvalidAssociationString)) {
+			attemptToFixInvalidAssociation = true;
+		}
 
 		/**
 		 * Parse through the user specified list.
@@ -304,6 +310,11 @@ public class CCIConfigurationManager extends ConfigurationManager {
 
 	public void setValidate(Boolean validate) {
 		this.validate = validate;
+	}
+
+
+	public boolean isAttemptToFixInvalidAssociation() {
+		return attemptToFixInvalidAssociation;
 	}
 
 	public List<CCIProject> getProjectList() {

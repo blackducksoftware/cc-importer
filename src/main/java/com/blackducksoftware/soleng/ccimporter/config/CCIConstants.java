@@ -61,6 +61,8 @@ public class CCIConstants {
 	
 	// Validate Step
 	public static final String VALIDATE_APPLICATION_PROPERTY = "validate.application";
+	
+	public static final String ATTEMPT_TO_FIX_INVALID_ASSOCIATION_PROPERTY = "attempt.to.fix.invalid.association";
 
 	// Option to make the validation "smart" - see Readme
 	public static final String VALIDATE_SMART_APPLICATION_PROPERTY = "validate.application.smart";
