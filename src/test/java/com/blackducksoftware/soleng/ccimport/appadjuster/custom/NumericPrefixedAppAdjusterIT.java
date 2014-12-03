@@ -43,12 +43,12 @@ public class NumericPrefixedAppAdjusterIT {
 	private static final String NUMPREFIX1_ATTR_VALUE = "123";
 	private static final String APP_NAME_STRING = "some application";
 	private static final String WORK_STREAM = "PROD";
-	private static String APPLICATION1_NAME = NUMPREFIX1_ATTR_VALUE + "-" + APP_NAME_STRING + "-" + WORK_STREAM + "-current";
+	private static String APPLICATION1_NAME = NUMPREFIX1_ATTR_VALUE + "-" + APP_NAME_STRING + "-" + WORK_STREAM + "-CURRENT";
 	
 	private static final String NUMPREFIX2_ATTR_VALUE = "123456";
-	private static String APPLICATION2_NAME = NUMPREFIX2_ATTR_VALUE + "-" + APP_NAME_STRING + "-" + WORK_STREAM + "-current";
+	private static String APPLICATION2_NAME = NUMPREFIX2_ATTR_VALUE + "-" + APP_NAME_STRING + "-" + WORK_STREAM + "-CURRENT";
 	private static final String NUMPREFIX3_ATTR_VALUE = "2468";
-	private static String APPLICATION3_NAME = NUMPREFIX3_ATTR_VALUE + "-" + APP_NAME_STRING + "-" + WORK_STREAM + "-current";
+	private static String APPLICATION3_NAME = NUMPREFIX3_ATTR_VALUE + "-" + APP_NAME_STRING + "-" + WORK_STREAM + "-CURRENT";
 	private static String EXPECTED_PROJECT_STATUS_VALUE = "cur";
 	
 	private static String APPLICATION_VERSION = "v123";

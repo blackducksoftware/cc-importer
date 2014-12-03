@@ -4,7 +4,7 @@
 
 	<groupId>com.blackducksoftware.soleng</groupId>
 	<artifactId>cc-importer</artifactId>
-	<version>1.0.7</version>
+	<version>1.0.8</version>
 	<packaging>jar</packaging>
 
 	<name>cc-importer</name>
@@ -182,6 +182,46 @@
 							<addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
 						</manifest>
 					</archive>
+				</configuration>
+			</plugin>
+			
+						<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>2.11</version>
+				<dependencies>
+					<dependency>
+						<groupId>org.apache.maven.surefire</groupId>
+						<artifactId>surefire-junit47</artifactId>
+						<version>2.12</version>
+					</dependency>
+				</dependencies>
+				<configuration>
+					<argLine>-XX:MaxPermSize=128m -Xms64m -Xmx256m</argLine>
+					<includes>
+						<include>**/*Test.class</include>
+					</includes>
+
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-failsafe-plugin</artifactId>
+				<version>2.16</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>integration-test</goal>
+							<goal>verify</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<argLine>-XX:MaxPermSize=128m -Xms64m -Xmx256m</argLine>
+					<includes>
+						<include>**/*IT.class</include>
+					</includes>
 				</configuration>
 			</plugin>
 

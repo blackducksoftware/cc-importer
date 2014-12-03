@@ -7,7 +7,7 @@ package com.blackducksoftware.soleng.ccimport.appadjuster.custom;
 
 public class NumericPrefixedAppMetadata {
 	private String numericPrefix;
-	private String appNameString;
+	private String appNameString="";
 	private String workStream;
 	
 	public String getNumericPrefix() {

@@ -56,19 +56,42 @@ public class NumericPrefixedAppAdjuster implements AppAdjuster {
 	
 	private static final String ANALYZED_DATE_NEVER_ANALYZED_DEFAULT = "Protex project has never been analyzed";
 	
-	private static final String PROJECT_STATUS_ATTRNAME_PROPERTY = "numprefixed.app.attribute.projectstatus";
-	private static final String PROJECT_STATUS_VALUE_PROPERTY = "numprefixed.app.value.projectstatus";
-	private static final String PROJECT_STATUS_VALUE_DEFAULT = "CURRENT";
+	private static final String PROJECT_STATE_ATTRNAME_PROPERTY = "numprefixed.app.attribute.projectstatus";
+	private static final String PROJECT_STATE_VALUE_PROPERTY = "numprefixed.app.value.projectstatus";
+	private static final String PROJECT_STATE_VALUE_DEFAULT = "CURRENT";
 	
+	private static final String WITHOUT_DESCRIPTION_FORMAT_PATTERN_STRING_PROPERTY = "numprefixed.app.name.format.without.description";
+	private static final String WITHOUT_DESCRIPTION_FORMAT_PATTERN_STRING_DEFAULT = "[0-9][0-9][0-9]+-(PROD|RC1|RC2|RC3|RC4|RC5)-CURRENT";
+	private static final String WITH_DESCRIPTION_FORMAT_PATTERN_STRING_PROPERTY = "numprefixed.app.name.format.with.description";
+	private static final String WITH_DESCRIPTION_FORMAT_PATTERN_STRING_DEFAULT = "[0-9][0-9][0-9]+-.*-(PROD|RC1|RC2|RC3|RC4|RC5)-CURRENT";
+	
+	// Used to find the end of the app description
+	private static final String FOLLOWS_DESCRIPTION_PATTERN_STRING_PROPERTY = "numprefixed.appname.pattern.follows.description";
+	private static final String FOLLOWS_DESCRIPTION_PATTERN_STRING_DEFAULT = "-(PROD|RC1|RC2|RC3|RC4|RC5)-CURRENT";
+	
+	private static final String PROJECT_STATE_PATTERN_STRING_PROPERTY = "";
+	private static final String PROJECT_STATE_PATTERN_STRING_DEFAULT = "CURRENT";
+	
+	// These patterns are used to determine whether or not the app name includes the app description.
+	// That is: <sealid>-<workstream>-CURRENT vs. <sealid>-<appdescription>-<workstream>-CURRENT
+	// They also ensure we only work on app names that conform to one of those formats
+	private Pattern withoutDescriptionFormatPattern=null;
+	private Pattern withDescriptionFormatPattern=null;
+	
+	// These patterns are used to extract individual parts of the app name
 	private Pattern numericPrefixPattern=null;
 	private Pattern separatorPattern=null;
 	private Pattern workStreamPattern=null;
+	private Pattern projectStatePattern=null;
+	
+	// Used to find end of app description part of app name
+	private Pattern followsDescriptionPattern=null;
 	
 	private String numericPrefixAttrName=null;
 	private String analyzedDateAttrName=null;
 	private String workStreamAttrName=null;
-	private String projectStatusAttrName=null;
-	private String projectStatusValue=null;
+	private String projectStateAttrName=null;
+	private String projectStateValue=null;
 	
 	private String dateFormatString;
 	
@@ -96,6 +119,30 @@ public class NumericPrefixedAppAdjuster implements AppAdjuster {
 			workStreamPatternString = WORK_STREAM_PATTERN_STRING_DEFAULT;
 		}
 		
+		String followsDescriptionPatternString = config.getOptionalProperty(FOLLOWS_DESCRIPTION_PATTERN_STRING_PROPERTY);
+		if (followsDescriptionPatternString == null) {
+			followsDescriptionPatternString = FOLLOWS_DESCRIPTION_PATTERN_STRING_DEFAULT;
+		}
+		
+		
+//		withoutDescriptionFormatPattern
+		String withoutDescriptionFormatPatternString = config.getOptionalProperty(WITHOUT_DESCRIPTION_FORMAT_PATTERN_STRING_PROPERTY);
+		if (withoutDescriptionFormatPatternString == null) {
+			withoutDescriptionFormatPatternString = WITHOUT_DESCRIPTION_FORMAT_PATTERN_STRING_DEFAULT;
+		}
+		
+//		withDescriptionFormatPattern
+		String withDescriptionFormatPatternString = config.getOptionalProperty(WITH_DESCRIPTION_FORMAT_PATTERN_STRING_PROPERTY);
+		if (withDescriptionFormatPatternString == null) {
+			withDescriptionFormatPatternString = WITH_DESCRIPTION_FORMAT_PATTERN_STRING_DEFAULT;
+		}
+		
+//		projectStatePattern
+		String projectStatePatternString = config.getOptionalProperty(PROJECT_STATE_PATTERN_STRING_PROPERTY);
+		if (projectStatePatternString == null) {
+			projectStatePatternString = PROJECT_STATE_PATTERN_STRING_DEFAULT;
+		}
+		
 		String analyzedDateNeverString = config.getOptionalProperty(ANALYZED_DATE_NEVER_ANALYZED);
 		if (analyzedDateNeverString == null) {
 			analyzedDateNeverString = ANALYZED_DATE_NEVER_ANALYZED_DEFAULT;
@@ -106,16 +153,21 @@ public class NumericPrefixedAppAdjuster implements AppAdjuster {
 		separatorPattern = Pattern.compile(separatorPatternString);
 		workStreamPattern = Pattern.compile(workStreamPatternString);
 		
+		withoutDescriptionFormatPattern = Pattern.compile(withoutDescriptionFormatPatternString);
+		withDescriptionFormatPattern = Pattern.compile(withDescriptionFormatPatternString);
+		projectStatePattern = Pattern.compile(projectStatePatternString);
+		followsDescriptionPattern = Pattern.compile(followsDescriptionPatternString);
+		
 		numericPrefixAttrName = config.getProperty(NUMERIC_PREFIX_ATTRNAME_PROPERTY);
 		analyzedDateAttrName = config.getProperty(ANALYZED_DATE_ATTRNAME_PROPERTY);
 		workStreamAttrName = config.getProperty(WORK_STREAM_ATTRNAME_PROPERTY);
-		projectStatusAttrName = config.getProperty(PROJECT_STATUS_ATTRNAME_PROPERTY);
+		projectStateAttrName = config.getProperty(PROJECT_STATE_ATTRNAME_PROPERTY);
 		
-		String projectStatusValue = config.getOptionalProperty(PROJECT_STATUS_VALUE_PROPERTY);
-		if (projectStatusValue == null) {
-			projectStatusValue = PROJECT_STATUS_VALUE_DEFAULT;
+		String projectStateValue = config.getOptionalProperty(PROJECT_STATE_VALUE_PROPERTY);
+		if (projectStateValue == null) {
+			projectStateValue = PROJECT_STATE_VALUE_DEFAULT;
 		}
-		this.projectStatusValue = projectStatusValue;
+		this.projectStateValue = projectStateValue;
 		
 		dateFormatString = config.getProperty(DATE_FORMAT_STRING_PROPERTY);
 	}
@@ -133,7 +185,7 @@ public class NumericPrefixedAppAdjuster implements AppAdjuster {
 		
 		String analyzedDateString = getDateString(project.getAnalyzedDateValue(), tz, dateFormatString);
 		setAttribute(app, metadata, "analyzed date", analyzedDateAttrName, analyzedDateString);
-		setAttribute(app, metadata, "project status", projectStatusAttrName, projectStatusValue);
+		setAttribute(app, metadata, "project state", projectStateAttrName, projectStateValue);
 	}
 	
 	String getDateString(Date date, TimeZone tz, String dateFormatString) {
@@ -176,45 +228,163 @@ public class NumericPrefixedAppAdjuster implements AppAdjuster {
 	}
 	
 	NumericPrefixedAppMetadata parse(String appName) throws CodeCenterImportException {
-		NumericPrefixedAppMetadata metadata = new NumericPrefixedAppMetadata();
+		NumericPrefixedAppMetadata metadata = null;
 		Scanner scanner = new Scanner(appName);
+		
+		// Distinguish between without-description and with-description formats:
+		// <sealid>-<workstream>-CURRENT vs. <sealid>-<appdescription>-<workstream>-CURRENT vs. non-conforming (other)
+		
+		// Try: without description
+		String currentMatch = scanner.findInLine(withoutDescriptionFormatPattern);
+		if (currentMatch != null) {
+			// This app name is "without description" format: 
+			// <sealid>-<workstream>-CURRENT
+			metadata = parseAppNameWithoutDescription(appName);
+		} else if (scanner.findInLine(withDescriptionFormatPattern) != null) {
+			// This app name is "with description" format: 
+			// <sealid>-<appdescription>-<workstream>-CURRENT
+			metadata = parseAppNameWithDescription(appName);
+		} else {
+			// This app name does not conform to either format
+			throw new CodeCenterImportException("Application name '" + appName +
+					"' does not conform to either of the supported formats");
+		}
+
+//		scanner.useDelimiter(separatorPattern);
+//		try {
+//			
+//			if (!scanner.hasNext(numericPrefixPattern)) {
+//				String msg = "Error parsing numeric prefix from app name " + appName;
+//				log.error(msg);
+//				throw new CodeCenterImportException(msg);
+//			}
+//			String numericPrefix = scanner.next(numericPrefixPattern);
+//			metadata.setNumericPrefix(numericPrefix);
+//
+//			if (!scanner.hasNext(workStreamPattern)) {
+//				String appNameString;
+//				try {
+//					appNameString = scanner.next();
+//				} catch (Exception e) { // Some parsing exceptions (like there's no more input) are runtime exceptions
+//					String msg = "Error parsing work stream from app name " + appName;
+//					log.error(msg);
+//					throw new CodeCenterImportException(msg);
+//				}
+//				metadata.setAppNameString(appNameString);
+//			}
+//			
+//			String workStream;
+//			try {
+//				workStream = scanner.next(workStreamPattern);
+//			} catch (Exception e) { // Some parsing exceptions (like there's no more input) are runtime exceptions
+//				String msg = "Error parsing work stream from app name " + appName;
+//				log.error(msg);
+//				throw new CodeCenterImportException(msg);
+//			}
+//			metadata.setWorkStream(workStream);
+//		
+//		} finally {
+//			scanner.close();
+//		}
+		return metadata;
+	}
+	
+	private NumericPrefixedAppMetadata parseAppNameWithoutDescription(String fullAppName) 
+			throws CodeCenterImportException {
+		NumericPrefixedAppMetadata metadata = new NumericPrefixedAppMetadata();
+		Scanner scanner = new Scanner(fullAppName);
 		scanner.useDelimiter(separatorPattern);
 		try {
 			
 			if (!scanner.hasNext(numericPrefixPattern)) {
-				String msg = "Error parsing numeric prefix from app name " + appName;
-				log.error(msg);
+				String msg = "Error parsing numeric prefix from app name " + fullAppName;
 				throw new CodeCenterImportException(msg);
 			}
 			String numericPrefix = scanner.next(numericPrefixPattern);
 			metadata.setNumericPrefix(numericPrefix);
 
-			if (!scanner.hasNext(workStreamPattern)) {
-				String appNameString;
-				try {
-					appNameString = scanner.next();
-				} catch (Exception e) { // Some parsing exceptions (like there's no more input) are runtime exceptions
-					String msg = "Error parsing work stream from app name " + appName;
-					log.error(msg);
-					throw new CodeCenterImportException(msg);
-				}
-				metadata.setAppNameString(appNameString);
-			}
+			// parse the separator (-) after numericPrefix
+			String sep = scanner.findInLine(separatorPattern);
 			
-			String workStream;
-			try {
-				workStream = scanner.next(workStreamPattern);
-			} catch (Exception e) { // Some parsing exceptions (like there's no more input) are runtime exceptions
-				String msg = "Error parsing work stream from app name " + appName;
-				log.error(msg);
+			// parse the Work Stream ("PROD", "RC1", etc.)
+			String workStream = scanner.findInLine(workStreamPattern);
+			if (workStream == null) {
+				String msg = "Error parsing work stream from app name " + fullAppName;
 				throw new CodeCenterImportException(msg);
 			}
 			metadata.setWorkStream(workStream);
-		
+			
+			// parse the separator (-) after work stream
+			sep = scanner.findInLine(separatorPattern);
+
+			// parse the Project State ("CURRENT")
+			String projectState = scanner.findInLine(projectStatePattern);
+			if (projectState == null) {
+				String msg = "Error parsing project state from app name " + fullAppName;
+				throw new CodeCenterImportException(msg);
+			}
 		} finally {
 			scanner.close();
 		}
+		
+		
 		return metadata;
 	}
+	
+	private NumericPrefixedAppMetadata parseAppNameWithDescription(String fullAppName)
+			throws CodeCenterImportException {
+		NumericPrefixedAppMetadata metadata = new NumericPrefixedAppMetadata();
+		Scanner scanner = new Scanner(fullAppName);
+		scanner.useDelimiter(separatorPattern);
+		try {
+			
+			if (!scanner.hasNext(numericPrefixPattern)) {
+				String msg = "Error parsing numeric prefix from app name " + fullAppName;
+				throw new CodeCenterImportException(msg);
+			}
+			String numericPrefix = scanner.next(numericPrefixPattern);
+			metadata.setNumericPrefix(numericPrefix);
+
+			// parse the separator (-) after numericPrefix
+			String sep = scanner.findInLine(separatorPattern);
+			
+			// parse app description
+			scanner.useDelimiter(followsDescriptionPattern);
+			if (scanner.hasNext()) {
+				String description = scanner.next();
+				metadata.setAppNameString(description);
+			} else {
+				String msg = "Error parsing app description from app name " + fullAppName;
+				throw new CodeCenterImportException(msg);
+			}
+			
+			// parse the separator (-) after description
+			sep = scanner.findInLine(separatorPattern);
+			
+			// parse the Work Stream ("PROD", "RC1", etc.)
+			String workStream = scanner.findInLine(workStreamPattern);
+			if (workStream == null) {
+				String msg = "Error parsing work stream from app name " + fullAppName;
+				throw new CodeCenterImportException(msg);
+			}
+			metadata.setWorkStream(workStream);
+			
+			// parse the separator (-) after work stream
+			sep = scanner.findInLine(separatorPattern);
+
+			// parse the Project State ("CURRENT")
+			String projectState = scanner.findInLine(projectStatePattern);
+			if (projectState == null) {
+				String msg = "Error parsing project state from app name " + fullAppName;
+				throw new CodeCenterImportException(msg);
+			}
+		} finally {
+			scanner.close();
+		}
+		
+		
+		return metadata;
+	}
+
 
 }
