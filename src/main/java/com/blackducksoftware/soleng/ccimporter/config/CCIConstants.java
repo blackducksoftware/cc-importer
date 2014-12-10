@@ -53,14 +53,17 @@ public class CCIConstants {
 
 	// Project
 	public static final String PROJECT_PROPERTY = "protex.project.list";
+	public static final String PROJECT_FILTER_PROPERTY = "protex.project.name.filter";
 	
-	public static final String APP_ADJUSTER_CLASSNAME = "app.adjuster.classname";
+	public static final String APP_ADJUSTER_CLASSNAME_PROPERTY = "app.adjuster.classname";
+	public static final String APP_ADJUSTER_ONLY_IF_BOM_EDITS_PROPERTY = "app.adjuster.only.if.bomedits";
 	
 	// This switch ignores the existing associations
 	public static final String IGNORE_ASSOCIATIONS = "cc.ignore.associations";
 	
 	// Validate Step
 	public static final String VALIDATE_APPLICATION_PROPERTY = "validate.application";
+	public static final String VALIDATE_MAX_VALIDATIONS_PROPERTY = "validate.max.validations";
 	
 	public static final String ATTEMPT_TO_FIX_INVALID_ASSOCIATION_PROPERTY = "attempt.to.fix.invalid.association";
 

@@ -16,6 +16,8 @@
  */
 package com.blackducksoftware.soleng.ccimporter.config;
 
+import java.util.Properties;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,6 +41,13 @@ public class CodeCenterConfigManager extends CCIConfigurationManager
     public CodeCenterConfigManager(String fileLocation)
     {
 	super(fileLocation, APPLICATION.CODECENTER);
+	log.info("Importing user configuration from file...");
+	initConfigFile();
+    }
+    
+    public CodeCenterConfigManager(Properties props)
+    {
+	super(props, APPLICATION.CODECENTER);
 	log.info("Importing user configuration from file...");
 	initConfigFile();
     }

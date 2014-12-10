@@ -8,6 +8,8 @@ All rights reserved. **/
  */
 package com.blackducksoftware.soleng.ccimporter.config;
 
+import java.util.Properties;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,6 +34,13 @@ public class ProtexConfigManager extends CCIConfigurationManager
     public ProtexConfigManager(String fileLocation)
     {
 	super(fileLocation, APPLICATION.PROTEX);
+	log.info("Importing user configuration from file for Protex.");
+	initConfigFile();
+    }
+    
+    public ProtexConfigManager(Properties props)
+    {
+	super(props, APPLICATION.PROTEX);
 	log.info("Importing user configuration from file for Protex.");
 	initConfigFile();
     }

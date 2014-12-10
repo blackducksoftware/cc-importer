@@ -45,6 +45,10 @@ public class CCIConfigurationManager extends ConfigurationManager {
 	private Boolean ignoreAssociations = false;
 	private boolean attemptToFixInvalidAssociation = false;
 	private String appAdjusterClassname = null;
+	private int maxValidations = 1;
+	private boolean appAdjusterOnlyIfBomEdits = false;
+	private String protexProjectNameFilter = null;
+	
 
 	// TODO: Temporary workarounds for DB access
 	private String hostName = null;
@@ -93,7 +97,7 @@ public class CCIConfigurationManager extends ConfigurationManager {
 		owner = getProperty(CCIConstants.OWNER_PROPERTY);
 		appVersion = getProperty(CCIConstants.VERSION_PROPERTY);
 		workflow = getProperty(CCIConstants.WORKFLOW_PROPERTY);
-		appAdjusterClassname = getOptionalProperty(CCIConstants.APP_ADJUSTER_CLASSNAME);
+		appAdjusterClassname = getOptionalProperty(CCIConstants.APP_ADJUSTER_CLASSNAME_PROPERTY);
 
 		submit = getOptionalProperty(CCIConstants.SUBMIT_PROPERTY, false,
 				Boolean.class);
@@ -133,6 +137,21 @@ public class CCIConfigurationManager extends ConfigurationManager {
 		} else {
 			projectList = buildProjectList(Arrays.asList(StringUtils.split(
 					potentiaList, ",")));
+		}
+		
+		String maxValidationsString = super.getOptionalProperty(CCIConstants.VALIDATE_MAX_VALIDATIONS_PROPERTY);
+		if (maxValidationsString != null) {
+			this.maxValidations = Integer.parseInt(maxValidationsString);
+		}
+		
+		String appAdjusterOnlyIfBomEditsString = super.getOptionalProperty(CCIConstants.APP_ADJUSTER_ONLY_IF_BOM_EDITS_PROPERTY);
+		if ("true".equalsIgnoreCase(appAdjusterOnlyIfBomEditsString)) {
+			this.appAdjusterOnlyIfBomEdits = true;
+		}
+		
+		String protexProjectNameFilterString = super.getOptionalProperty(CCIConstants.PROJECT_FILTER_PROPERTY);
+		if (protexProjectNameFilterString != null) {
+			this.protexProjectNameFilter = protexProjectNameFilterString;
 		}
 	}
 
@@ -428,6 +447,18 @@ public class CCIConfigurationManager extends ConfigurationManager {
 
 	public String getAppAdjusterClassname() {
 		return appAdjusterClassname;
+	}
+
+	public int getMaxValidations() {
+		return maxValidations;
+	}
+
+	public boolean isAppAdjusterOnlyIfBomEdits() {
+		return appAdjusterOnlyIfBomEdits;
+	}
+
+	public String getProtexProjectNameFilter() {
+		return protexProjectNameFilter;
 	}
 
 }
