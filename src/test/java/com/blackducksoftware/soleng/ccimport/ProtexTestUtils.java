@@ -7,20 +7,33 @@ package com.blackducksoftware.soleng.ccimport;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import soleng.framework.core.config.ConfigurationManager;
 import soleng.framework.standard.common.ProjectPojo;
 import soleng.framework.standard.protex.ProtexProjectPojo;
 import soleng.framework.standard.protex.ProtexServerWrapper;
+import soleng.framework.standard.protex.identification.DeclareIdentifier;
+import soleng.framework.standard.protex.identification.Identifier;
+import soleng.framework.standard.protex.identification.ProtexIdUtils;
 import soleng.framework.standard.protex.project.SimpleProtexProjectCreator;
 import soleng.framework.standard.protex.project.SimpleProtexProjectCreatorImpl;
 
+import com.blackducksoftware.sdk.fault.SdkFault;
 import com.blackducksoftware.sdk.protex.project.RapidIdentificationMode;
+import com.blackducksoftware.sdk.protex.project.codetree.CodeTreeNode;
+import com.blackducksoftware.sdk.protex.project.codetree.PartialCodeTree;
+import com.blackducksoftware.sdk.protex.project.codetree.discovery.CodeMatchDiscovery;
+import com.blackducksoftware.sdk.protex.project.codetree.discovery.Discovery;
 import com.blackducksoftware.sdk.protex.user.User;
 
 public class ProtexTestUtils {
+	private static final int CHUNK_SIZE = 7;
+	
 //	public static ConfigurationManager initConfig(String protexUrl, String username, String password) {
 //		Properties props = new Properties();
 //		props.setProperty("protex.server.name", protexUrl);
@@ -57,19 +70,19 @@ public class ProtexTestUtils {
 		assertEquals(projectName, projectPojo.getProjectName());
 	}
 	
-	public static void enableRapidId(ProtexServerWrapper protexServerWrapper, String projectId) throws Exception {
-		protexServerWrapper.getInternalApiWrapper().getProjectApi().updateRapidIdentificationMode(projectId, RapidIdentificationMode.AUTOMATIC_INCLUDE_GLOBAL_CONFIGURATIONS);
-	}
+//	public static void enableRapidId(ProtexServerWrapper protexServerWrapper, String projectId) throws Exception {
+//		protexServerWrapper.getInternalApiWrapper().getProjectApi().updateRapidIdentificationMode(projectId, RapidIdentificationMode.AUTOMATIC_INCLUDE_GLOBAL_CONFIGURATIONS);
+//	}
 	
-	public static void confirmByProjectIdRapidIdDisabled(ProtexServerWrapper protexServerWrapper, String projectId) throws Exception {
-		assertEquals(RapidIdentificationMode.DISABLED,
-				protexServerWrapper.getInternalApiWrapper().getProjectApi().getRapidIdentificationMode(projectId));
-	}
+//	public static void confirmByProjectIdRapidIdDisabled(ProtexServerWrapper protexServerWrapper, String projectId) throws Exception {
+//		assertEquals(RapidIdentificationMode.DISABLED,
+//				protexServerWrapper.getInternalApiWrapper().getProjectApi().getRapidIdentificationMode(projectId));
+//	}
 	
-	public static void confirmRapidIdDisabled(ProtexServerWrapper protexServerWrapper, String projectName) throws Exception {
-		String projectId = protexServerWrapper.getProjectByName(projectName).getProjectKey();
-		confirmByProjectIdRapidIdDisabled(protexServerWrapper, projectId);
-	}
+//	public static void confirmRapidIdDisabled(ProtexServerWrapper protexServerWrapper, String projectName) throws Exception {
+//		String projectId = protexServerWrapper.getProjectByName(projectName).getProjectKey();
+//		confirmByProjectIdRapidIdDisabled(protexServerWrapper, projectId);
+//	}
 	
 	
 	
@@ -102,5 +115,103 @@ public class ProtexTestUtils {
 		ProtexServerWrapper<ProtexProjectPojo> protexServerWrapper = 
 				new ProtexServerWrapper<ProtexProjectPojo>(config.getServerBean(), config, true);
 		return protexServerWrapper;
+	}
+	
+	public static void makeSomeMatches(ConfigurationManager config,
+			String projectName, boolean includeBomRefresh) throws Exception {		
+		Identifier identifier = new DeclareIdentifier("test");
+		ProtexIdUtils idUtils = new ProtexIdUtils(config, identifier,
+				projectName,
+				includeBomRefresh);
+		identifier.setProtexUtils(idUtils);
+		makeIdentifications(idUtils);
+	}
+	
+	
+	private static void makeIdentifications(ProtexIdUtils codeMatchUtils) throws Exception {
+
+		String path = "/";
+		PartialCodeTree fullTreeFiles = 
+				codeMatchUtils.getAllCodeTreeFiles(path);
+		
+		PartialCodeTree rootDir = 
+				codeMatchUtils.getCodeTreeDir(path);
+	
+		boolean keepGoing = codeMatchUtils.hasPendingIds(rootDir);
+		while (keepGoing) {
+			doIt(codeMatchUtils, path, fullTreeFiles);
+			keepGoing = codeMatchUtils.isMultiPassIdStrategy() && codeMatchUtils.hasPendingIds(rootDir);
+		}
+		codeMatchUtils.refreshBom();
+	}
+	
+	private static void doIt(ProtexIdUtils codeMatchUtils, String path, PartialCodeTree fullTreeFiles) throws SdkFault {
+		List<CodeTreeNode> fileNodes = fullTreeFiles.getNodes();
+		List<CodeMatchDiscovery> codeMatchDiscoveries = collectDiscoveries(codeMatchUtils,
+				path, fileNodes);
+		Map<String, List<CodeMatchDiscovery>> discoveryListMap = 
+				getDiscoveriesListsOrganizedByFilePath(codeMatchDiscoveries);
+		
+		for (String filePath : discoveryListMap.keySet()) {
+			Discovery target = ProtexIdUtils.bestMatch(discoveryListMap.get(filePath));
+			
+			if (target != null) {
+				codeMatchUtils.makeId(filePath, target);
+			}
+		}
+	}
+	
+	private static List<CodeMatchDiscovery> collectDiscoveries(ProtexIdUtils codeMatchUtils, 
+			String path,
+			List<CodeTreeNode> fileNodes) throws SdkFault {
+		
+		List<CodeMatchDiscovery> codeMatchDiscoveriesAll = new ArrayList<CodeMatchDiscovery>(1024);
+		
+		int startIndex = 0;
+		int endIndex;
+		int listSize = fileNodes.size();
+		
+		while ((endIndex = getEndIndex(startIndex, listSize, CHUNK_SIZE)) > startIndex) {
+			List<CodeTreeNode> fileNodesChunk = fileNodes.subList(startIndex, endIndex+1);
+			List<CodeMatchDiscovery> codeMatchDiscoveriesChunk = codeMatchUtils.getCodeMatchDiscoveries(path, fileNodesChunk);
+			codeMatchDiscoveriesAll.addAll(codeMatchDiscoveriesChunk);
+			startIndex = endIndex+1;
+		}
+		
+		return codeMatchDiscoveriesAll;
+	}
+	
+	public static int getEndIndex(int startIndex, int listSize, int chunkSize) {
+		if (listSize == 0) {
+			return 0;
+		}
+		int endIndex = startIndex + chunkSize - 1;
+		if (endIndex > (listSize-1)) {
+			endIndex = listSize-1;
+		}
+		return endIndex;
+	}
+	
+	/**
+	 * Given a list of discoveries spanning many files, return a map of discovery lists, keys = file path.
+	 * @param codeMatchDiscoveries
+	 * @return
+	 */
+	private static Map<String, List<CodeMatchDiscovery>> getDiscoveriesListsOrganizedByFilePath(List<CodeMatchDiscovery> codeMatchDiscoveries) {
+		Map<String, List<CodeMatchDiscovery>> map = new HashMap<String, List<CodeMatchDiscovery>>(CHUNK_SIZE);
+
+		for (CodeMatchDiscovery disco : codeMatchDiscoveries) {
+			String filePath = disco.getFilePath();
+			List<CodeMatchDiscovery> discoveryList;
+			if (map.containsKey(filePath)) {
+				discoveryList = map.get(filePath);
+			} else {
+				discoveryList = new ArrayList<CodeMatchDiscovery>(20);
+				map.put(filePath, discoveryList);
+			}
+			discoveryList.add(disco);
+		}
+		
+		return map;
 	}
 }

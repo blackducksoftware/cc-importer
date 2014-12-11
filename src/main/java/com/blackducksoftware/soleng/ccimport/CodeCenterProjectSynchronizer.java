@@ -210,11 +210,17 @@ public class CodeCenterProjectSynchronizer
 				}
 
 				if (importSuccess) {
+					boolean bomWasChanged = false;
 					try {
 						boolean performValidate = configManager.isValidate();
-						if (performValidate)
-							reportSummary = processValidation(importedProject,
+						if (performValidate) {
+							bomWasChanged = processValidation(importedProject,
 									reportSummary);
+							if (configManager.isAppAdjusterOnlyIfBomEdits() && bomWasChanged) {
+								invokeAppAdjuster(configManager, importedProject.getApplication(), project);
+							}
+						}
+						
 					} catch (Exception e) {
 						String exceptionMessage = e.getMessage();
 						log.error(
@@ -272,7 +278,7 @@ public class CodeCenterProjectSynchronizer
 	    // Creates the application (if needed) and then perform the association	 
 	    if (correspondingApplicationID == null)
 	    {
-		    	log.info("No association found for project ID [{}], will attempt to create one", project.getProjectKey());
+		    	log.info("No corresponding application found for project ID [{}], will attempt to create one", project.getProjectKey());
 		    	// This will return an existing application, or create a new
 			// one. This is generic and not import specific.
 			app = createApplication(project);
@@ -313,9 +319,10 @@ public class CodeCenterProjectSynchronizer
 				    + correspondingApplicationID, e);
 		}
 	    }	
-	   
-
-	    invokeAppAdjuster(configManager, app, project);
+	    
+	    if (!configManager.isAppAdjusterOnlyIfBomEdits()) {
+	    	invokeAppAdjuster(configManager, app, project);
+	    }
 	    
 	    // If everything goes well, set the application name for
 	    // potential validation down the road.
@@ -390,16 +397,17 @@ public class CodeCenterProjectSynchronizer
      * 
      * @param importedProject
      * @param summary
-     * @return
+     * @return true if the Code Center BOM was changed
      * @throws CodeCenterImportException
      */
-    private CCIReportSummary processValidation(CCIProject importedProject,
+    private boolean processValidation(CCIProject importedProject,
 	    CCIReportSummary summary) throws CodeCenterImportException
     {
 	// VALIDATION CALL
 	Application app = importedProject.getApplication();
 	String applicationName = app.getName();
 	ApplicationIdToken appIdToken = app.getId();
+	boolean ccBomChanged = false;
 
 	// If user selected smart validate, then determine the last date of the
 	// application
@@ -464,7 +472,7 @@ public class CodeCenterProjectSynchronizer
 				applicationName, lastValidatedTime.toString(),
 				lastRefreshDate.toString());
 			summary.addToTotalValidatesSkipped();
-			return summary;
+			return ccBomChanged;
 		    }
 		}
 	    } catch (Exception e)
@@ -492,13 +500,17 @@ public class CodeCenterProjectSynchronizer
 	    throw new CodeCenterImportException("Error with validation:"
 		    + sfe.getMessage(), sfe);
 	}
+	
 
 	// ADD REQUESTS
-	addRequestsToCodeCenter(app, summary);
+	int requestsAdded = addRequestsToCodeCenter(app, summary);
 	// DELETE REQUESTS
-	deleteRequestsFromCodeCenter(app, summary);
+	int requestsDeleted = deleteRequestsFromCodeCenter(app, summary);
 
-	return summary;
+	if ((requestsAdded > 0) || (requestsDeleted > 0))
+		ccBomChanged = true;
+	
+	return ccBomChanged;
     }
 
     /**
@@ -508,10 +520,12 @@ public class CodeCenterProjectSynchronizer
      * 
      * @param app
      * @param summary
+     * @return Number of requests added to CC
      */
-    private void addRequestsToCodeCenter(Application app,
+    private int addRequestsToCodeCenter(Application app,
 	    CCIReportSummary summary)
     {
+    	int requestsAdded = 0;
 	String applicationName = app.getName();
 	List<ProtexRequest> protexOnlyComponents = new ArrayList<ProtexRequest>();
 
@@ -540,7 +554,7 @@ public class CodeCenterProjectSynchronizer
 	    log.debug("User specified submit set to: "
 		    + configManager.isSubmit());
 
-	    int requestsAdded = 0;
+	    
 	    for (ProtexRequest protexRequest : protexOnlyComponents)
 	    {
 		try
@@ -575,7 +589,7 @@ public class CodeCenterProjectSynchronizer
 	{
 	    log.info("Add request option disabled");
 	}
-
+	return requestsAdded;
     }
 
     /**
@@ -584,10 +598,12 @@ public class CodeCenterProjectSynchronizer
      * 
      * @param app
      * @param summary
+     * @return Number of requests deleted from CC
      */
-    private void deleteRequestsFromCodeCenter(Application app,
+    private int deleteRequestsFromCodeCenter(Application app,
 	    CCIReportSummary summary)
     {
+    int totalRequestsDeleted = 0;
 
 	String applicationName = app.getName();
 	List<RequestSummary> ccOnlyComps = new ArrayList<RequestSummary>();
@@ -607,7 +623,7 @@ public class CodeCenterProjectSynchronizer
 	// Delete the components
 	if (this.configManager.isPerformDelete())
 	{
-	    int totalRequestsDeleted = 0;
+	    
 
 	    try
 	    {
@@ -629,7 +645,7 @@ public class CodeCenterProjectSynchronizer
 	{
 	    log.info("Delete requests option disabled");
 	}
-
+	return totalRequestsDeleted;
     }
 
     /**

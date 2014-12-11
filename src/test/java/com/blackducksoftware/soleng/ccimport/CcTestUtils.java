@@ -203,29 +203,29 @@ public class CcTestUtils {
 		}
 //		assertTrue(app.isObligationFulFillment()); // Don't know any way to get this to pass
 		
-//		if (expectedAttrValues != null) {
-//			List<AttributeValue> actualAttrValues = app.getAttributeValues();
-//			checkAttrValues(ccServerWrapper, expectedAttrValues, actualAttrValues);
-//		}
+		if (expectedAttrValues != null) {
+			List<AttributeValue> actualAttrValues = app.getAttributeValues();
+			checkAttrValues(ccServerWrapper, expectedAttrValues, actualAttrValues);
+		}
 	}
 	
-//	private static void checkAttrValues(CodeCenterServerWrapper ccServerWrapper,
-//			Map<String, String> expectedAttrValues, List<AttributeValue> actualAttrValues) 
-//					throws SdkFault {
-//		Map<String, String> actualAttrValuesMap = new HashMap<String, String>();
-//		for (AttributeValue actualAttrValue : actualAttrValues) {
-//			AttributeNameOrIdToken actualAttrIdToken = actualAttrValue.getAttributeId();
-//			AbstractAttribute actualAttrDef = ccServerWrapper.getInternalApiWrapper().attributeApi.getAttribute(actualAttrIdToken);
-//
-//			String actualAttrName = actualAttrDef.getName();
-//			actualAttrValuesMap.put(actualAttrName, actualAttrValue.getValues().get(0));
-//		}
-//		
-//		for (String expectedAttrName : expectedAttrValues.keySet()) {
-//			String actualAttrValue = actualAttrValuesMap.get(expectedAttrName);
-//			assertEquals(expectedAttrValues.get(expectedAttrName), actualAttrValue);
-//		}
-//	}
+	private static void checkAttrValues(CodeCenterServerWrapper ccServerWrapper,
+			Map<String, String> expectedAttrValues, List<AttributeValue> actualAttrValues) 
+					throws SdkFault {
+		Map<String, String> actualAttrValuesMap = new HashMap<String, String>();
+		for (AttributeValue actualAttrValue : actualAttrValues) {
+			AttributeNameOrIdToken actualAttrIdToken = actualAttrValue.getAttributeId();
+			AbstractAttribute actualAttrDef = ccServerWrapper.getInternalApiWrapper().attributeApi.getAttribute(actualAttrIdToken);
+
+			String actualAttrName = actualAttrDef.getName();
+			actualAttrValuesMap.put(actualAttrName, actualAttrValue.getValues().get(0));
+		}
+		
+		for (String expectedAttrName : expectedAttrValues.keySet()) {
+			String actualAttrValue = actualAttrValuesMap.get(expectedAttrName);
+			assertEquals(expectedAttrValues.get(expectedAttrName), actualAttrValue);
+		}
+	}
 	
 	
 	
