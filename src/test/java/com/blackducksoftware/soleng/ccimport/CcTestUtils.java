@@ -32,6 +32,7 @@ import com.blackducksoftware.sdk.codecenter.application.data.Application;
 import com.blackducksoftware.sdk.codecenter.application.data.ApplicationCreate;
 import com.blackducksoftware.sdk.codecenter.application.data.ApplicationIdToken;
 import com.blackducksoftware.sdk.codecenter.application.data.ApplicationNameVersionToken;
+import com.blackducksoftware.sdk.codecenter.application.data.ValidationStatusEnum;
 import com.blackducksoftware.sdk.codecenter.approval.data.WorkflowNameToken;
 import com.blackducksoftware.sdk.codecenter.attribute.data.AbstractAttribute;
 import com.blackducksoftware.sdk.codecenter.attribute.data.AttributeNameOrIdToken;
@@ -181,25 +182,38 @@ public class CcTestUtils {
 	public static void checkApplication(CodeCenterServerWrapper ccServerWrapper,
 			String appName, String appVersion, String appDescription,
 			Map<String, String> expectedAttrValues) throws Exception {
-		checkApplication(ccServerWrapper, appName, appVersion, appDescription, false, expectedAttrValues);
+		checkApplication(ccServerWrapper, appName, appVersion, appDescription, false, expectedAttrValues, false);
 	}
+	
+	public static void checkApplicationValidationStatusOk(CodeCenterServerWrapper ccServerWrapper,
+			String appName, String appVersion) throws Exception {
+		checkApplication(ccServerWrapper, appName, appVersion, null, false, null, true);
+	}
+		
 	public static void checkApplicationAndUseProtexstatus(CodeCenterServerWrapper ccServerWrapper,
 			String appName, String appVersion, String appDescription,
 			Map<String, String> expectedAttrValues) throws Exception {
-		checkApplication(ccServerWrapper, appName, appVersion, appDescription, true, expectedAttrValues);
+		checkApplication(ccServerWrapper, appName, appVersion, appDescription, true, expectedAttrValues, false);
 	}
 	
 	public static void checkApplication(CodeCenterServerWrapper ccServerWrapper,
 			String appName, String appVersion, String appDescription, boolean confirmUseProtexstatusTrue,
-			Map<String, String> expectedAttrValues) throws Exception {
+			Map<String, String> expectedAttrValues,
+			boolean confirmValidationStatusOk) throws Exception {
 		ApplicationNameVersionToken token = new ApplicationNameVersionToken();
 		token.setName(appName);
 		token.setVersion(appVersion);
 		Application app = ccServerWrapper.getInternalApiWrapper().applicationApi.getApplication(token);
 		assertEquals(appName, app.getName());
-		assertEquals(appDescription, app.getDescription());
+		if (appDescription != null) {
+			assertEquals(appDescription, app.getDescription());
+		}
 		if (confirmUseProtexstatusTrue) {
 			assertTrue(app.isUseProtexstatus());
+		}
+		
+		if (confirmValidationStatusOk) {
+			assertEquals(ValidationStatusEnum.PASSED, app.getValidationStatus());
 		}
 //		assertTrue(app.isObligationFulFillment()); // Don't know any way to get this to pass
 		

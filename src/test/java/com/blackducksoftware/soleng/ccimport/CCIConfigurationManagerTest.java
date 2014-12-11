@@ -48,13 +48,13 @@ public class CCIConfigurationManagerTest {
 		props.setProperty("validate.application", "true");
 		props.setProperty("cc.submit.request", "true");
 		props.setProperty("validate.requests.delete", "true");
-		props.setProperty("validate.max.validations", "123");
+		props.setProperty("revalidate.after.changing.bom", "true");
 		props.setProperty("app.adjuster.only.if.bomedits", "true");
 		props.setProperty("protex.project.name.filter", ".*-CURRENT$");
 		
 		CodeCenterConfigManager ccConfig = new CodeCenterConfigManager(props);
 		
-		assertEquals(123, ccConfig.getMaxValidations());
+		assertTrue(ccConfig.isReValidateAfterBomChange());
 		assertTrue(ccConfig.isAppAdjusterOnlyIfBomEdits());
 		
 		ProtexConfigManager pConfig = new ProtexConfigManager(props);

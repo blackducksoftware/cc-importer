@@ -190,14 +190,15 @@ public class CodeCenterProjectSynchronizer
 	public void synchronize(List<CCIProject> projectList) {
 		reportSummary.setTotalProtexProjects(projectList.size());
 
-		int counter = 1;
+		int projectCounter = 1;
 		for (CCIProject project : projectList) {
-			boolean retry = false;
-			int retryCount = 0;
+			boolean retryImport = false;
+			int importRetryCount = 0;
 			do {
-				log.info("[{}/{}] Processing {}", counter++,
+				log.info("[{}/{}] Processing {}", projectCounter++,
 						projectList.size(), project.getProjectName());
-				retry = false;
+				importRetryCount++;
+				retryImport = false;
 				boolean importSuccess = false;
 				CCIProject importedProject = null;
 				try {
@@ -210,49 +211,74 @@ public class CodeCenterProjectSynchronizer
 				}
 
 				if (importSuccess) {
-					boolean bomWasChanged = false;
-					try {
-						boolean performValidate = configManager.isValidate();
-						if (performValidate) {
-							bomWasChanged = processValidation(importedProject,
-									reportSummary);
-							if (configManager.isAppAdjusterOnlyIfBomEdits() && bomWasChanged) {
-								invokeAppAdjuster(configManager, importedProject.getApplication(), project);
-							}
-						}
-						
-					} catch (Exception e) {
-						String exceptionMessage = e.getMessage();
-						log.error(
-								"[{}] Unable to perform validation: "
-										+ exceptionMessage,
-								project.getProjectName());
-						// If we got NoRemoteProjectFoundException, app may be associated with wrong projex server
-						// clear the assoc and retry (up to a couple times)
-						if ((exceptionMessage.contains("NoRemoteProjectFoundException")) && 
-								(configManager.isAttemptToFixInvalidAssociation())) {
-							if (++retryCount < 2) {
-								ApplicationNameVersionToken appToken = new ApplicationNameVersionToken();
-								appToken.setName(project.getProjectName());
-								appToken.setVersion(project.getProjectVersion());
-								try {
-									ccWrapper.getInternalApiWrapper().applicationApi.disassociateProtexProject(appToken);
-									retry = true;
-								} catch (SdkFault sdkFault) {
-									log.error("Disassociate on app " + project.getProjectName() +
-											" / " + project.getProjectVersion() + 
-											" failed: " + sdkFault.getMessage());
-									retry = false;
-								}
-							}
-						}
-					}
+					retryImport = validate(project, importedProject, importRetryCount);
 				}
-			} while (retry);
+			} while (retryImport);
 		}
 
 		// Here, we display the basic summary
 		log.info(reportSummary.toString());
+	}
+	
+	private boolean validate(CCIProject project, CCIProject importedProject, int importRetryCount) {
+		boolean retryImport=false;
+		boolean bomWasChanged = false;
+		try {
+			boolean performValidate = configManager.isValidate();
+			if (performValidate) {
+				bomWasChanged = processValidation(importedProject,
+						reportSummary);
+				if (configManager.isAppAdjusterOnlyIfBomEdits() && bomWasChanged) {
+					invokeAppAdjuster(configManager, importedProject.getApplication(), project);
+				}
+				if (configManager.isReValidateAfterBomChange() && bomWasChanged) {
+					reValidate(importedProject);
+				}
+			}
+			
+		} catch (Exception e) {
+			String exceptionMessage = e.getMessage();
+			log.error(
+					"[{}] Unable to perform validation: "
+							+ exceptionMessage,
+					project.getProjectName());
+			
+			// If we got NoRemoteProjectFoundException, app may be associated with wrong projex server
+			// clear the assoc and retry (up to a couple times)
+			if ((exceptionMessage.contains("NoRemoteProjectFoundException")) && 
+					(configManager.isAttemptToFixInvalidAssociation()) && (importRetryCount < 2)) {
+
+					retryImport = disassociateAppFromOldProject(project);
+			}
+		}
+		return retryImport;
+	}
+	
+	private void reValidate(CCIProject importedProject) {
+		Application app = importedProject.getApplication();
+		String applicationName = app.getName();
+		ApplicationIdToken appIdToken = app.getId();
+		try {
+			ccWrapper.getInternalApiWrapper().applicationApi.validate(appIdToken, false, false);
+		} catch (SdkFault e) {
+			log.error("Re-validate (after BOM change) failed: " + e.getMessage());
+		}
+	}
+	
+	private boolean disassociateAppFromOldProject(CCIProject project) {
+		boolean retryImport = true;
+		ApplicationNameVersionToken appToken = new ApplicationNameVersionToken();
+		appToken.setName(project.getProjectName());
+		appToken.setVersion(project.getProjectVersion());
+		try {
+			ccWrapper.getInternalApiWrapper().applicationApi.disassociateProtexProject(appToken);
+		} catch (SdkFault sdkFault) {
+			log.error("Disassociate on app " + project.getProjectName() +
+					" / " + project.getProjectVersion() + 
+					" failed: " + sdkFault.getMessage());
+			retryImport = false;
+		}
+		return retryImport;
 	}
 
     /**
@@ -487,8 +513,7 @@ public class CodeCenterProjectSynchronizer
 		    "[{}] Attempting validation with Protex. This may take some time, depending on the number of components...",
 		    applicationName);
 
-	    ccWrapper.getInternalApiWrapper().applicationApi.validate(
-		    appIdToken, false, false);
+	    ccWrapper.getInternalApiWrapper().applicationApi.validate(appIdToken, false, false);
 	    reportSummary.addToTotalValidatesPerfomed();
 	    log.info("[{}] validation completed. ", applicationName);
 	} catch (Exception sfe)

@@ -69,7 +69,7 @@ public class NumericPrefixedAppAdjuster implements AppAdjuster {
 	private static final String FOLLOWS_DESCRIPTION_PATTERN_STRING_PROPERTY = "numprefixed.appname.pattern.follows.description";
 	private static final String FOLLOWS_DESCRIPTION_PATTERN_STRING_DEFAULT = "-(PROD|RC1|RC2|RC3|RC4|RC5)-CURRENT";
 	
-	private static final String PROJECT_STATE_PATTERN_STRING_PROPERTY = "";
+	private static final String PROJECT_STATE_PATTERN_STRING_PROPERTY = "numprefixed.appname.pattern.projectstatus";
 	private static final String PROJECT_STATE_PATTERN_STRING_DEFAULT = "CURRENT";
 	
 	// These patterns are used to determine whether or not the app name includes the app description.

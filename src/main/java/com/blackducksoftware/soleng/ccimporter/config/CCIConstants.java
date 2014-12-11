@@ -63,7 +63,7 @@ public class CCIConstants {
 	
 	// Validate Step
 	public static final String VALIDATE_APPLICATION_PROPERTY = "validate.application";
-	public static final String VALIDATE_MAX_VALIDATIONS_PROPERTY = "validate.max.validations";
+	public static final String RE_VALIDATE_AFTER_CHANGING_BOM_PROPERTY = "revalidate.after.changing.bom";
 	
 	public static final String ATTEMPT_TO_FIX_INVALID_ASSOCIATION_PROPERTY = "attempt.to.fix.invalid.association";
 

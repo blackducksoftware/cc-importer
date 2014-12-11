@@ -45,7 +45,7 @@ public class CCIConfigurationManager extends ConfigurationManager {
 	private Boolean ignoreAssociations = false;
 	private boolean attemptToFixInvalidAssociation = false;
 	private String appAdjusterClassname = null;
-	private int maxValidations = 1;
+	private boolean reValidateAfterBomChange = false;
 	private boolean appAdjusterOnlyIfBomEdits = false;
 	private String protexProjectNameFilter = null;
 	
@@ -139,9 +139,9 @@ public class CCIConfigurationManager extends ConfigurationManager {
 					potentiaList, ",")));
 		}
 		
-		String maxValidationsString = super.getOptionalProperty(CCIConstants.VALIDATE_MAX_VALIDATIONS_PROPERTY);
-		if (maxValidationsString != null) {
-			this.maxValidations = Integer.parseInt(maxValidationsString);
+		String reValidateString = super.getOptionalProperty(CCIConstants.RE_VALIDATE_AFTER_CHANGING_BOM_PROPERTY);
+		if ("true".equalsIgnoreCase(reValidateString)) {
+			this.reValidateAfterBomChange = true;
 		}
 		
 		String appAdjusterOnlyIfBomEditsString = super.getOptionalProperty(CCIConstants.APP_ADJUSTER_ONLY_IF_BOM_EDITS_PROPERTY);
@@ -449,8 +449,8 @@ public class CCIConfigurationManager extends ConfigurationManager {
 		return appAdjusterClassname;
 	}
 
-	public int getMaxValidations() {
-		return maxValidations;
+	public boolean isReValidateAfterBomChange() {
+		return reValidateAfterBomChange;
 	}
 
 	public boolean isAppAdjusterOnlyIfBomEdits() {

@@ -136,11 +136,10 @@ public class ImportIT {
 
 		// Check the app, including a custom attr that'll prove that the (real)
 		// app adjuster ran and worked
+		// Also verify that the validate status is PASSED
 		Map<String, String> expectedAttrValues = new HashMap<String, String>();
 		expectedAttrValues.put("Sample Textfield", "123456");
-		CcTestUtils.checkApplication(ccsw, APP_NAME, APP_VERSION, APP_DESCRIPTION, expectedAttrValues);
-		
-		
+		CcTestUtils.checkApplication(ccsw, APP_NAME, APP_VERSION, APP_DESCRIPTION, false, expectedAttrValues, true);
 
 		// Change the project BOM
 		ProtexTestUtils.makeSomeMatches(pConfig, APP_NAME, true);
@@ -155,6 +154,7 @@ public class ImportIT {
 		
 		int lastAdjusterCount = MockAppAdjuster.getAdjustAppCalledCount();
 		processor.performSynchronize();
+		CcTestUtils.checkApplicationValidationStatusOk(ccsw, APP_NAME, APP_VERSION);
 		
 		// Verify that app adjuster was called (since BOM changed)
 		assertEquals(lastAdjusterCount+1, MockAppAdjuster.getAdjustAppCalledCount());
@@ -186,6 +186,7 @@ public class ImportIT {
 		props.setProperty("validate.requests.delete", "true");
 		props.setProperty("app.adjuster.classname", "com.blackducksoftware.soleng.ccimport.appadjuster.custom.MockAppAdjuster");
 		props.setProperty("app.adjuster.only.if.bomedits", "true");
+		props.setProperty("revalidate.after.changing.bom", "true");
 		return props;
 	}
 
