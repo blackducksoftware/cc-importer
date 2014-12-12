@@ -48,9 +48,6 @@ public class CCIConstants {
 	// Owner property
 	public static final String OWNER_PROPERTY = "cc.owner";
 
-	// Submit request property
-	protected static final String SUBMIT_PROPERTY = "cc.submit.request";
-
 	// Project
 	public static final String PROJECT_PROPERTY = "protex.project.list";
 	public static final String PROJECT_FILTER_PROPERTY = "protex.project.name.filter";
@@ -76,13 +73,12 @@ public class CCIConstants {
 	public static final String VALIDATE_SMART_DB_PROPERTY = "validate.smart.db.string";
 	
 	// Part of validate, should the requests be added?
-	public static final String SUBMIT_REQUESTS = "validate.requests.add";
+	protected static final String SUBMIT_PROPERTY = "cc.submit.request";
+//	public static final String SUBMIT_REQUESTS = "validate.requests.add";
 	
 	// Part of validate, should CC requests be deleted?
 	public static final String DELETE_REQUESTS = "validate.requests.delete";
 
-
-	
 	// Option to run the tool in report mode only.
 	public static final String RUN_REPORT_PROPERTY = "generate.report";
 }

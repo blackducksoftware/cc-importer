@@ -18,6 +18,9 @@ public class CCIReportSummary
 
     private Integer totalProtexProjects = 0;
     private Integer totalCCApplications = 0;
+    
+    // Keep track of how many projects were skipped because they didn't match the project name filter
+    private Integer totalProjectsSkipped = 0;
 
     // Keep track of how many validates were performed/skipped
     private Integer totalValidatesPerfomed= 0;
@@ -44,7 +47,12 @@ public class CCIReportSummary
 	return totalProtexProjects;
     }
 
-    public void setTotalProtexProjects(Integer totalProtexProjects)
+    public Integer getTotalProjectsSkipped() {
+		return totalProjectsSkipped;
+	}
+
+
+	public void setTotalProtexProjects(Integer totalProtexProjects)
     {
 	this.totalProtexProjects = totalProtexProjects;
     }
@@ -155,7 +163,10 @@ public class CCIReportSummary
     // Incremental Adds
     // These are invoked once after each respective action
     
-
+    public void addTotalProjectsSkipped()
+    {
+	this.totalProjectsSkipped ++;
+    }
     public Integer getTotalValidatesPerfomed()
     {
 	return totalValidatesPerfomed;
@@ -181,8 +192,11 @@ public class CCIReportSummary
     {
 	StringBuilder sb = new StringBuilder();
 
+	
 	sb.append("\n");
 	sb.append("Total Projects Analyzed: " + totalProtexProjects);
+	sb.append("\n");
+	sb.append("Total Projects Skipped based on name filter: " + totalProjectsSkipped);
 	sb.append("\n");
 	sb.append("Total Validations Performed: " + totalValidatesPerfomed);
 	sb.append("\n");

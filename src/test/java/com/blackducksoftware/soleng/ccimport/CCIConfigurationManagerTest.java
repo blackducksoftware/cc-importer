@@ -8,6 +8,7 @@ package com.blackducksoftware.soleng.ccimport;
 import static org.junit.Assert.*;
 
 import java.util.Properties;
+import java.util.regex.Pattern;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -59,7 +60,7 @@ public class CCIConfigurationManagerTest {
 		
 		ProtexConfigManager pConfig = new ProtexConfigManager(props);
 		
-		assertEquals(".*-CURRENT$", pConfig.getProtexProjectNameFilter());
+		assertTrue(Pattern.compile(".*-CURRENT$").toString().equals(pConfig.getProtexProjectNameFilterPattern().toString()));
 	}
 
 }

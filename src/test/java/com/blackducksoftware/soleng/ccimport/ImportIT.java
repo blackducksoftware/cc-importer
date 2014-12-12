@@ -12,7 +12,6 @@ import junit.framework.Assert;
 
 import org.junit.BeforeClass;
 import org.junit.AfterClass;
-
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -50,10 +49,19 @@ import soleng.framework.standard.protex.ProtexServerWrapper;
  * 
  */
 public class ImportIT {
+	private static final String CUSTOM_ATTR = "Sample Textfield";
+//	private static final String CUSTOM_ATTR = "Product Name";
+
+		private static final String WORKFLOW = "Serial";
+//	private static final String WORKFLOW = "Application Build Workflow";
+	
 	private static final String APP_VERSION = "Unspecified";
 	private static final String APP_SEALID = "123456";
 	private static final String APP_NAME = APP_SEALID + "-test-PROD-CURRENT";
+	
 	private static final String APP_OWNER = "unitTester@blackducksoftware.com";
+//	private static final String APP_OWNER = "sbillings@blackducksoftware.com";
+	
 	private static final String APP_DESCRIPTION = "Application created by the Code Center Importer version: undefined";
 	private static final String ROLE = "Application Administrator";
 	
@@ -72,34 +80,7 @@ public class ImportIT {
 	@BeforeClass
 	static public void setUpBeforeClass() throws Exception {
 
-		Properties props = new Properties();
-		props.setProperty("protex.server.name", "http://se-menger.blackducksoftware.com");
-		props.setProperty("protex.user.name", "ccImportUser@blackducksoftware.com");
-		props.setProperty("protex.password", "blackduck");
-		props.setProperty("cc.server.name", "http://cc-integration/");
-		props.setProperty("cc.user.name", "ccImportUser");
-		props.setProperty("cc.password", "blackduck");
-		props.setProperty("protex.password.isplaintext", "true");
-		props.setProperty("cc.password.isplaintext", "true");
-		props.setProperty("cc.protex.name", "Menger");
-		props.setProperty("cc.default.app.version", APP_VERSION);
-		props.setProperty("cc.workflow", "Serial");
-		props.setProperty("cc.owner", APP_OWNER);
-		props.setProperty("protex.project.list", APP_NAME);
-		props.setProperty("validate.application", "true");
-		props.setProperty("cc.submit.request", "true");
-		props.setProperty("validate.requests.delete", "true");
-		props.setProperty("app.adjuster.classname", "com.blackducksoftware.soleng.ccimport.appadjuster.custom.NumericPrefixedAppAdjuster");
-//		props.setProperty("app.adjuster.classname", "com.blackducksoftware.soleng.ccimport.appadjuster.custom.MockAppAdjuster");
-		
-		props.setProperty("numprefixed.app.attribute.numericprefix", "Sample Textfield");
-		props.setProperty("numprefixed.app.attribute.analyzeddate", "null");
-		props.setProperty("numprefixed.app.attribute.workstream", "null");
-		props.setProperty("numprefixed.app.attribute.projectstatus", "null");
-		props.setProperty("numprefixed.analyzed.date.format", "MM-dd-yyyy");
-		props.setProperty("numprefixed.appname.pattern.separator", "-");
-		props.setProperty("numprefixed.appname.pattern.numericprefix", "[0-9][0-9][0-9]+");
-		props.setProperty("numprefixed.appname.pattern.workstream", "(PROD|RC1|RC2|RC3|RC4|RC5)");
+		Properties props = createPropertiesNumericPrefixAppAdjuster();
 		
 		ccConfig = new CodeCenterConfigManager(props);
 		pConfig = new ProtexConfigManager(props);
@@ -112,7 +93,6 @@ public class ImportIT {
 
 		processor = new CCISingleServerProcessor(ccConfig, pConfig);
 		
-//		CcTestUtils.createApp(ccsw, ccConfig, APP_NAME, APP_VERSION, "test", APP_OWNER, ROLE, null);
 		projectId = ProtexTestUtils.createProject(psw, pConfig, APP_NAME, "src/test/resources/source");
 	}
 	
@@ -138,22 +118,24 @@ public class ImportIT {
 		// app adjuster ran and worked
 		// Also verify that the validate status is PASSED
 		Map<String, String> expectedAttrValues = new HashMap<String, String>();
-		expectedAttrValues.put("Sample Textfield", "123456");
+		expectedAttrValues.put(CUSTOM_ATTR, "123456");
 		CcTestUtils.checkApplication(ccsw, APP_NAME, APP_VERSION, APP_DESCRIPTION, false, expectedAttrValues, true);
 
-		// Change the project BOM
-		ProtexTestUtils.makeSomeMatches(pConfig, APP_NAME, true);
-		
-		
 		// Switch to the Mock app adjuster so we can easily tell if it
 		// was called or not (that logic is a little tricky)
-		Properties props = getPropertiesMockAppAdjuster();
+		Properties props = createPropertiesMockAppAdjuster();
 		ccConfig = new CodeCenterConfigManager(props);
 		pConfig = new ProtexConfigManager(props);
 		processor = new CCISingleServerProcessor(ccConfig, pConfig);
-		
+				
+		// Change the project BOM
+		ProtexTestUtils.makeSomeMatches(pConfig, APP_NAME, true);
+
+		// Run sync
 		int lastAdjusterCount = MockAppAdjuster.getAdjustAppCalledCount();
 		processor.performSynchronize();
+		
+		// Make sure validation status is Green (sync should have re-run validation to get it to green)
 		CcTestUtils.checkApplicationValidationStatusOk(ccsw, APP_NAME, APP_VERSION);
 		
 		// Verify that app adjuster was called (since BOM changed)
@@ -164,29 +146,78 @@ public class ImportIT {
 		
 		// Verify that app adjuster was NOT called (since BOM did NOT change)
 		assertEquals(lastAdjusterCount+1, MockAppAdjuster.getAdjustAppCalledCount());
+		
+		// Configure util to filter out (skip) this project/app
+		props = createPropertiesWithFilter();
+		ccConfig = new CodeCenterConfigManager(props);
+		pConfig = new ProtexConfigManager(props);
+		processor = new CCISingleServerProcessor(ccConfig, pConfig);
+		
+		// Delete the app
+		CcTestUtils.deleteAppByName(ccsw, APP_NAME, APP_VERSION);
+		
+		// Sync again
+		processor.performSynchronize();
+		
+		// Verify that it skipped the filtered-out app
+		CcTestUtils.checkApplicationDoesNotExist(ccsw, APP_NAME, APP_VERSION);
 	}
 	
-	private Properties getPropertiesMockAppAdjuster() {
+	private static Properties createPropertiesNumericPrefixAppAdjuster() {
+		Properties props = createBasicProperties();
+		props.setProperty("app.adjuster.classname", "com.blackducksoftware.soleng.ccimport.appadjuster.custom.NumericPrefixedAppAdjuster");
+//		props.setProperty("app.adjuster.classname", "com.blackducksoftware.soleng.ccimport.appadjuster.custom.MockAppAdjuster");
+		
+		props.setProperty("numprefixed.app.attribute.numericprefix", CUSTOM_ATTR);
+		props.setProperty("numprefixed.app.attribute.analyzeddate", "null");
+		props.setProperty("numprefixed.app.attribute.workstream", "null");
+		props.setProperty("numprefixed.app.attribute.projectstatus", "null");
+		props.setProperty("numprefixed.analyzed.date.format", "MM-dd-yyyy");
+		props.setProperty("numprefixed.appname.pattern.separator", "-");
+		props.setProperty("numprefixed.appname.pattern.numericprefix", "[0-9][0-9][0-9]+");
+		props.setProperty("numprefixed.appname.pattern.workstream", "(PROD|RC1|RC2|RC3|RC4|RC5)");
+		
+		return props;
+	}
+	
+	private static Properties createPropertiesWithFilter() {
+		Properties props = createBasicProperties();
+		props.setProperty("protex.project.name.filter", ".*-NONEXISTENT");
+		
+		return props;
+	}
+	
+	private static Properties createPropertiesMockAppAdjuster() {
+		Properties props = createBasicProperties();
+		props.setProperty("app.adjuster.classname", "com.blackducksoftware.soleng.ccimport.appadjuster.custom.MockAppAdjuster");
+		props.setProperty("app.adjuster.only.if.bomedits", "true");
+		props.setProperty("revalidate.after.changing.bom", "true");
+		return props;
+	}
+	
+	private static Properties createBasicProperties() {
 		Properties props = new Properties();
 		props.setProperty("protex.server.name", "http://se-menger.blackducksoftware.com");
 		props.setProperty("protex.user.name", "ccImportUser@blackducksoftware.com");
 		props.setProperty("protex.password", "blackduck");
+
 		props.setProperty("cc.server.name", "http://cc-integration/");
+//		props.setProperty("cc.server.name", "http://salescc/");
+		
 		props.setProperty("cc.user.name", "ccImportUser");
+//		props.setProperty("cc.user.name", "sbillings@blackducksoftware.com");
+		
 		props.setProperty("cc.password", "blackduck");
 		props.setProperty("protex.password.isplaintext", "true");
 		props.setProperty("cc.password.isplaintext", "true");
 		props.setProperty("cc.protex.name", "Menger");
 		props.setProperty("cc.default.app.version", APP_VERSION);
-		props.setProperty("cc.workflow", "Serial");
+		props.setProperty("cc.workflow", WORKFLOW);
 		props.setProperty("cc.owner", APP_OWNER);
 		props.setProperty("protex.project.list", APP_NAME);
 		props.setProperty("validate.application", "true");
 		props.setProperty("cc.submit.request", "true");
 		props.setProperty("validate.requests.delete", "true");
-		props.setProperty("app.adjuster.classname", "com.blackducksoftware.soleng.ccimport.appadjuster.custom.MockAppAdjuster");
-		props.setProperty("app.adjuster.only.if.bomedits", "true");
-		props.setProperty("revalidate.after.changing.bom", "true");
 		return props;
 	}
 

@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
+import java.util.regex.Pattern;
 
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -47,7 +48,7 @@ public class CCIConfigurationManager extends ConfigurationManager {
 	private String appAdjusterClassname = null;
 	private boolean reValidateAfterBomChange = false;
 	private boolean appAdjusterOnlyIfBomEdits = false;
-	private String protexProjectNameFilter = null;
+	private Pattern protexProjectNameFilterPattern = null;
 	
 
 	// TODO: Temporary workarounds for DB access
@@ -151,7 +152,7 @@ public class CCIConfigurationManager extends ConfigurationManager {
 		
 		String protexProjectNameFilterString = super.getOptionalProperty(CCIConstants.PROJECT_FILTER_PROPERTY);
 		if (protexProjectNameFilterString != null) {
-			this.protexProjectNameFilter = protexProjectNameFilterString;
+			this.protexProjectNameFilterPattern = Pattern.compile(protexProjectNameFilterString);
 		}
 	}
 
@@ -457,8 +458,8 @@ public class CCIConfigurationManager extends ConfigurationManager {
 		return appAdjusterOnlyIfBomEdits;
 	}
 
-	public String getProtexProjectNameFilter() {
-		return protexProjectNameFilter;
+	public Pattern getProtexProjectNameFilterPattern() {
+		return protexProjectNameFilterPattern;
 	}
 
 }

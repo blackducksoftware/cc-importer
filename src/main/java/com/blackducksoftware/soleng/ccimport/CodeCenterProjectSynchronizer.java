@@ -30,6 +30,8 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.TimeZone;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -192,11 +194,22 @@ public class CodeCenterProjectSynchronizer
 
 		int projectCounter = 1;
 		for (CCIProject project : projectList) {
+			log.info("[{}/{}] Processing {}", projectCounter++,
+					projectList.size(), project.getProjectName());
+			
+			Pattern projectNameFilterPattern = configManager.getProtexProjectNameFilterPattern();
+			if (projectNameFilterPattern != null) {
+				Matcher m = projectNameFilterPattern.matcher(project.getProjectName());
+				if (!m.matches()) {
+					log.info("Project {} does not match the project name filter; skipping it", project.getProjectName());
+					reportSummary.addTotalProjectsSkipped();
+					continue;
+				}
+			}
+			
 			boolean retryImport = false;
 			int importRetryCount = 0;
 			do {
-				log.info("[{}/{}] Processing {}", projectCounter++,
-						projectList.size(), project.getProjectName());
 				importRetryCount++;
 				retryImport = false;
 				boolean importSuccess = false;
@@ -229,7 +242,11 @@ public class CodeCenterProjectSynchronizer
 				bomWasChanged = processValidation(importedProject,
 						reportSummary);
 				if (configManager.isAppAdjusterOnlyIfBomEdits() && bomWasChanged) {
-					invokeAppAdjuster(configManager, importedProject.getApplication(), project);
+					try {
+						invokeAppAdjuster(configManager, importedProject.getApplication(), project);
+					} catch (CodeCenterImportException e) {
+						log.error("Application Adjuster failed, but proceeding with validation.");
+					}
 				}
 				if (configManager.isReValidateAfterBomChange() && bomWasChanged) {
 					reValidate(importedProject);
@@ -250,11 +267,20 @@ public class CodeCenterProjectSynchronizer
 
 					retryImport = disassociateAppFromOldProject(project);
 			}
+			
+			if (!retryImport) {
+				// If we're not going to retry: report the error
+				Application app = importedProject.getApplication();
+			    reportSummary.addTotalValidationsFailed();
+			    reportSummary.addToFailedValidationList(app.getName() + ":"
+				    + app.getVersion());
+			}
 		}
 		return retryImport;
 	}
 	
 	private void reValidate(CCIProject importedProject) {
+		log.info("Re-running validation on " + importedProject.getProjectName());
 		Application app = importedProject.getApplication();
 		String applicationName = app.getName();
 		ApplicationIdToken appIdToken = app.getId();
@@ -429,10 +455,11 @@ public class CodeCenterProjectSynchronizer
     private boolean processValidation(CCIProject importedProject,
 	    CCIReportSummary summary) throws CodeCenterImportException
     {
-	// VALIDATION CALL
+	// Set up for the validation call
 	Application app = importedProject.getApplication();
 	String applicationName = app.getName();
 	ApplicationIdToken appIdToken = app.getId();
+	
 	boolean ccBomChanged = false;
 
 	// If user selected smart validate, then determine the last date of the
@@ -518,9 +545,9 @@ public class CodeCenterProjectSynchronizer
 	    log.info("[{}] validation completed. ", applicationName);
 	} catch (Exception sfe)
 	{
-	    reportSummary.addTotalValidationsFailed();
-	    reportSummary.addToFailedValidationList(app.getName() + ":"
-		    + app.getVersion());
+//	    reportSummary.addTotalValidationsFailed();
+//	    reportSummary.addToFailedValidationList(app.getName() + ":"
+//		    + app.getVersion());
 	    log.error("Unable to validate application {}", applicationName);
 	    throw new CodeCenterImportException("Error with validation:"
 		    + sfe.getMessage(), sfe);
@@ -609,7 +636,7 @@ public class CodeCenterProjectSynchronizer
 	    }
 	    // We want to keep track of successful requests.
 	    summary.addRequestsAdded(requestsAdded);
-	    log.info("[{}] completed adding requests", applicationName);
+	    log.info("[{}] completed adding {} requests", applicationName, requestsAdded);
 	} else
 	{
 	    log.info("Add request option disabled");
@@ -664,7 +691,7 @@ public class CodeCenterProjectSynchronizer
 	    }
 
 	    summary.addRequestsDeleted(totalRequestsDeleted);
-	    log.info("[{}] completed deleting all requests", applicationName);
+	    log.info("[{}] completed deleting {} requests", applicationName, totalRequestsDeleted);
 
 	} else
 	{

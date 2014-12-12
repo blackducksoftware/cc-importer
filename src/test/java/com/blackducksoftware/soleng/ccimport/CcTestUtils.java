@@ -8,6 +8,7 @@ package com.blackducksoftware.soleng.ccimport;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -221,6 +222,21 @@ public class CcTestUtils {
 			List<AttributeValue> actualAttrValues = app.getAttributeValues();
 			checkAttrValues(ccServerWrapper, expectedAttrValues, actualAttrValues);
 		}
+	}
+	
+	public static void checkApplicationDoesNotExist(CodeCenterServerWrapper ccServerWrapper,
+			String appName, String appVersion) throws SdkFault {
+		
+		ApplicationNameVersionToken token = new ApplicationNameVersionToken();
+		token.setName(appName);
+		token.setVersion(appVersion);
+		try {
+			Application app = ccServerWrapper.getInternalApiWrapper().applicationApi.getApplication(token);
+			fail("Application " + app.getName() + " / " + app.getVersion() + " should not exist");
+		} catch (SdkFault e) {
+			System.out.println("As expected, got error checking on app that should not exist: " + e.getMessage());
+		}
+		
 	}
 	
 	private static void checkAttrValues(CodeCenterServerWrapper ccServerWrapper,
