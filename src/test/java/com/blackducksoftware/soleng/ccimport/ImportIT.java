@@ -56,8 +56,11 @@ public class ImportIT {
 //	private static final String WORKFLOW = "Application Build Workflow";
 	
 	private static final String APP_VERSION = "Unspecified";
-	private static final String APP_SEALID = "123456";
-	private static final String APP_NAME = APP_SEALID + "-test-PROD-CURRENT";
+	private static final String APP_SEALID1 = "123456";
+	private static final String APP_NAME1 = APP_SEALID1 + "-test1-PROD-CURRENT";
+	
+	private static final String APP_SEALID2 = "123457";
+	private static final String APP_NAME2 = APP_SEALID2 + "-test2-PROD-CURRENT";
 	
 	private static final String APP_OWNER = "unitTester@blackducksoftware.com";
 //	private static final String APP_OWNER = "sbillings@blackducksoftware.com";
@@ -73,14 +76,15 @@ public class ImportIT {
 	private static ProtexServerWrapper<ProtexProjectPojo> psw = null;
 	private static ProtexConfigManager pConfig = null;
 	
-	private static String projectId = null;
+	private static String projectId1 = null;
+	private static String projectId2 = null;
 
 	private static CCISingleServerProcessor processor = null;
 
 	@BeforeClass
 	static public void setUpBeforeClass() throws Exception {
 
-		Properties props = createPropertiesNumericPrefixAppAdjuster();
+		Properties props = createPropertiesNumericPrefixAppAdjuster(APP_NAME1);
 		
 		ccConfig = new CodeCenterConfigManager(props);
 		pConfig = new ProtexConfigManager(props);
@@ -93,17 +97,27 @@ public class ImportIT {
 
 		processor = new CCISingleServerProcessor(ccConfig, pConfig);
 		
-		projectId = ProtexTestUtils.createProject(psw, pConfig, APP_NAME, "src/test/resources/source");
+		
+		
 	}
 	
 	@AfterClass
 	static public void tearDownAfterClass() throws Exception {
-		CcTestUtils.deleteAppByName(ccsw, APP_NAME, APP_VERSION);
-		ProtexTestUtils.deleteProjectById(psw, projectId);
+		CcTestUtils.deleteAppByName(ccsw, APP_NAME1, APP_VERSION);
+		ProtexTestUtils.deleteProjectById(psw, projectId1);
+		
+		CcTestUtils.deleteAppByName(ccsw, APP_NAME2, APP_VERSION);
+		ProtexTestUtils.deleteProjectById(psw, projectId2);
 	}
 
 	@Test
 	public void test() throws Exception {
+		
+		Properties props = createPropertiesNumericPrefixAppAdjuster(APP_NAME1);
+		ccConfig = new CodeCenterConfigManager(props);
+		pConfig = new ProtexConfigManager(props);
+		processor = new CCISingleServerProcessor(ccConfig, pConfig);
+		projectId1 = ProtexTestUtils.createProject(psw, pConfig, APP_NAME1, "src/test/resources/source");
 
 		// The project has just been created; the app does not exist yet
 		
@@ -118,25 +132,25 @@ public class ImportIT {
 		// app adjuster ran and worked
 		// Also verify that the validate status is PASSED
 		Map<String, String> expectedAttrValues = new HashMap<String, String>();
-		expectedAttrValues.put(CUSTOM_ATTR, "123456");
-		CcTestUtils.checkApplication(ccsw, APP_NAME, APP_VERSION, APP_DESCRIPTION, false, expectedAttrValues, true);
+		expectedAttrValues.put(CUSTOM_ATTR, APP_SEALID1);
+		CcTestUtils.checkApplication(ccsw, APP_NAME1, APP_VERSION, APP_DESCRIPTION, false, expectedAttrValues, true);
 
 		// Switch to the Mock app adjuster so we can easily tell if it
 		// was called or not (that logic is a little tricky)
-		Properties props = createPropertiesMockAppAdjuster();
+		props = createPropertiesMockAppAdjuster(APP_NAME1);
 		ccConfig = new CodeCenterConfigManager(props);
 		pConfig = new ProtexConfigManager(props);
 		processor = new CCISingleServerProcessor(ccConfig, pConfig);
 				
 		// Change the project BOM
-		ProtexTestUtils.makeSomeMatches(pConfig, APP_NAME, true);
+		ProtexTestUtils.makeSomeMatches(pConfig, APP_NAME1, true);
 
 		// Run sync
 		int lastAdjusterCount = MockAppAdjuster.getAdjustAppCalledCount();
 		processor.performSynchronize();
 		
 		// Make sure validation status is Green (sync should have re-run validation to get it to green)
-		CcTestUtils.checkApplicationValidationStatusOk(ccsw, APP_NAME, APP_VERSION);
+		CcTestUtils.checkApplicationValidationStatusOk(ccsw, APP_NAME1, APP_VERSION);
 		
 		// Verify that app adjuster was called (since BOM changed)
 		assertEquals(lastAdjusterCount+1, MockAppAdjuster.getAdjustAppCalledCount());
@@ -148,23 +162,65 @@ public class ImportIT {
 		assertEquals(lastAdjusterCount+1, MockAppAdjuster.getAdjustAppCalledCount());
 		
 		// Configure util to filter out (skip) this project/app
-		props = createPropertiesWithFilter();
+		props = createPropertiesWithFilter(APP_NAME1);
 		ccConfig = new CodeCenterConfigManager(props);
 		pConfig = new ProtexConfigManager(props);
 		processor = new CCISingleServerProcessor(ccConfig, pConfig);
 		
 		// Delete the app
-		CcTestUtils.deleteAppByName(ccsw, APP_NAME, APP_VERSION);
+		CcTestUtils.deleteAppByName(ccsw, APP_NAME1, APP_VERSION);
 		
 		// Sync again
 		processor.performSynchronize();
 		
 		// Verify that it skipped the filtered-out app
-		CcTestUtils.checkApplicationDoesNotExist(ccsw, APP_NAME, APP_VERSION);
+		CcTestUtils.checkApplicationDoesNotExist(ccsw, APP_NAME1, APP_VERSION);
 	}
 	
-	private static Properties createPropertiesNumericPrefixAppAdjuster() {
-		Properties props = createBasicProperties();
+	@Test
+	public void testCleanUpOldValidationErrors() throws Exception {
+
+		// The project has just been created; the app does not exist yet
+		
+		Properties props = createPropertiesLeaveOldValidationErrors(APP_NAME2);
+		ccConfig = new CodeCenterConfigManager(props);
+		pConfig = new ProtexConfigManager(props);
+		processor = new CCISingleServerProcessor(ccConfig, pConfig);
+		
+		projectId2 = ProtexTestUtils.createProject(psw, pConfig, APP_NAME2, "src/test/resources/source");
+		
+		List<CCIProject> projects = ccConfig.getProjectList();
+		// Before running the import, make sure to clean up.
+		cleanupProjectsBeforeImport(projects);
+		
+		// Run the sync to create the app
+		processor.performSynchronize();
+
+		// Check the app, and confirm that validation status is OK
+		CcTestUtils.checkApplication(ccsw, APP_NAME2, APP_VERSION, APP_DESCRIPTION, false, null, true);
+		
+		// Change the project BOM
+		ProtexTestUtils.makeSomeMatches(pConfig, APP_NAME2, true);
+		
+		// Run the sync to create the app; this should leave validation status = ERROR
+		processor.performSynchronize();
+
+		// Switch to "clear old validation errors" mode
+		// 
+		props = createPropertiesClearOldValidationErrors(APP_NAME2);
+		ccConfig = new CodeCenterConfigManager(props);
+		pConfig = new ProtexConfigManager(props);
+		processor = new CCISingleServerProcessor(ccConfig, pConfig);
+		
+		// Run the sync. This should clear the validation error
+		processor.performSynchronize();
+		
+		// Check the app, and confirm that validation status is OK
+		CcTestUtils.checkApplication(ccsw, APP_NAME2, APP_VERSION, APP_DESCRIPTION, false, null, true);
+	}
+	
+	private static Properties createPropertiesNumericPrefixAppAdjuster(String appName) {
+		Properties props = createBasicProperties(appName);
 		props.setProperty("app.adjuster.classname", "com.blackducksoftware.soleng.ccimport.appadjuster.custom.NumericPrefixedAppAdjuster");
 //		props.setProperty("app.adjuster.classname", "com.blackducksoftware.soleng.ccimport.appadjuster.custom.MockAppAdjuster");
 		
@@ -180,22 +236,34 @@ public class ImportIT {
 		return props;
 	}
 	
-	private static Properties createPropertiesWithFilter() {
-		Properties props = createBasicProperties();
+	private static Properties createPropertiesWithFilter(String appName) {
+		Properties props = createBasicProperties(appName);
 		props.setProperty("protex.project.name.filter", ".*-NONEXISTENT");
 		
 		return props;
 	}
 	
-	private static Properties createPropertiesMockAppAdjuster() {
-		Properties props = createBasicProperties();
+	private static Properties createPropertiesMockAppAdjuster(String appName) {
+		Properties props = createBasicProperties(appName);
 		props.setProperty("app.adjuster.classname", "com.blackducksoftware.soleng.ccimport.appadjuster.custom.MockAppAdjuster");
 		props.setProperty("app.adjuster.only.if.bomedits", "true");
 		props.setProperty("revalidate.after.changing.bom", "true");
 		return props;
 	}
 	
-	private static Properties createBasicProperties() {
+	private static Properties createPropertiesLeaveOldValidationErrors(String appName) {
+		Properties props = createBasicProperties(appName);
+		props.setProperty("revalidate.after.changing.bom", "false");
+		return props;
+	}
+	
+	private static Properties createPropertiesClearOldValidationErrors(String appName) {
+		Properties props = createBasicProperties(appName);
+		props.setProperty("revalidate.after.changing.bom", "true");
+		return props;
+	}
+	
+	private static Properties createBasicProperties(String appName) {
 		Properties props = new Properties();
 		props.setProperty("protex.server.name", "http://se-menger.blackducksoftware.com");
 		props.setProperty("protex.user.name", "ccImportUser@blackducksoftware.com");
@@ -214,8 +282,9 @@ public class ImportIT {
 		props.setProperty("cc.default.app.version", APP_VERSION);
 		props.setProperty("cc.workflow", WORKFLOW);
 		props.setProperty("cc.owner", APP_OWNER);
-		props.setProperty("protex.project.list", APP_NAME);
+		props.setProperty("protex.project.list", appName);
 		props.setProperty("validate.application", "true");
+		props.setProperty("validate.application.smart", "true");
 		props.setProperty("cc.submit.request", "true");
 		props.setProperty("validate.requests.delete", "true");
 		return props;

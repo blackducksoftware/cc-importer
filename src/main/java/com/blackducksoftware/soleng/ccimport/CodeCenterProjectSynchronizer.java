@@ -45,6 +45,7 @@ import com.blackducksoftware.sdk.codecenter.application.data.ApplicationIdToken;
 import com.blackducksoftware.sdk.codecenter.application.data.ApplicationNameVersionToken;
 import com.blackducksoftware.sdk.codecenter.application.data.ProjectNameToken;
 import com.blackducksoftware.sdk.codecenter.application.data.ProtexRequest;
+import com.blackducksoftware.sdk.codecenter.application.data.ValidationStatusEnum;
 import com.blackducksoftware.sdk.codecenter.approval.data.WorkflowNameToken;
 import com.blackducksoftware.sdk.codecenter.client.util.CodeCenterServerProxyV6_6_0;
 import com.blackducksoftware.sdk.codecenter.fault.ErrorCode;
@@ -461,6 +462,12 @@ public class CodeCenterProjectSynchronizer
 	ApplicationIdToken appIdToken = app.getId();
 	
 	boolean ccBomChanged = false;
+	
+	// ReValidate mode is really "we don't want to see any validation failures" mode.
+	// In re-validate mode: we want to clear any old validation failures. So if the
+	// app has a non-PASSED validation status: force validation on it
+	boolean forceValidation = configManager.isReValidateAfterBomChange() && 
+			(app.getValidationStatus() != ValidationStatusEnum.PASSED);
 
 	// If user selected smart validate, then determine the last date of the
 	// application
@@ -470,7 +477,7 @@ public class CodeCenterProjectSynchronizer
 	    try
 	    // smart validate
 	    {
-		if (this.configManager.isPerformSmartValidate())
+		if (this.configManager.isPerformSmartValidate() && !forceValidation)
 		{
 		    // Our formatter
 		    SimpleDateFormat formatter = new SimpleDateFormat(
