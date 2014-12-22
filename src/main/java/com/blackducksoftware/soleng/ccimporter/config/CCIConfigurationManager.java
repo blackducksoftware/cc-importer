@@ -33,6 +33,7 @@ public class CCIConfigurationManager extends ConfigurationManager {
 	private final static Logger log = LoggerFactory
 			.getLogger(CCIConfigurationManager.class.getName());
 
+	private String[] cmdLineArgs = null;
 	private String protexServerName = "";
 	private String appVersion = "";
 	private String workflow = "";
@@ -195,6 +196,7 @@ public class CCIConfigurationManager extends ConfigurationManager {
 	}
 
 	protected void initCommandLine(String[] args, APPLICATION type) {
+		this.cmdLineArgs = args.clone();
 		String pServer = null;
 		String pUsername = null;
 		String pPassword = null;
@@ -339,6 +341,14 @@ public class CCIConfigurationManager extends ConfigurationManager {
 
 	public List<CCIProject> getProjectList() {
 		return projectList;
+	}
+
+	public String[] getCmdLineArgs() {
+		return cmdLineArgs;
+	}
+
+	public void setCmdLineArgs(String[] cmdLineArgs) {
+		this.cmdLineArgs = cmdLineArgs;
 	}
 
 	public static void usage() {

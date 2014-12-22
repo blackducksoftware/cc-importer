@@ -39,6 +39,8 @@ import com.blackducksoftware.soleng.ccimporter.model.CCIApplication;
 import com.blackducksoftware.soleng.ccimporter.model.CCIProject;
 
 public class NumericPrefixedAppAdjuster implements AppAdjuster {
+	private static final String NEW_APP_LIST_FILENAME_CMDLINE_ARG = "-new-app-list-filename";
+
 	private static Logger log = LoggerFactory.getLogger(NumericPrefixedAppAdjuster.class.getName());
 	
 	private static final String NUMERIC_PREFIX_PATTERN_STRING_PROPERTY = "numprefixed.appname.pattern.numericprefix";
@@ -157,10 +159,7 @@ public class NumericPrefixedAppAdjuster implements AppAdjuster {
 		}
 		this.analyzedDateNeverString = analyzedDateNeverString;
 		
-		newAppListFilename = config.getOptionalProperty(NEW_APP_LIST_FILENAME_PROPERTY);
-		if (newAppListFilename != null) {
-			this.newAppList = new NumericPrefixedAppListFile();
-		}
+		deriveNewAppListFilename(config);
 		
 		numericPrefixPattern = Pattern.compile(numericPrefixPatternString);
 		separatorPattern = Pattern.compile(separatorPatternString);
@@ -183,6 +182,31 @@ public class NumericPrefixedAppAdjuster implements AppAdjuster {
 		this.projectStateValue = projectStateValue;
 		
 		dateFormatString = config.getProperty(DATE_FORMAT_STRING_PROPERTY);
+	}
+	
+	private void deriveNewAppListFilename(CCIConfigurationManager config) {
+		newAppListFilename = null;
+		
+		// try to get the "new app" list filename from the cmd line first
+		String[] args = config.getCmdLineArgs();
+		if (args != null) {
+			for (int i=0; i < args.length; i++) {
+				if ((NEW_APP_LIST_FILENAME_CMDLINE_ARG.equals(args[i])) && (args.length > (i+1))) {
+					newAppListFilename = args[i+1];
+					break;
+				}
+			}
+		}
+		
+		// if not set on cmd line, try config properties
+		if (newAppListFilename == null) {
+			newAppListFilename = config.getOptionalProperty(NEW_APP_LIST_FILENAME_PROPERTY);
+		}
+		
+		// if it was set, start an empty "new app" list
+		if (newAppListFilename != null) {
+			this.newAppList = new NumericPrefixedAppListFile();
+		}
 	}
 	
 	public void adjustApp(CCIApplication app,

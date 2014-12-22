@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -107,12 +108,16 @@ public class AppAdjusterIT {
 		protexProjectIdOrig = ProtexTestUtils.createProject(protexServerWrapper, protexConfigManager, APPLICATION1_NAME,
 				"src/test/resources/source");
     	
+		String[] args = {"-config", "config.properties", "-new-app-list-filename", "unit_test_new_apps.txt"};
+		ccConfigManager.setCmdLineArgs(args);
     	CCISingleServerProcessor processor = new CCISingleServerProcessor(ccConfigManager, protexConfigManager);
 
 		try {
 			List<CCIProject> projects = ccConfigManager.getProjectList();
 			// Before running the import, make sure to clean up.
 			cleanupProjectsBeforeImport(ccWrapper, projects);
+			File outputFile = new File("unit_test_new_apps.txt");
+			outputFile.delete();
 
 			// Run the sync
 			processor.performSynchronize();
