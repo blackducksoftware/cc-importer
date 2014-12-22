@@ -3,6 +3,8 @@ package com.blackducksoftware.soleng.ccimport;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -118,6 +120,10 @@ public class AppAdjusterIT {
 			// Now check to see if the application(s) actually exists.
 			boolean exists = checkCcApp(ccWrapper, projects);
 			Assert.assertEquals(true, exists);
+			
+			BufferedReader br = new BufferedReader(new FileReader("unit_test_new_apps.txt"));
+			String line = br.readLine();
+			assertEquals(APPLICATION1_NAME, line);
 
 		} catch (CodeCenterImportException e) {
 			Assert.fail(e.getMessage());

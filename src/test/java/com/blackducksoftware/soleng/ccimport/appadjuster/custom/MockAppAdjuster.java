@@ -13,6 +13,7 @@ import com.blackducksoftware.sdk.codecenter.application.data.Application;
 import com.blackducksoftware.soleng.ccimport.appadjuster.AppAdjuster;
 import com.blackducksoftware.soleng.ccimport.exception.CodeCenterImportException;
 import com.blackducksoftware.soleng.ccimporter.config.CCIConfigurationManager;
+import com.blackducksoftware.soleng.ccimporter.model.CCIApplication;
 import com.blackducksoftware.soleng.ccimporter.model.CCIProject;
 
 public class MockAppAdjuster implements AppAdjuster {
@@ -22,7 +23,7 @@ public class MockAppAdjuster implements AppAdjuster {
 			CCIConfigurationManager config, TimeZone tz) {
 	}
 
-	public void adjustApp(Application app, CCIProject project)
+	public void adjustApp(CCIApplication app, CCIProject project)
 			throws CodeCenterImportException {
 		adjustAppCalledCount++;
 	}

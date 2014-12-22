@@ -24,7 +24,7 @@ import soleng.framework.standard.protex.ProtexProjectPojo;
 public class CCIProject extends ProtexProjectPojo
 {
     private String projectVersion = null;
-    private Application application = null;
+    private CCIApplication cciApplication = null;
     private Date lastBOMRefreshDate = null;
     private Date analyzedDateValue = null;
     
@@ -60,15 +60,30 @@ public class CCIProject extends ProtexProjectPojo
 
     public Application getApplication()
     {
-	return application;
+	return cciApplication.getApp();
     }
 
+    /**
+     * Set the CCIApplication with justCreated=false by providing an Application.
+     * This is for backward compatibility for all the code that was written
+     * using this class when the application was stored as an Application,
+     * rather than a CCIApplication.
+     * @param application
+     */
     public void setApplication(Application application)
     {
-	this.application = application;
+    	this.cciApplication = new CCIApplication(application, false);
     }
 
-    public Date getLastBOMRefreshDate()
+    public CCIApplication getCciApplication() {
+		return cciApplication;
+	}
+
+	public void setCciApplication(CCIApplication cciApplication) {
+		this.cciApplication = cciApplication;
+	}
+
+	public Date getLastBOMRefreshDate()
     {
 	return lastBOMRefreshDate;
     }

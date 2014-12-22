@@ -62,6 +62,7 @@ import com.blackducksoftware.soleng.ccimport.report.CCIReportSummary;
 import com.blackducksoftware.soleng.ccimport.validate.CodeCenterValidator;
 import com.blackducksoftware.soleng.ccimporter.config.CCIConfigurationManager;
 import com.blackducksoftware.soleng.ccimporter.config.CCIConstants;
+import com.blackducksoftware.soleng.ccimporter.model.CCIApplication;
 import com.blackducksoftware.soleng.ccimporter.model.CCIProject;
 
 /**
@@ -77,7 +78,7 @@ public class CodeCenterProjectSynchronizer
 	    .getLogger(CodeCenterProjectSynchronizer.class.getName());
 
     private Object appAdjusterObject = null;
-    private Method appAdjusterMethod = null; 	    // TODO: add mechanism to supply a custom adjuster
+    private Method appAdjusterMethod = null;
     private CodeCenterServerWrapper ccWrapper = null;
     private CCIConfigurationManager configManager = null;
     private CCIReportSummary reportSummary = new CCIReportSummary();
@@ -159,7 +160,7 @@ public class CodeCenterProjectSynchronizer
     	}
     	
     	// Get the adjustApp method on the custom app adjuster class
-    	Class[] adjustAppMethodArgTypes = { Application.class, CCIProject.class };
+    	Class[] adjustAppMethodArgTypes = { CCIApplication.class, CCIProject.class };
     	try {
     		appAdjusterMethod = sourceClass.getDeclaredMethod("adjustApp", adjustAppMethodArgTypes);
     	} catch (NoSuchMethodException e) {
@@ -244,7 +245,7 @@ public class CodeCenterProjectSynchronizer
 						reportSummary);
 				if (configManager.isAppAdjusterOnlyIfBomEdits() && bomWasChanged) {
 					try {
-						invokeAppAdjuster(configManager, importedProject.getApplication(), project);
+						invokeAppAdjuster(configManager, importedProject.getCciApplication(), project);
 					} catch (CodeCenterImportException e) {
 						log.error("Application Adjuster failed, but proceeding with validation.");
 					}
@@ -325,7 +326,7 @@ public class CodeCenterProjectSynchronizer
 	    log.info("[{}] Attempting Protex project import. (version: {})",
 		    project.getProjectName(), project.getProjectVersion());
 
-	    Application app = null;
+	    CCIApplication cciApp = null;
 	    String correspondingApplicationID = lookUpCorrespondingApplication(project);	  
 		
 	    // Creates the application (if needed) and then perform the association	 
@@ -334,13 +335,13 @@ public class CodeCenterProjectSynchronizer
 		    	log.info("No corresponding application found for project ID [{}], will attempt to create one", project.getProjectKey());
 		    	// This will return an existing application, or create a new
 			// one. This is generic and not import specific.
-			app = createApplication(project);
+			cciApp = createApplication(project);
 
 			// This takes the Code Center app and attempts to associate it
 			// with a Protex project. We do not need to return anything
 			// because the return object is useless to us. Any failure to obtain an
 			// object signifies an error and thus the failure of the import.
-			associateApplicationToProtexProject(project, app);
+			associateApplicationToProtexProject(project, cciApp.getApp());
 			
 			log.info("[{}] IMPORT SUCCESSFUL!", project.getProjectName());
 			log.info("-----------------------------");
@@ -356,13 +357,14 @@ public class CodeCenterProjectSynchronizer
 
 		try
 		{
-		    app = ccWrapper.getInternalApiWrapper().applicationApi
+		    Application app = ccWrapper.getInternalApiWrapper().applicationApi
 			    .getApplication(token);
+		    cciApp = new CCIApplication(app, false);
 
 		    log.info(
 			    "[{}] LOOKUP SUCCESSFUL for project [{}]:[{}]!",
-			    project.getProjectName(), app.getName(),
-			    app.getVersion());
+			    project.getProjectName(), cciApp.getApp().getName(),
+			    cciApp.getApp().getVersion());
 		    log.info("-----------------------------");
 
 		} catch (SdkFault e)
@@ -374,12 +376,12 @@ public class CodeCenterProjectSynchronizer
 	    }	
 	    
 	    if (!configManager.isAppAdjusterOnlyIfBomEdits()) {
-	    	invokeAppAdjuster(configManager, app, project);
+	    	invokeAppAdjuster(configManager, cciApp, project);
 	    }
 	    
-	    // If everything goes well, set the application name for
+	    // If everything goes well, set the application for
 	    // potential validation down the road.
-	    project.setApplication(app);
+	    project.setCciApplication(cciApp);
 	    
 	    
 	    
@@ -395,10 +397,10 @@ public class CodeCenterProjectSynchronizer
 	return project;
     }
     
-    private void invokeAppAdjuster(CCIConfigurationManager configManager, Application app, CCIProject project) throws CodeCenterImportException {
+    private void invokeAppAdjuster(CCIConfigurationManager configManager, CCIApplication cciApp, CCIProject project) throws CodeCenterImportException {
     	if (appAdjusterMethod != null) {
 	    	try {
-	    		appAdjusterMethod.invoke(appAdjusterObject, app, project);
+	    		appAdjusterMethod.invoke(appAdjusterObject, cciApp, project);
 	    	} catch (InvocationTargetException e) {
 	    		String msg = "Error during post-import application metadata adjustment: InvocationTargetException: " + e.getTargetException().getMessage(); 
 //	    		log.error(msg, e);
@@ -711,12 +713,13 @@ public class CodeCenterProjectSynchronizer
      * @param project
      * @throws CodeCenterImportException
      */
-    private Application createApplication(CCIProject project)
+    private CCIApplication createApplication(CCIProject project)
 	    throws CodeCenterImportException
     {
 	boolean createNewApplication = false;
 
 	// The object to return (either existing or new)
+	CCIApplication cciApp = null;
 	Application app = null;
 
 	String applicationName = project.getProjectName();
@@ -737,7 +740,8 @@ public class CodeCenterProjectSynchronizer
 		    .getApplication(appNameVersionToken);
 	    log.info("[{}] Exists in Code Center.", applicationName);
 
-	    return app;
+	    // wrap it in a CCIApplication, which tracks whether it's new or not
+	    return new CCIApplication(app, false);
 
 	} catch (SdkFault e)
 	{
@@ -794,6 +798,8 @@ public class CodeCenterProjectSynchronizer
 		app = ccWrapper.getInternalApiWrapper().applicationApi
 			.getApplication(appIdToken);
 
+		// wrap it in a CCIApplication, which tracks whether it's new or not
+		cciApp = new CCIApplication(app, true);
 		log.info("...success!");
 
 	    } catch (SdkFault sdke)
@@ -804,7 +810,7 @@ public class CodeCenterProjectSynchronizer
 	    }
 	}
 
-	return app;
+	return cciApp;
     }
 
     /**

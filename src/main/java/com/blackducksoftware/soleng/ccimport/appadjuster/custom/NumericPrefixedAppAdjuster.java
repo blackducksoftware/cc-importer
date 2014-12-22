@@ -7,6 +7,7 @@ package com.blackducksoftware.soleng.ccimport.appadjuster.custom;
 
 import static org.junit.Assert.assertEquals;
 
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -33,6 +34,8 @@ import soleng.framework.standard.codecenter.CodeCenterServerWrapper;
 
 import com.blackducksoftware.soleng.ccimport.exception.CodeCenterImportException;
 import com.blackducksoftware.soleng.ccimporter.config.CCIConfigurationManager;
+import com.blackducksoftware.soleng.ccimporter.config.CCIConstants;
+import com.blackducksoftware.soleng.ccimporter.model.CCIApplication;
 import com.blackducksoftware.soleng.ccimporter.model.CCIProject;
 
 public class NumericPrefixedAppAdjuster implements AppAdjuster {
@@ -72,6 +75,8 @@ public class NumericPrefixedAppAdjuster implements AppAdjuster {
 	private static final String PROJECT_STATE_PATTERN_STRING_PROPERTY = "numprefixed.appname.pattern.projectstatus";
 	private static final String PROJECT_STATE_PATTERN_STRING_DEFAULT = "CURRENT";
 	
+	public static final String NEW_APP_LIST_FILENAME_PROPERTY = "numprefixed.new.app.list.filename";
+	
 	// These patterns are used to determine whether or not the app name includes the app description.
 	// That is: <sealid>-<workstream>-CURRENT vs. <sealid>-<appdescription>-<workstream>-CURRENT
 	// They also ensure we only work on app names that conform to one of those formats
@@ -99,6 +104,9 @@ public class NumericPrefixedAppAdjuster implements AppAdjuster {
 	private TimeZone tz;
 	
 	private String analyzedDateNeverString=null;
+	
+	private String newAppListFilename = null;
+	private NumericPrefixedAppListFile newAppList = null;
 
 	public void init(CodeCenterServerWrapper ccWrapper, CCIConfigurationManager config, TimeZone tz) {
 		this.ccWrapper = ccWrapper;
@@ -149,6 +157,11 @@ public class NumericPrefixedAppAdjuster implements AppAdjuster {
 		}
 		this.analyzedDateNeverString = analyzedDateNeverString;
 		
+		newAppListFilename = config.getOptionalProperty(NEW_APP_LIST_FILENAME_PROPERTY);
+		if (newAppListFilename != null) {
+			this.newAppList = new NumericPrefixedAppListFile();
+		}
+		
 		numericPrefixPattern = Pattern.compile(numericPrefixPatternString);
 		separatorPattern = Pattern.compile(separatorPatternString);
 		workStreamPattern = Pattern.compile(workStreamPatternString);
@@ -172,11 +185,23 @@ public class NumericPrefixedAppAdjuster implements AppAdjuster {
 		dateFormatString = config.getProperty(DATE_FORMAT_STRING_PROPERTY);
 	}
 	
-	public void adjustApp(Application app,
+	public void adjustApp(CCIApplication app,
 			CCIProject project) throws CodeCenterImportException {
 
-		NumericPrefixedAppMetadata metadata = parse(app.getName());
-		setAttributes(app, project, metadata);
+		if (app.isJustCreated()) {
+			if (newAppList != null) {
+				newAppList.addApp(app.getApp().getName());
+				try {
+					newAppList.save(this.newAppListFilename); // save current list, in case this is the last one
+				} catch (IOException e) {
+					String msg = "Unable to save new application list to file (" + newAppListFilename + "): " + e.getMessage();
+					log.error(msg);
+					throw new CodeCenterImportException(msg);
+				}
+			}
+		}
+		NumericPrefixedAppMetadata metadata = parse(app.getApp().getName());
+		setAttributes(app.getApp(), project, metadata);
 	}
 	
 	private void setAttributes(Application app, CCIProject project, NumericPrefixedAppMetadata metadata) throws CodeCenterImportException {

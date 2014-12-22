@@ -30,6 +30,7 @@ import com.blackducksoftware.soleng.ccimport.TestUtils;
 import com.blackducksoftware.soleng.ccimport.appadjuster.custom.NumericPrefixedAppAdjuster;
 import com.blackducksoftware.soleng.ccimporter.config.CodeCenterConfigManager;
 import com.blackducksoftware.soleng.ccimporter.config.ProtexConfigManager;
+import com.blackducksoftware.soleng.ccimporter.model.CCIApplication;
 import com.blackducksoftware.soleng.ccimporter.model.CCIProject;
 
 public class NumericPrefixedAppAdjusterIT {
@@ -105,6 +106,7 @@ public class NumericPrefixedAppAdjusterIT {
     	TestUtils.createUser(cc, USER1_USERNAME, USER_PASSWORD);
     	ApplicationIdToken appIdToken = TestUtils.createApplication(cc, APPLICATION1_NAME, APPLICATION_VERSION, USER1_USERNAME, USER_ROLE1);
     	Application app = TestUtils.getApplication(cc, appIdToken);
+    	CCIApplication cciApp = new CCIApplication(app, false);
 		
 		CCIProject project = new CCIProject();
 		project.setProjectName(APPLICATION1_NAME);
@@ -114,7 +116,7 @@ public class NumericPrefixedAppAdjusterIT {
 		NumericPrefixedAppAdjuster appAdjuster = new NumericPrefixedAppAdjuster();
 		TimeZone tz = TimeZone.getDefault();
 		appAdjuster.init(ccWrapper, ccConfigManager, tz);
-		appAdjuster.adjustApp(app, project);
+		appAdjuster.adjustApp(cciApp, project);
 		
 		boolean foundNumPrefixAttr = false;
 		Application app2 = cc.getApplicationApi().getApplication(appIdToken); // Not sure why we have to get it again... weird
@@ -153,7 +155,8 @@ public class NumericPrefixedAppAdjusterIT {
     	TestUtils.createUser(cc, USER2_USERNAME, USER_PASSWORD);
     	ApplicationIdToken appIdToken = TestUtils.createApplication(cc, APPLICATION2_NAME, APPLICATION_VERSION, USER2_USERNAME, USER_ROLE1);
     	Application app = TestUtils.getApplication(cc, appIdToken);
-		
+    	CCIApplication cciApp = new CCIApplication(app, false);
+    	
 		CCIProject project = new CCIProject();
 		project.setProjectName(APPLICATION2_NAME);
 		Date testDateValue = new Date(TIME_VALUE_OF_JAN1_2000);
@@ -162,7 +165,7 @@ public class NumericPrefixedAppAdjusterIT {
 		NumericPrefixedAppAdjuster appAdjuster = new NumericPrefixedAppAdjuster();
 		TimeZone tz = TimeZone.getDefault();
 		appAdjuster.init(ccWrapper, ccConfigManager, tz);
-		appAdjuster.adjustApp(app, project);
+		appAdjuster.adjustApp(cciApp, project);
 		
 		boolean foundNumPrefixAttr = false;
 		System.out.println("==============\nGetting attr values:");
@@ -202,7 +205,8 @@ public class NumericPrefixedAppAdjusterIT {
     	TestUtils.createUser(cc, USER3_USERNAME, USER_PASSWORD);
     	ApplicationIdToken appIdToken = TestUtils.createApplication(cc, APPLICATION3_NAME, APPLICATION_VERSION, USER3_USERNAME, USER_ROLE1);
     	Application app = TestUtils.getApplication(cc, appIdToken);
-		
+    	CCIApplication cciApp = new CCIApplication(app, false);
+    	
 		CCIProject project = new CCIProject();
 		project.setProjectName(APPLICATION3_NAME);
 		Date testDateValue = new Date(TIME_VALUE_OF_JAN1_2000);
@@ -211,7 +215,7 @@ public class NumericPrefixedAppAdjusterIT {
 		NumericPrefixedAppAdjuster appAdjuster = new NumericPrefixedAppAdjuster();
 		TimeZone tz = TimeZone.getDefault();
 		appAdjuster.init(ccWrapper, ccConfigManager, tz);
-		appAdjuster.adjustApp(app, project);
+		appAdjuster.adjustApp(cciApp, project);
 		
 		boolean foundProjectStatus = false;
 		System.out.println("==============\nGetting attr values:");

@@ -12,9 +12,10 @@ import soleng.framework.standard.codecenter.CodeCenterServerWrapper;
 import com.blackducksoftware.sdk.codecenter.application.data.Application;
 import com.blackducksoftware.soleng.ccimport.exception.CodeCenterImportException;
 import com.blackducksoftware.soleng.ccimporter.config.CCIConfigurationManager;
+import com.blackducksoftware.soleng.ccimporter.model.CCIApplication;
 import com.blackducksoftware.soleng.ccimporter.model.CCIProject;
 
 public interface AppAdjuster {
 	public void init(CodeCenterServerWrapper ccWrapper, CCIConfigurationManager config, TimeZone tz);
-	public void adjustApp(Application app, CCIProject project) throws CodeCenterImportException;
+	public void adjustApp(CCIApplication app, CCIProject project) throws CodeCenterImportException;
 }
