@@ -111,7 +111,7 @@ public class NumericPrefixedAppAdjusterTest {
 	}
 	
 	@Test
-	public void testDateFormatting() {
+	public void testDateFormatting() throws Exception {
 		String dateFormat = "yyyy-MM-dd HH:mm:ss";
 
 		Properties props = new Properties();

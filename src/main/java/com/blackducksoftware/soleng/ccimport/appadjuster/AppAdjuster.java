@@ -16,6 +16,6 @@ import com.blackducksoftware.soleng.ccimporter.model.CCIApplication;
 import com.blackducksoftware.soleng.ccimporter.model.CCIProject;
 
 public interface AppAdjuster {
-	public void init(CodeCenterServerWrapper ccWrapper, CCIConfigurationManager config, TimeZone tz);
+	public void init(CodeCenterServerWrapper ccWrapper, CCIConfigurationManager config, TimeZone tz) throws CodeCenterImportException;
 	public void adjustApp(CCIApplication app, CCIProject project) throws CodeCenterImportException;
 }

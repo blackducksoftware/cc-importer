@@ -241,17 +241,17 @@ public class CodeCenterProjectSynchronizer
 		try {
 			boolean performValidate = configManager.isValidate();
 			if (performValidate) {
-				bomWasChanged = processValidation(importedProject,
-						reportSummary);
-				if (configManager.isAppAdjusterOnlyIfBomEdits() && bomWasChanged) {
-					try {
-						invokeAppAdjuster(configManager, importedProject.getCciApplication(), project);
-					} catch (CodeCenterImportException e) {
-						log.error("Application Adjuster failed, but proceeding with validation.");
-					}
-				}
+				bomWasChanged = processValidation(importedProject, reportSummary);
+				
 				if (configManager.isReValidateAfterBomChange() && bomWasChanged) {
 					reValidate(importedProject);
+				}
+			}
+			if (configManager.isAppAdjusterOnlyIfBomEdits() && (bomWasChanged || importedProject.getCciApplication().isJustCreated())) {
+				try {
+					invokeAppAdjuster(configManager, importedProject.getCciApplication(), project);
+				} catch (CodeCenterImportException e) {
+					log.error("Application Adjuster failed, but proceeding with validation.");
 				}
 			}
 			
@@ -787,7 +787,7 @@ public class CodeCenterProjectSynchronizer
 		ownerToken.setName(owner);
 		appCreate.setOwnerId(ownerToken);
 		RoleNameToken role = new RoleNameToken();
-		role.setName("Application Administrator");
+		role.setName("Application Administrator"); // TODO should be configurable
 		appCreate.setOwnerRoleId(role);
 
 		// create Application

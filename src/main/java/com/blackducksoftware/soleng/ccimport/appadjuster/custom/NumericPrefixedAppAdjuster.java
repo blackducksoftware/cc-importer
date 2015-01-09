@@ -39,7 +39,7 @@ import com.blackducksoftware.soleng.ccimporter.model.CCIApplication;
 import com.blackducksoftware.soleng.ccimporter.model.CCIProject;
 
 public class NumericPrefixedAppAdjuster implements AppAdjuster {
-	private static final String NEW_APP_LIST_FILENAME_CMDLINE_ARG = "-new-app-list-filename";
+	private static final String NEW_APP_LIST_FILENAME_CMDLINE_ARG = "--new-app-list-filename";
 
 	private static Logger log = LoggerFactory.getLogger(NumericPrefixedAppAdjuster.class.getName());
 	
@@ -110,7 +110,7 @@ public class NumericPrefixedAppAdjuster implements AppAdjuster {
 	private String newAppListFilename = null;
 	private NumericPrefixedAppListFile newAppList = null;
 
-	public void init(CodeCenterServerWrapper ccWrapper, CCIConfigurationManager config, TimeZone tz) {
+	public void init(CodeCenterServerWrapper ccWrapper, CCIConfigurationManager config, TimeZone tz) throws CodeCenterImportException {
 		this.ccWrapper = ccWrapper;
 		this.tz = tz;
 
@@ -184,7 +184,7 @@ public class NumericPrefixedAppAdjuster implements AppAdjuster {
 		dateFormatString = config.getProperty(DATE_FORMAT_STRING_PROPERTY);
 	}
 	
-	private void deriveNewAppListFilename(CCIConfigurationManager config) {
+	private void deriveNewAppListFilename(CCIConfigurationManager config) throws CodeCenterImportException{
 		newAppListFilename = null;
 		
 		// try to get the "new app" list filename from the cmd line first
@@ -205,7 +205,15 @@ public class NumericPrefixedAppAdjuster implements AppAdjuster {
 		
 		// if it was set, start an empty "new app" list
 		if (newAppListFilename != null) {
+			log.info("A list of created applications will be written to: " + newAppListFilename);
 			this.newAppList = new NumericPrefixedAppListFile();
+			try {
+				newAppList.save(this.newAppListFilename);
+			} catch (IOException e) {
+				String msg = "Unable to save new application list to file (" + newAppListFilename + "): " + e.getMessage();
+				log.error(msg);
+				throw new CodeCenterImportException(msg);
+			}
 		}
 	}
 	
@@ -214,6 +222,7 @@ public class NumericPrefixedAppAdjuster implements AppAdjuster {
 
 		if (app.isJustCreated()) {
 			if (newAppList != null) {
+				log.info("Adding app " + app.getApp().getName() + " to list of created applications");
 				newAppList.addApp(app.getApp().getName());
 				try {
 					newAppList.save(this.newAppListFilename); // save current list, in case this is the last one

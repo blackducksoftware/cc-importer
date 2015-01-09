@@ -45,6 +45,7 @@ import soleng.framework.standard.protex.ProtexServerWrapper;
  */
 public class AppAdjusterIT {
 
+	private static final String NEW_APPS_LIST_FILENAME = "unit_test_new_apps.txt";
 	private static final String DATE_FORMAT = "MM-dd-yyyy";
 	private static final String CUSTOM_ATTR_NAME = "Sample Textfield";
 	private static final String CC_URL = "http://cc-integration.blackducksoftware.com/";
@@ -108,7 +109,7 @@ public class AppAdjusterIT {
 		protexProjectIdOrig = ProtexTestUtils.createProject(protexServerWrapper, protexConfigManager, APPLICATION1_NAME,
 				"src/test/resources/source");
     	
-		String[] args = {"-config", "config.properties", "-new-app-list-filename", "unit_test_new_apps.txt"};
+		String[] args = {"-config", "config.properties", "-new-app-list-filename", NEW_APPS_LIST_FILENAME};
 		ccConfigManager.setCmdLineArgs(args);
     	CCISingleServerProcessor processor = new CCISingleServerProcessor(ccConfigManager, protexConfigManager);
 
@@ -116,7 +117,7 @@ public class AppAdjusterIT {
 			List<CCIProject> projects = ccConfigManager.getProjectList();
 			// Before running the import, make sure to clean up.
 			cleanupProjectsBeforeImport(ccWrapper, projects);
-			File outputFile = new File("unit_test_new_apps.txt");
+			File outputFile = new File(NEW_APPS_LIST_FILENAME);
 			outputFile.delete();
 
 			// Run the sync
@@ -126,7 +127,7 @@ public class AppAdjusterIT {
 			boolean exists = checkCcApp(ccWrapper, projects);
 			Assert.assertEquals(true, exists);
 			
-			BufferedReader br = new BufferedReader(new FileReader("unit_test_new_apps.txt"));
+			BufferedReader br = new BufferedReader(new FileReader(NEW_APPS_LIST_FILENAME));
 			String line = br.readLine();
 			assertEquals(APPLICATION1_NAME, line);
 

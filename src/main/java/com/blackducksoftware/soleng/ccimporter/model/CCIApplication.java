@@ -5,7 +5,11 @@ All rights reserved. **/
 
 package com.blackducksoftware.soleng.ccimporter.model;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.blackducksoftware.sdk.codecenter.application.data.Application;
+import com.blackducksoftware.soleng.ccimport.CodeCenterProjectSynchronizer;
 
 public class CCIApplication {
 	private Application app;
@@ -20,4 +24,8 @@ public class CCIApplication {
 	public boolean isJustCreated() {
 		return justCreated;
 	}
+	public void setJustCreated(boolean justCreated) {
+		this.justCreated = justCreated;
+	}
+	
 }
