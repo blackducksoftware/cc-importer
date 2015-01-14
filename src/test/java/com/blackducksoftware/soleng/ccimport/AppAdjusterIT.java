@@ -48,7 +48,7 @@ public class AppAdjusterIT {
 	private static final String NEW_APPS_LIST_FILENAME = "unit_test_new_apps.txt";
 	private static final String DATE_FORMAT = "MM-dd-yyyy";
 	private static final String CUSTOM_ATTR_NAME = "Sample Textfield";
-	private static final String CC_URL = "http://cc-integration.blackducksoftware.com/";
+	private static final String CC_URL = "http://int-cc-dev.blackducksoftware.com/";
 	public static final String SUPERUSER_USERNAME = "super";
 	public static final String SUPERUSER_PASSWORD = "super";
 	

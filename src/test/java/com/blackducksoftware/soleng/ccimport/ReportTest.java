@@ -22,7 +22,7 @@ import soleng.framework.standard.datatable.writer.DataSetWriterStdOut;
 
 public class ReportTest
 {
-	private static final String CC_URL = "http://cc-integration.blackducksoftware.com/";
+	private static final String CC_URL = "http://int-cc-dev.blackducksoftware.com/";
 	public static final String SUPERUSER_USERNAME = "super";
 	public static final String SUPERUSER_PASSWORD = "super";
 	private static String APPLICATION0_NAME = "ccImporterReportTestApp1";
