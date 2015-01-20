@@ -134,12 +134,7 @@ public class CCIConfigurationManager extends ConfigurationManager {
 		 * Parse through the user specified list.
 		 */
 		String potentiaList = getOptionalProperty(CCIConstants.PROJECT_PROPERTY);
-		if (potentiaList == null) {
-			projectList = new ArrayList<CCIProject>(0);
-		} else {
-			projectList = buildProjectList(Arrays.asList(StringUtils.split(
-					potentiaList, ",")));
-		}
+		setProjectList(potentiaList);
 		
 		String reValidateString = super.getOptionalProperty(CCIConstants.RE_VALIDATE_AFTER_CHANGING_BOM_PROPERTY);
 		if ("true".equalsIgnoreCase(reValidateString)) {
@@ -154,6 +149,21 @@ public class CCIConfigurationManager extends ConfigurationManager {
 		String protexProjectNameFilterString = super.getOptionalProperty(CCIConstants.PROJECT_FILTER_PROPERTY);
 		if (protexProjectNameFilterString != null) {
 			this.protexProjectNameFilterPattern = Pattern.compile(protexProjectNameFilterString);
+		}
+	}
+
+	/**
+	 * Set project list from a comma separated list of project names. 
+	 * Any project can be followed by a semicolon plus the version:
+	 * "project1;version1,project2,project3"
+	 * @param projectListString
+	 */
+	public void setProjectList(String projectListString) {
+		if (projectListString == null) {
+			projectList = new ArrayList<CCIProject>(0);
+		} else {
+			projectList = buildProjectList(Arrays.asList(StringUtils.split(
+				projectListString, ",")));
 		}
 	}
 
