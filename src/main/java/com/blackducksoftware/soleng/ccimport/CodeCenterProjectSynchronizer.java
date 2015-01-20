@@ -196,6 +196,8 @@ public class CodeCenterProjectSynchronizer
 
 		int projectCounter = 1;
 		for (CCIProject project : projectList) {
+			Date now = new Date();
+			long startMilliseconds = now.getTime();
 			log.info("[{}/{}] Processing {}", projectCounter++,
 					projectList.size(), project.getProjectName());
 			
@@ -229,6 +231,10 @@ public class CodeCenterProjectSynchronizer
 					retryImport = validate(project, importedProject, importRetryCount);
 				}
 			} while (retryImport);
+			now = new Date();
+			long endMilliseconds = now.getTime();
+			long duration = endMilliseconds - startMilliseconds;
+			log.info("cc-import app import time (seconds): " + Math.round((double)duration / 1000.0));
 		}
 
 		// Here, we display the basic summary
@@ -592,6 +598,7 @@ public class CodeCenterProjectSynchronizer
 
 	try
 	{
+		log.info("Fetching components to add");
 	    protexOnlyComponents = ccWrapper.getInternalApiWrapper().applicationApi
 		    .getProtexOnlyComponentsFromLastValidation(app.getId());
 
@@ -671,6 +678,7 @@ public class CodeCenterProjectSynchronizer
 
 	try
 	{
+		log.info("Fetching components to delete");
 	    ccOnlyComps = ccWrapper.getInternalApiWrapper().applicationApi
 		    .getCodeCenterOnlyComponentsFromLastValidation(app.getId());
 

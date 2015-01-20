@@ -37,7 +37,7 @@ public class NumericPrefixedAppAdjusterIT {
 	private static final long TIME_VALUE_OF_JAN1_2000 = 946702800000L;
 	private static final String CUSTOM_ATTR_NAME = "Sample Textfield";
 	
-	private static final String CC_URL = "http://int-cc-dev.blackducksoftware.com/";
+	private static final String CC_URL = "http://cc-integration.blackducksoftware.com/";
 	public static final String SUPERUSER_USERNAME = "super";
 	public static final String SUPERUSER_PASSWORD = "super";
 	
