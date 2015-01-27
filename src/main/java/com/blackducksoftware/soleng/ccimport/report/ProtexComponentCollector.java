@@ -13,6 +13,8 @@ import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import soleng.framework.standard.codecenter.pojo.ComponentPojo;
+import soleng.framework.standard.codecenter.pojo.ComponentPojoImpl;
 import soleng.framework.standard.common.ProjectPojo;
 import soleng.framework.standard.protex.ProtexAPIWrapper;
 import soleng.framework.standard.protex.ProtexServerWrapper;
@@ -28,8 +30,6 @@ import com.blackducksoftware.sdk.protex.project.bom.BomComponent;
 import com.blackducksoftware.sdk.protex.project.bom.BomComponentType;
 import com.blackducksoftware.sdk.protex.project.localcomponent.LocalComponent;
 import com.blackducksoftware.soleng.ccimporter.model.CCIProject;
-import com.blackducksoftware.soleng.ccreport.ComponentPojo;
-import com.blackducksoftware.soleng.ccreport.datasource.ApplicationDataDao;
 
 public class ProtexComponentCollector extends ComponentCollector {
 	private static Logger log = LoggerFactory
@@ -74,7 +74,7 @@ public class ProtexComponentCollector extends ComponentCollector {
 			if (component.getType() == ComponentType.PROJECT) {
 				continue;
 			}
-			ComponentPojo compPojo = new ComponentPojo(bomcomponent.getComponentId(),
+			ComponentPojo compPojo = new ComponentPojoImpl(bomcomponent.getComponentId(),
 					component.getName(),
 					bomcomponent.getBomVersionName(),
 					bomcomponent.getComponentId());

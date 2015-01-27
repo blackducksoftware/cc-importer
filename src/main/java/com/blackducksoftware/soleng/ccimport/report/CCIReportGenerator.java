@@ -9,6 +9,8 @@ import org.slf4j.LoggerFactory;
 
 import soleng.framework.core.exception.CommonFrameworkException;
 import soleng.framework.standard.codecenter.CodeCenterServerWrapper;
+import soleng.framework.standard.codecenter.dao.ApplicationDataDao;
+import soleng.framework.standard.codecenter.dao.CodeCenter6_6_1Dao;
 import soleng.framework.standard.protex.ProtexProjectPojo;
 import soleng.framework.standard.protex.ProtexServerWrapper;
 
@@ -20,9 +22,7 @@ import com.blackducksoftware.sdk.fault.SdkFault;
 import com.blackducksoftware.soleng.ccimport.exception.CodeCenterImportException;
 import com.blackducksoftware.soleng.ccimporter.model.CCIProject;
 import com.blackducksoftware.soleng.ccimporter.model.CCIProjectList;
-import com.blackducksoftware.soleng.ccreport.ComponentPojo;
-import com.blackducksoftware.soleng.ccreport.datasource.ApplicationDataDao;
-import com.blackducksoftware.soleng.ccreport.datasource.CodeCenter6_6_1Dao;
+
 import soleng.framework.standard.datatable.DataTable;
 import soleng.framework.standard.datatable.FieldDef;
 import soleng.framework.standard.datatable.FieldType;

@@ -11,9 +11,10 @@ import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import soleng.framework.standard.codecenter.pojo.ComponentPojo;
+
 import com.blackducksoftware.sdk.codecenter.fault.SdkFault;
-import com.blackducksoftware.soleng.ccreport.ComponentPojo;
-import com.blackducksoftware.soleng.ccreport.datasource.ApplicationDataDao;
+
 
 public abstract class ComponentCollector {
 	private static Logger log = LoggerFactory
