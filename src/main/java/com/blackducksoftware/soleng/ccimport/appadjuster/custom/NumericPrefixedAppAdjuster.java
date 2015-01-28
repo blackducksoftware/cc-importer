@@ -234,16 +234,20 @@ public class NumericPrefixedAppAdjuster implements AppAdjuster {
 			}
 		}
 		NumericPrefixedAppMetadata metadata = parse(app.getApp().getName());
-		setAttributes(app.getApp(), project, metadata);
+		setAttributes(app.getApp(), project, metadata, app.isJustCreated());
 	}
 	
-	private void setAttributes(Application app, CCIProject project, NumericPrefixedAppMetadata metadata) throws CodeCenterImportException {
-		setAttribute(app, metadata, "numeric prefix", numericPrefixAttrName, metadata.getNumericPrefix());
-		setAttribute(app, metadata, "work stream", workStreamAttrName, metadata.getWorkStream());
+	private void setAttributes(Application app, CCIProject project, NumericPrefixedAppMetadata metadata,
+			boolean newApp) throws CodeCenterImportException {
+		
+		if (newApp) {
+			setAttribute(app, metadata, "numeric prefix", numericPrefixAttrName, metadata.getNumericPrefix());
+			setAttribute(app, metadata, "work stream", workStreamAttrName, metadata.getWorkStream());
+			setAttribute(app, metadata, "project state", projectStateAttrName, projectStateValue);
+		}
 		
 		String analyzedDateString = getDateString(project.getAnalyzedDateValue(), tz, dateFormatString);
 		setAttribute(app, metadata, "analyzed date", analyzedDateAttrName, analyzedDateString);
-		setAttribute(app, metadata, "project state", projectStateAttrName, projectStateValue);
 	}
 	
 	String getDateString(Date date, TimeZone tz, String dateFormatString) {

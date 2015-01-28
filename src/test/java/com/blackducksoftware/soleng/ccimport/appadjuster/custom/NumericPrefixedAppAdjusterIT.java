@@ -45,17 +45,21 @@ public class NumericPrefixedAppAdjusterIT {
 	private static final String APP_NAME_STRING = "some application";
 	private static final String WORK_STREAM = "PROD";
 	private static String APPLICATION1_NAME = NUMPREFIX1_ATTR_VALUE + "-" + APP_NAME_STRING + "-" + WORK_STREAM + "-CURRENT";
+	private static String APPLICATION1a_NAME = NUMPREFIX1_ATTR_VALUE + "-" + APP_NAME_STRING + "_A" + "-" + WORK_STREAM + "-CURRENT";
 	
 	private static final String NUMPREFIX2_ATTR_VALUE = "123456";
 	private static String APPLICATION2_NAME = NUMPREFIX2_ATTR_VALUE + "-" + APP_NAME_STRING + "-" + WORK_STREAM + "-CURRENT";
+	private static String APPLICATION2a_NAME = NUMPREFIX2_ATTR_VALUE + "-" + APP_NAME_STRING + "_A" + "-" + WORK_STREAM + "-CURRENT";
 	private static final String NUMPREFIX3_ATTR_VALUE = "2468";
 	private static String APPLICATION3_NAME = NUMPREFIX3_ATTR_VALUE + "-" + APP_NAME_STRING + "-" + WORK_STREAM + "-CURRENT";
 	private static String EXPECTED_PROJECT_STATUS_VALUE = "cur";
 	
 	private static String APPLICATION_VERSION = "v123";
-	private static String USER1_USERNAME = "JUnit_ccimporter_report_user3";
-	private static String USER2_USERNAME = "JUnit_ccimporter_report_user3a";
-	private static String USER3_USERNAME = "JUnit_ccimporter_report_user3b";
+	private static String USER1_USERNAME = "JUnit_ccimporter_report_user3_1";
+	private static String USER1a_USERNAME = "JUnit_ccimporter_report_user3_1a";
+	private static String USER2_USERNAME = "JUnit_ccimporter_report_user3_2";
+	private static String USER2a_USERNAME = "JUnit_ccimporter_report_user3_2a";
+	private static String USER3_USERNAME = "JUnit_ccimporter_report_user3_3";
 	private static String USER_PASSWORD = "password";
 	private static final String USER_ROLE1 = "Application Developer";
 
@@ -79,10 +83,14 @@ public class NumericPrefixedAppAdjusterIT {
 		CodeCenterServerProxyV6_6_0 cc = ccWrapper.getInternalApiWrapper().getProxy();
     	
 		TestUtils.removeApplication(cc, APPLICATION1_NAME, APPLICATION_VERSION);
+		TestUtils.removeApplication(cc, APPLICATION1a_NAME, APPLICATION_VERSION);
 		TestUtils.removeApplication(cc, APPLICATION2_NAME, APPLICATION_VERSION);
+		TestUtils.removeApplication(cc, APPLICATION2a_NAME, APPLICATION_VERSION);
 		TestUtils.removeApplication(cc, APPLICATION3_NAME, APPLICATION_VERSION);
 		TestUtils.removeUserFromCc(cc, USER1_USERNAME);
+		TestUtils.removeUserFromCc(cc, USER1a_USERNAME);
 		TestUtils.removeUserFromCc(cc, USER2_USERNAME);
+		TestUtils.removeUserFromCc(cc, USER2a_USERNAME);
 		TestUtils.removeUserFromCc(cc, USER3_USERNAME);
 	}
 	
@@ -116,6 +124,7 @@ public class NumericPrefixedAppAdjusterIT {
 		NumericPrefixedAppAdjuster appAdjuster = new NumericPrefixedAppAdjuster();
 		TimeZone tz = TimeZone.getDefault();
 		appAdjuster.init(ccWrapper, ccConfigManager, tz);
+		cciApp.setJustCreated(true);
 		appAdjuster.adjustApp(cciApp, project);
 		
 		boolean foundNumPrefixAttr = false;
@@ -134,6 +143,55 @@ public class NumericPrefixedAppAdjusterIT {
 			}
 		}
 		assertTrue(foundNumPrefixAttr);
+    }
+    @Test
+    public void testNumPrefixOldApp() throws Exception
+    {
+    	String configPath = "src/test/resources/numprefixed_numprefix.properties";
+
+        CodeCenterConfigManager ccConfigManager = ccConfigManager = new CodeCenterConfigManager(configPath);
+        ProtexConfigManager protexConfigManager = protexConfigManager = new ProtexConfigManager(configPath);
+		
+    	ServerBean bean = new ServerBean();
+		bean.setServerName(CC_URL);
+		bean.setUserName(SUPERUSER_USERNAME);
+		bean.setPassword(SUPERUSER_PASSWORD);
+		
+		CodeCenterServerWrapper ccWrapper = new CodeCenterServerWrapper(bean, ccConfigManager);
+		CodeCenterServerProxyV6_6_0 cc = ccWrapper.getInternalApiWrapper().getProxy();
+
+    	TestUtils.createUser(cc, USER1a_USERNAME, USER_PASSWORD);
+    	ApplicationIdToken appIdToken = TestUtils.createApplication(cc, APPLICATION1a_NAME, APPLICATION_VERSION, USER1a_USERNAME, USER_ROLE1);
+    	Application app = TestUtils.getApplication(cc, appIdToken);
+    	CCIApplication cciApp = new CCIApplication(app, false);
+		
+		CCIProject project = new CCIProject();
+		project.setProjectName(APPLICATION1a_NAME);
+		Date testDateValue = new Date();
+		project.setAnalyzedDateValue(testDateValue);
+
+		NumericPrefixedAppAdjuster appAdjuster = new NumericPrefixedAppAdjuster();
+		TimeZone tz = TimeZone.getDefault();
+		appAdjuster.init(ccWrapper, ccConfigManager, tz);
+		cciApp.setJustCreated(false);
+		appAdjuster.adjustApp(cciApp, project);
+		
+		boolean foundNumPrefixAttr = false;
+		Application app2 = cc.getApplicationApi().getApplication(appIdToken); // Not sure why we have to get it again... weird
+		List<AttributeValue> attrValues = app2.getAttributeValues();
+		for (AttributeValue attrValue : attrValues) {
+			AttributeIdToken a = (AttributeIdToken) attrValue.getAttributeId();
+			String curAttrName = cc.getAttributeApi().getAttribute(a).getName();
+			String curAttrValue = attrValue.getValues().get(0);
+			System.out.println("attr name: " + curAttrName + 
+				"; value: " + curAttrValue);
+			
+			if (CUSTOM_ATTR_NAME.equals(curAttrName)) {
+				foundNumPrefixAttr = true;
+				assertEquals(NUMPREFIX1_ATTR_VALUE, curAttrValue);
+			}
+		}
+		assertFalse(foundNumPrefixAttr);
     }
     
     @Test
@@ -165,6 +223,58 @@ public class NumericPrefixedAppAdjusterIT {
 		NumericPrefixedAppAdjuster appAdjuster = new NumericPrefixedAppAdjuster();
 		TimeZone tz = TimeZone.getDefault();
 		appAdjuster.init(ccWrapper, ccConfigManager, tz);
+		cciApp.setJustCreated(true);
+		appAdjuster.adjustApp(cciApp, project);
+		
+		boolean foundNumPrefixAttr = false;
+		System.out.println("==============\nGetting attr values:");
+		Application app2 = cc.getApplicationApi().getApplication(appIdToken); // Not sure why we have to get it again... weird
+		List<AttributeValue> attrValues = app2.getAttributeValues();
+		for (AttributeValue attrValue : attrValues) {
+			AttributeIdToken a = (AttributeIdToken) attrValue.getAttributeId();
+			String curAttrName = cc.getAttributeApi().getAttribute(a).getName();
+			String curAttrValue = attrValue.getValues().get(0);
+			System.out.println("attr name: " + curAttrName + 
+				"; value: " + curAttrValue);
+			
+			if (CUSTOM_ATTR_NAME.equals(curAttrName)) {
+				foundNumPrefixAttr = true;
+				assertEquals("01-01-2000", curAttrValue);
+			}
+		}
+		assertTrue(foundNumPrefixAttr);
+    }
+    
+    @Test
+    public void testAnalyzedDateOldApp() throws Exception
+    {
+    	String configPath = "src/test/resources/numprefixed_analyzeddate.properties";
+    	
+    	CodeCenterConfigManager ccConfigManager = ccConfigManager = new CodeCenterConfigManager(configPath);
+        ProtexConfigManager protexConfigManager = protexConfigManager = new ProtexConfigManager(configPath);
+		
+    	ServerBean bean = new ServerBean();
+		bean.setServerName(CC_URL);
+		bean.setUserName(SUPERUSER_USERNAME);
+		bean.setPassword(SUPERUSER_PASSWORD);
+		
+		CodeCenterServerWrapper ccWrapper = new CodeCenterServerWrapper(bean, ccConfigManager);
+		CodeCenterServerProxyV6_6_0 cc = ccWrapper.getInternalApiWrapper().getProxy();
+    	
+    	TestUtils.createUser(cc, USER2a_USERNAME, USER_PASSWORD);
+    	ApplicationIdToken appIdToken = TestUtils.createApplication(cc, APPLICATION2a_NAME, APPLICATION_VERSION, USER2a_USERNAME, USER_ROLE1);
+    	Application app = TestUtils.getApplication(cc, appIdToken);
+    	CCIApplication cciApp = new CCIApplication(app, false);
+    	
+		CCIProject project = new CCIProject();
+		project.setProjectName(APPLICATION2a_NAME);
+		Date testDateValue = new Date(TIME_VALUE_OF_JAN1_2000);
+		project.setAnalyzedDateValue(testDateValue);
+
+		NumericPrefixedAppAdjuster appAdjuster = new NumericPrefixedAppAdjuster();
+		TimeZone tz = TimeZone.getDefault();
+		appAdjuster.init(ccWrapper, ccConfigManager, tz);
+		cciApp.setJustCreated(false);
 		appAdjuster.adjustApp(cciApp, project);
 		
 		boolean foundNumPrefixAttr = false;
@@ -215,6 +325,7 @@ public class NumericPrefixedAppAdjusterIT {
 		NumericPrefixedAppAdjuster appAdjuster = new NumericPrefixedAppAdjuster();
 		TimeZone tz = TimeZone.getDefault();
 		appAdjuster.init(ccWrapper, ccConfigManager, tz);
+		cciApp.setJustCreated(true);
 		appAdjuster.adjustApp(cciApp, project);
 		
 		boolean foundProjectStatus = false;
