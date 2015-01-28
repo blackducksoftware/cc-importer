@@ -1,5 +1,7 @@
 package com.blackducksoftware.soleng.ccimport;
 
+import static org.junit.Assert.*;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -177,10 +179,14 @@ public class BasicImportTest
 
 	    List<CCIReportSummary> summaries = processor.getReportSummaryList();
 	    
-	    CCIReportSummary singleProcessor = summaries.get(0);
+	    assertEquals(1, summaries.size());
 	    
+	    CCIReportSummary summary = summaries.get(0);
+	    	
 	    // Check the report summary to make sure validation was a success
-	    Assert.assertEquals(0, singleProcessor.getFailedValidationList().size());
+		assertEquals(0, summary.getFailedValidationList().size());
+		    
+		System.out.println("\nSummary: " + summary);
 
 	} catch (CodeCenterImportException e)
 	{

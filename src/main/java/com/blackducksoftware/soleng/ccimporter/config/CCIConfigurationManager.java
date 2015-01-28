@@ -50,6 +50,7 @@ public class CCIConfigurationManager extends ConfigurationManager {
 	private boolean reValidateAfterBomChange = false;
 	private boolean appAdjusterOnlyIfBomEdits = false;
 	private Pattern protexProjectNameFilterPattern = null;
+	private int numThreads = 1;
 	
 
 	// TODO: Temporary workarounds for DB access
@@ -149,6 +150,11 @@ public class CCIConfigurationManager extends ConfigurationManager {
 		String protexProjectNameFilterString = super.getOptionalProperty(CCIConstants.PROJECT_FILTER_PROPERTY);
 		if (protexProjectNameFilterString != null) {
 			this.protexProjectNameFilterPattern = Pattern.compile(protexProjectNameFilterString);
+		}
+		
+		String numThreadsString = super.getOptionalProperty(CCIConstants.NUM_THREADS_PROPERTY);
+		if (numThreadsString != null) {
+			this.numThreads = Integer.parseInt(numThreadsString);
 		}
 	}
 
@@ -482,4 +488,7 @@ public class CCIConfigurationManager extends ConfigurationManager {
 		return protexProjectNameFilterPattern;
 	}
 
+	public int getNumThreads() {
+		return numThreads;
+	}
 }

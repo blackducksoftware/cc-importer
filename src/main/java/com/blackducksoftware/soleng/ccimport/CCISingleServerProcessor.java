@@ -9,6 +9,7 @@ All rights reserved. **/
 package com.blackducksoftware.soleng.ccimport;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -17,9 +18,12 @@ import org.slf4j.LoggerFactory;
 import soleng.framework.core.config.ConfigConstants.APPLICATION;
 import soleng.framework.core.config.server.ServerBean;
 import soleng.framework.core.exception.CommonFrameworkException;
+import soleng.framework.core.multithreading.ListDistributor;
+import soleng.framework.standard.codecenter.CodeCenterServerWrapper;
 import soleng.framework.standard.common.ProjectPojo;
 import soleng.framework.standard.protex.ProtexServerWrapper;
 
+import com.blackducksoftware.sdk.codecenter.application.data.Application;
 import com.blackducksoftware.sdk.fault.SdkFault;
 import com.blackducksoftware.sdk.protex.project.Project;
 import com.blackducksoftware.soleng.ccimport.exception.CodeCenterImportException;
@@ -44,6 +48,8 @@ public class CCISingleServerProcessor extends CCIProcessor
   
     private ProtexServerWrapper protexWrapper = null;
     private CCIReportGenerator reportGen = null;
+    private int numThreads;
+    private boolean threadExceptionThrown=false;
 
     /**
      * @param configManager
@@ -54,6 +60,8 @@ public class CCISingleServerProcessor extends CCIProcessor
 	    ProtexConfigManager protexConfigManager) throws Exception
     {
 	super(configManager);
+	
+	numThreads = configManager.getNumThreads();
 
 	// There will only be one in the single instance
 	ServerBean protexBean = protexConfigManager.getServerBean();
@@ -66,21 +74,62 @@ public class CCISingleServerProcessor extends CCIProcessor
 
     }
 
-    @Override
-    public void performSynchronize() throws CodeCenterImportException
-    {
+	@Override
+	public void performSynchronize() throws CodeCenterImportException {
 
-	CodeCenterProjectSynchronizer synchronizer = new CodeCenterProjectSynchronizer(
-		codeCenterWrapper, codeCenterConfigManager);
+		List<CCIProject> projectList = getProjects().getList();
+		setLastAnalyzedDates(protexWrapper, projectList);
 
-	List<CCIProject> projectList = getProjects().getList();
-	log.info("Processing {} projects for synchronization", projectList);
+		log.info("Processing {} projects for synchronization", projectList);
 
-	setLastAnalyzedDates(protexWrapper, projectList);
-	synchronizer.synchronize(projectList);
-	reportSummaryList.add(synchronizer.getReportSummary());
+		ListDistributor distrib = new ListDistributor(numThreads,
+				projectList.size());
 
-    }
+		// Create a temporary list of summary reports, one for each thread
+		List<CCIReportSummary> threadsReportSummaryList = new ArrayList<CCIReportSummary>();
+		List<CCIReportSummary> synchronizedThreadsReportSummaryList = Collections.synchronizedList(threadsReportSummaryList);
+		
+		// Launch a bunch of threads to process apps
+		List<Thread> startedThreads = new ArrayList<Thread>(
+				distrib.getNumThreads());
+		for (int i = 0; i < distrib.getNumThreads(); i++) {
+			List<CCIProject> partialProjectList = projectList.subList(
+					distrib.getFromListIndex(i), distrib.getToListIndex(i));
+
+			ProjectProcessorThread threadWorker = new ProjectProcessorThread(
+					codeCenterWrapper, codeCenterConfigManager,
+					partialProjectList, synchronizedThreadsReportSummaryList);
+
+			Thread t = new Thread(threadWorker, "ProjectProcessorThread" + i);
+			t.setUncaughtExceptionHandler(new WorkerThreadExceptionHandler());
+			log.info("Starting thread " + t.getName());
+			t.start();
+			startedThreads.add(t);
+		}
+
+		// Now wait for all threads to finish
+		for (Thread startedThread : startedThreads) {
+			log.info("Waiting for thread " + startedThread.getName());
+			try {
+				startedThread.join();
+			} catch (InterruptedException e) {
+				// TODO
+				log.error("Interrupted while waiting for worker threads to finish");
+			}
+		}
+		log.info("Done waiting for threads.");
+
+		if (threadExceptionThrown) {
+			// TODO
+			log.error("Exception thrown from worker thread");
+		}
+		
+		// Aggregate summary reports: Add the 2nd, 3rd, etc. report summary into the first
+		for (int i=1; i < distrib.getNumThreads(); i++) {
+			threadsReportSummaryList.get(0).addReportSummary(threadsReportSummaryList.get(i));
+		}
+		reportSummaryList.add(threadsReportSummaryList.get(0));
+	}
     
     public static void setLastAnalyzedDates(ProtexServerWrapper protexWrapper, List<CCIProject> projectList) throws CodeCenterImportException {
     	for (CCIProject project : projectList) {
@@ -112,6 +161,16 @@ public class CCISingleServerProcessor extends CCIProcessor
 	// Used by unit tests
 	public CCIReportGenerator getReportGen() {
 		return reportGen;
+	}
+	
+	private class WorkerThreadExceptionHandler implements Thread.UncaughtExceptionHandler {
+		public WorkerThreadExceptionHandler() {
+			log.debug("WorkerThreadExceptionHandler constructed");
+		}
+		public void uncaughtException(Thread t, Throwable e) {
+			log.error("Thread " + t.getName() + " failed: " + e.getMessage(), e);
+			threadExceptionThrown = true;
+		}
 	}
 	
 }

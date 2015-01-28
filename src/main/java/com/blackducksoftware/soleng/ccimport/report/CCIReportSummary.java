@@ -246,6 +246,20 @@ public class CCIReportSummary
 	return sb.toString();
     }
 
-
+    public void addReportSummary(CCIReportSummary s2) {
+    	this.failedImportList.addAll(s2.getFailedImportList());
+    	this.failedValidationList.addAll(s2.getFailedValidationList());
+    	this.totalCCApplications += s2.getTotalCCApplications();
+    	this.totalImportsFailed += s2.getTotalImportsFailed();
+    	this.totalPotentialAdds += s2.getTotalPotentialAdds();
+    	this.totalPotentialDeletes += s2.getTotalPotentialDeletes();
+    	this.totalProjectsSkipped += s2.getTotalProjectsSkipped();
+    	this.totalProtexProjects += s2.getTotalProtexProjects();
+    	this.totalRequestsAdded += s2.getTotalRequestsAdded();
+    	this.totalRequestsDeleted += s2.getTotalRequestsDeleted();
+    	this.totalValidatesPerfomed += s2.getTotalValidatesPerfomed();
+    	this.totalValidatesSkipped += s2.getTotalValidatesSkipped();
+    	this.totalValidationsFailed += s2.getTotalValidationsFailed();
+    }
 
 }

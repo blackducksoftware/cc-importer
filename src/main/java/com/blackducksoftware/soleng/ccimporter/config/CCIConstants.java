@@ -55,6 +55,8 @@ public class CCIConstants {
 	public static final String APP_ADJUSTER_CLASSNAME_PROPERTY = "app.adjuster.classname";
 	public static final String APP_ADJUSTER_ONLY_IF_BOM_EDITS_PROPERTY = "app.adjuster.only.if.bomedits";
 	
+	public static final String NUM_THREADS_PROPERTY = "num.threads";
+	
 	// This switch ignores the existing associations
 	public static final String IGNORE_ASSOCIATIONS = "cc.ignore.associations";
 	
