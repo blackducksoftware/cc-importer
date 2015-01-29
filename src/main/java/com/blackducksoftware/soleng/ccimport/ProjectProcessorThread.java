@@ -35,7 +35,7 @@ public class ProjectProcessorThread implements Runnable {
 	}
 
 	public void run() {
-		logger.info("run() called");
+		logger.debug("run() called");
 		try {
 			CodeCenterProjectSynchronizer synchronizer = new CodeCenterProjectSynchronizer(
 					codeCenterServerWrapper, codeCenterConfigManager);
