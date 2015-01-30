@@ -238,7 +238,7 @@ public class CodeCenterProjectSynchronizer
 		}
 
 		// Here, we display the basic summary
-		log.info(reportSummary.toString());
+		log.info("Summary for THIS thread:\n" + reportSummary.toString());
 	}
 	
 	private boolean validate(CCIProject project, CCIProject importedProject, int importRetryCount) {

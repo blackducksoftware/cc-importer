@@ -118,6 +118,8 @@ public class CCISingleServerProcessor extends CCIProcessor
 			}
 		}
 		log.info("Done waiting for threads.");
+		
+		log.info("Consolidated summary:\n" + synchronizedThreadsReportSummaryList.toString());
 
 		if (threadExceptionThrown) {
 			// TODO
@@ -125,10 +127,10 @@ public class CCISingleServerProcessor extends CCIProcessor
 		}
 		
 		// Aggregate summary reports: Add the 2nd, 3rd, etc. report summary into the first
-		for (int i=1; i < distrib.getNumThreads(); i++) {
-			threadsReportSummaryList.get(0).addReportSummary(threadsReportSummaryList.get(i));
-		}
-		reportSummaryList.add(threadsReportSummaryList.get(0));
+//		for (int i=1; i < distrib.getNumThreads(); i++) {
+//			threadsReportSummaryList.get(0).addReportSummary(threadsReportSummaryList.get(i));
+//		}
+		reportSummaryList = threadsReportSummaryList;
 	}
     
     public static void setLastAnalyzedDates(ProtexServerWrapper protexWrapper, List<CCIProject> projectList) throws CodeCenterImportException {

@@ -246,7 +246,7 @@ public class CCIReportSummary
 	return sb.toString();
     }
 
-    public void addReportSummary(CCIReportSummary s2) {
+    public synchronized void addReportSummary(CCIReportSummary s2) {
     	this.failedImportList.addAll(s2.getFailedImportList());
     	this.failedValidationList.addAll(s2.getFailedValidationList());
     	this.totalCCApplications += s2.getTotalCCApplications();

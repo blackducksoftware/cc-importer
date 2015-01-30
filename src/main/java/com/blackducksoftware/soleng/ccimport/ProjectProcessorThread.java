@@ -40,7 +40,12 @@ public class ProjectProcessorThread implements Runnable {
 			CodeCenterProjectSynchronizer synchronizer = new CodeCenterProjectSynchronizer(
 					codeCenterServerWrapper, codeCenterConfigManager);
 			synchronizer.synchronize(partialProjectList);
-			reportSummaryList.add(synchronizer.getReportSummary());
+			synchronized(reportSummaryList) {
+				if (reportSummaryList.size() == 0)
+					reportSummaryList.add(synchronizer.getReportSummary());
+				else
+					reportSummaryList.get(0).addReportSummary(synchronizer.getReportSummary());
+			}
 			
 		} catch (Exception e) {
 			logger.error(e.getMessage());
