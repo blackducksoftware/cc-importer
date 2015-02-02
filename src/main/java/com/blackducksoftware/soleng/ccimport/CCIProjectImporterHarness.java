@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import soleng.framework.core.config.server.ServerBean;
+import soleng.framework.standard.codecenter.CodeCenterServerWrapper;
 
 import com.blackducksoftware.soleng.ccimporter.config.CCIConstants;
 import com.blackducksoftware.soleng.ccimporter.config.CodeCenterConfigManager;
@@ -52,6 +53,7 @@ public class CCIProjectImporterHarness {
 				+ ccConfigManager.getVersion());
 
 		try {
+			CodeCenterServerWrapper codeCenterServerWrapper = createCodeCenterServerWrapper(ccConfigManager);
 			/**
 			 * Here we determine whether we do single or multi-protex support.
 			 * By simply checking the server list size we have our answer
@@ -64,15 +66,20 @@ public class CCIProjectImporterHarness {
 			if (servers.size() > 2) {
 				log.info("Multi-Protex mode started.");
 				processor = new CCIMultiServerProcessor(ccConfigManager,
-						protexConfigManager);
+						protexConfigManager, codeCenterServerWrapper);
 			} else {
 				/**
 				 * In the case of single, we want to pass along the protex
 				 * config manager
 				 */
 				log.info("Single-Protex mode started");
+				
+				// Construct the factory that the processor will use to create
+				// the objects (run multi-threaded) to handle each subset of the project list
+				ProjectProcessorThreadWorkerFactory threadWorkerFactory = 
+						new ProjectProcessorThreadWorkerFactoryImpl(codeCenterServerWrapper, ccConfigManager);
 				processor = new CCISingleServerProcessor(ccConfigManager,
-						protexConfigManager);
+						protexConfigManager, codeCenterServerWrapper, threadWorkerFactory);
 			}
 
 			if (ccConfigManager.isRunReport()) {
@@ -87,5 +94,26 @@ public class CCIProjectImporterHarness {
 		} catch (Exception e) {
 			log.error("General failure: " + e.getMessage());
 		}
+	}
+	
+	private static CodeCenterServerWrapper createCodeCenterServerWrapper(
+			CodeCenterConfigManager configManager) throws Exception {
+		CodeCenterServerWrapper codeCenterWrapper;
+		try {
+			// Always just one code center
+			ServerBean ccBean = configManager.getServerBean();
+			if (ccBean == null)
+				throw new Exception("No valid Code Center server configurations found");
+
+			log.info("Using Code Center URL [{}]", ccBean.getServerName());
+
+			codeCenterWrapper = new CodeCenterServerWrapper(ccBean,
+					configManager);
+
+		} catch (Exception e) {
+			throw new Exception("Unable to establish Code Center connection: "
+					+ e.getMessage());
+		}
+		return codeCenterWrapper;
 	}
 }

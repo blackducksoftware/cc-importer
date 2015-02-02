@@ -111,7 +111,13 @@ public class AppAdjusterIT {
     	
 		String[] args = {"-config", "config.properties", "-new-app-list-filename", NEW_APPS_LIST_FILENAME};
 		ccConfigManager.setCmdLineArgs(args);
-    	CCISingleServerProcessor processor = new CCISingleServerProcessor(ccConfigManager, protexConfigManager);
+		
+		// Construct the factory that the processor will use to create
+		// the objects (run multi-threaded) to handle each subset of the project list
+		ProjectProcessorThreadWorkerFactory threadWorkerFactory = 
+				new ProjectProcessorThreadWorkerFactoryImpl(ccWrapper, ccConfigManager);
+    	CCISingleServerProcessor processor = new CCISingleServerProcessor(ccConfigManager, protexConfigManager, ccWrapper,
+    			threadWorkerFactory);
 
 		try {
 			List<CCIProject> projects = ccConfigManager.getProjectList();

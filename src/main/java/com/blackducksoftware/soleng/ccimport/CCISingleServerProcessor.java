@@ -50,6 +50,9 @@ public class CCISingleServerProcessor extends CCIProcessor
     private CCIReportGenerator reportGen = null;
     private int numThreads;
     private boolean threadExceptionThrown=false;
+    private boolean threadWaitInterrupted=false;
+    private String threadExceptionMessages="";
+    private ProjectProcessorThreadWorkerFactory threadFactory;
 
     /**
      * @param configManager
@@ -57,9 +60,10 @@ public class CCISingleServerProcessor extends CCIProcessor
      * @throws Exception
      */
     public CCISingleServerProcessor(CodeCenterConfigManager configManager,
-	    ProtexConfigManager protexConfigManager) throws Exception
+	    ProtexConfigManager protexConfigManager, CodeCenterServerWrapper codeCenterServerWrapper,
+	    ProjectProcessorThreadWorkerFactory threadFactory) throws Exception
     {
-	super(configManager);
+	super(configManager, codeCenterServerWrapper);
 	
 	numThreads = configManager.getNumThreads();
 
@@ -72,6 +76,7 @@ public class CCISingleServerProcessor extends CCIProcessor
 	protexWrapper = new ProtexServerWrapper(protexBean,
 		protexConfigManager, true);
 
+	this.threadFactory = threadFactory;
     }
 
 	@Override
@@ -96,15 +101,14 @@ public class CCISingleServerProcessor extends CCIProcessor
 			List<CCIProject> partialProjectList = projectList.subList(
 					distrib.getFromListIndex(i), distrib.getToListIndex(i));
 
-			ProjectProcessorThread threadWorker = new ProjectProcessorThread(
-					codeCenterWrapper, codeCenterConfigManager,
-					partialProjectList, synchronizedThreadsReportSummaryList);
+			Runnable threadWorker = 
+					threadFactory.createProjectProcessorThreadWorker(partialProjectList, synchronizedThreadsReportSummaryList);
 
-			Thread t = new Thread(threadWorker, "ProjectProcessorThread" + i);
-			t.setUncaughtExceptionHandler(new WorkerThreadExceptionHandler());
-			log.info("Starting thread " + t.getName());
-			t.start();
-			startedThreads.add(t);
+			Thread thread = new Thread(threadWorker, "ProjectProcessorThread" + i);
+			thread.setUncaughtExceptionHandler(new WorkerThreadExceptionHandler());
+			log.info("Starting thread " + thread.getName());
+			thread.start();
+			startedThreads.add(thread);
 		}
 
 		// Now wait for all threads to finish
@@ -113,24 +117,25 @@ public class CCISingleServerProcessor extends CCIProcessor
 			try {
 				startedThread.join();
 			} catch (InterruptedException e) {
-				// TODO
-				log.error("Interrupted while waiting for worker threads to finish");
+				this.threadWaitInterrupted=true;
 			}
 		}
-		log.info("Done waiting for threads.");
 		
 		log.info("Consolidated summary:\n" + synchronizedThreadsReportSummaryList.toString());
-
-		if (threadExceptionThrown) {
-			// TODO
-			log.error("Exception thrown from worker thread");
-		}
 		
-		// Aggregate summary reports: Add the 2nd, 3rd, etc. report summary into the first
-//		for (int i=1; i < distrib.getNumThreads(); i++) {
-//			threadsReportSummaryList.get(0).addReportSummary(threadsReportSummaryList.get(i));
-//		}
+		if (threadExceptionThrown) {
+			log.error("Exception(s) thrown from worker thread(s): " + threadExceptionMessages);
+		} else if (threadWaitInterrupted) {
+			log.error("Interrupted while waiting for worker threads to finish");
+		} else {
+			log.info("All threads finished.");
+		}
+
 		reportSummaryList = threadsReportSummaryList;
+	}
+	
+	public String getThreadExceptionMessages() {
+		return this.threadExceptionMessages;
 	}
     
     public static void setLastAnalyzedDates(ProtexServerWrapper protexWrapper, List<CCIProject> projectList) throws CodeCenterImportException {
@@ -170,8 +175,12 @@ public class CCISingleServerProcessor extends CCIProcessor
 			log.debug("WorkerThreadExceptionHandler constructed");
 		}
 		public void uncaughtException(Thread t, Throwable e) {
-			log.error("Thread " + t.getName() + " failed: " + e.getMessage(), e);
+			String msg = "Thread " + t.getName() + " failed: " + e.getMessage();
+			log.error(msg, e);
 			threadExceptionThrown = true;
+			synchronized(this) {
+				threadExceptionMessages += ";" + msg;
+			}
 		}
 	}
 	

@@ -95,7 +95,11 @@ public class ImportIT {
 		psw = new ProtexServerWrapper<ProtexProjectPojo>(pConfig.getServerBean(),
 				pConfig, true);
 
-		processor = new CCISingleServerProcessor(ccConfig, pConfig);
+		// Construct the factory that the processor will use to create
+	    // the objects (run multi-threaded) to handle each subset of the project list
+	 	ProjectProcessorThreadWorkerFactory threadWorkerFactory = 
+	 				new ProjectProcessorThreadWorkerFactoryImpl(ccsw, ccConfig);
+		processor = new CCISingleServerProcessor(ccConfig, pConfig, ccsw, threadWorkerFactory);
 		
 		
 		
@@ -111,19 +115,24 @@ public class ImportIT {
 	}
 
 	@Test
-	public void test() throws Exception {
+	public void testBasic() throws Exception {
 		
 		Properties props = createPropertiesNumericPrefixAppAdjuster(APP_NAME1);
 		ccConfig = new CodeCenterConfigManager(props);
 		pConfig = new ProtexConfigManager(props);
-		processor = new CCISingleServerProcessor(ccConfig, pConfig);
+		
+		// Construct the factory that the processor will use to create
+	    // the objects (run multi-threaded) to handle each subset of the project list
+	 	ProjectProcessorThreadWorkerFactory threadWorkerFactory = 
+	 				new ProjectProcessorThreadWorkerFactoryImpl(ccsw, ccConfig);
+		processor = new CCISingleServerProcessor(ccConfig, pConfig, ccsw, threadWorkerFactory);
 		projectId1 = ProtexTestUtils.createProject(psw, pConfig, APP_NAME1, "src/test/resources/source");
 
 		// The project has just been created; the app does not exist yet
 		
 		List<CCIProject> projects = ccConfig.getProjectList();
 		// Before running the import, make sure to clean up.
-		cleanupProjectsBeforeImport(projects);
+		removeAppsBeforeImport(projects);
 
 		// Run the sync to create the app
 		processor.performSynchronize();
@@ -140,7 +149,12 @@ public class ImportIT {
 		props = createPropertiesMockAppAdjuster(APP_NAME1);
 		ccConfig = new CodeCenterConfigManager(props);
 		pConfig = new ProtexConfigManager(props);
-		processor = new CCISingleServerProcessor(ccConfig, pConfig);
+		
+		// Construct the factory that the processor will use to create
+	    // the objects (run multi-threaded) to handle each subset of the project list
+	 	threadWorkerFactory = 
+	 				new ProjectProcessorThreadWorkerFactoryImpl(ccsw, ccConfig);
+		processor = new CCISingleServerProcessor(ccConfig, pConfig, ccsw, threadWorkerFactory);
 				
 		// Change the project BOM
 		ProtexTestUtils.makeSomeMatches(pConfig, APP_NAME1, true);
@@ -165,7 +179,12 @@ public class ImportIT {
 		props = createPropertiesWithFilter(APP_NAME1);
 		ccConfig = new CodeCenterConfigManager(props);
 		pConfig = new ProtexConfigManager(props);
-		processor = new CCISingleServerProcessor(ccConfig, pConfig);
+		
+		// Construct the factory that the processor will use to create
+	    // the objects (run multi-threaded) to handle each subset of the project list
+	 	threadWorkerFactory = 
+	 				new ProjectProcessorThreadWorkerFactoryImpl(ccsw, ccConfig);
+		processor = new CCISingleServerProcessor(ccConfig, pConfig, ccsw, threadWorkerFactory);
 		
 		// Delete the app
 		CcTestUtils.deleteAppByName(ccsw, APP_NAME1, APP_VERSION);
@@ -185,13 +204,18 @@ public class ImportIT {
 		Properties props = createPropertiesLeaveOldValidationErrors(APP_NAME2);
 		ccConfig = new CodeCenterConfigManager(props);
 		pConfig = new ProtexConfigManager(props);
-		processor = new CCISingleServerProcessor(ccConfig, pConfig);
+		
+		// Construct the factory that the processor will use to create
+	    // the objects (run multi-threaded) to handle each subset of the project list
+	 	ProjectProcessorThreadWorkerFactory threadWorkerFactory = 
+	 				new ProjectProcessorThreadWorkerFactoryImpl(ccsw, ccConfig);
+		processor = new CCISingleServerProcessor(ccConfig, pConfig, ccsw, threadWorkerFactory);
 		
 		projectId2 = ProtexTestUtils.createProject(psw, pConfig, APP_NAME2, "src/test/resources/source");
 		
 		List<CCIProject> projects = ccConfig.getProjectList();
 		// Before running the import, make sure to clean up.
-		cleanupProjectsBeforeImport(projects);
+		removeAppsBeforeImport(projects);
 		
 		// Run the sync to create the app
 		processor.performSynchronize();
@@ -210,13 +234,38 @@ public class ImportIT {
 		props = createPropertiesClearOldValidationErrors(APP_NAME2);
 		ccConfig = new CodeCenterConfigManager(props);
 		pConfig = new ProtexConfigManager(props);
-		processor = new CCISingleServerProcessor(ccConfig, pConfig);
+		
+		// Construct the factory that the processor will use to create
+	    // the objects (run multi-threaded) to handle each subset of the project list
+	 	threadWorkerFactory = 
+	 				new ProjectProcessorThreadWorkerFactoryImpl(ccsw, ccConfig);
+		processor = new CCISingleServerProcessor(ccConfig, pConfig, ccsw, threadWorkerFactory);
 		
 		// Run the sync. This should clear the validation error
 		processor.performSynchronize();
 		
 		// Check the app, and confirm that validation status is OK
 		CcTestUtils.checkApplication(ccsw, APP_NAME2, APP_VERSION, APP_DESCRIPTION, false, null, true);
+	}
+	
+	@Test
+	public void testExceptionHandling() throws Exception {
+		
+		Properties props = createPropertiesNumericPrefixAppAdjuster(APP_NAME1);
+		ccConfig = new CodeCenterConfigManager(props);
+		pConfig = new ProtexConfigManager(props);
+		
+		// Construct the factory that the processor will use to create
+	    // the objects (run multi-threaded) to handle each subset of the project list
+	 	ProjectProcessorThreadWorkerFactory threadWorkerFactory = 
+	 				new SuicidalProjectProcessorThreadWorkerFactory();
+		processor = new CCISingleServerProcessor(ccConfig, pConfig, ccsw, threadWorkerFactory);
+		projectId1 = ProtexTestUtils.createProject(psw, pConfig, APP_NAME1, "src/test/resources/source");
+		
+		// Run the sync; should throw mock exception
+		processor.performSynchronize();
+		assertTrue(processor.getThreadExceptionMessages().contains("Mock exception"));
+		
 	}
 	
 	private static Properties createPropertiesNumericPrefixAppAdjuster(String appName) {
@@ -335,7 +384,7 @@ public class ImportIT {
 	 * 
 	 * @param projects
 	 */
-	private void cleanupProjectsBeforeImport(List<CCIProject> projects) {
+	private void removeAppsBeforeImport(List<CCIProject> projects) {
 		log.info("Cleaning up projects before testing import");
 
 		try {

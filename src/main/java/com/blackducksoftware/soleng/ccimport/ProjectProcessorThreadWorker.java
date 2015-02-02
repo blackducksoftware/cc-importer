@@ -18,15 +18,15 @@ import com.blackducksoftware.soleng.ccimporter.config.CodeCenterConfigManager;
 import com.blackducksoftware.soleng.ccimporter.model.CCIProject;
 
 
-public class ProjectProcessorThread implements Runnable {
-	private static Logger logger = LoggerFactory.getLogger(ProjectProcessorThread.class.getName());
+public class ProjectProcessorThreadWorker implements Runnable {
+	private static Logger logger = LoggerFactory.getLogger(ProjectProcessorThreadWorker.class.getName());
 
 	private CodeCenterServerWrapper codeCenterServerWrapper;
 	private List<CCIProject> partialProjectList;
 	private List<CCIReportSummary> reportSummaryList;
 	private CodeCenterConfigManager codeCenterConfigManager;
 
-	public ProjectProcessorThread(CodeCenterServerWrapper codeCenterWrapper, CodeCenterConfigManager codeCenterConfigManager,
+	public ProjectProcessorThreadWorker(CodeCenterServerWrapper codeCenterWrapper, CodeCenterConfigManager codeCenterConfigManager,
 			List<CCIProject> partialProjectList, List<CCIReportSummary> reportSummaryList) {
 		this.codeCenterServerWrapper = codeCenterWrapper;
 		this.codeCenterConfigManager = codeCenterConfigManager;

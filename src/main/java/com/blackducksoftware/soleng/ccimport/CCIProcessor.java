@@ -54,28 +54,30 @@ public abstract class CCIProcessor
      * @param configManager
      * @throws Exception
      */
-    public CCIProcessor(CodeCenterConfigManager configManager) throws Exception
+    public CCIProcessor(CodeCenterConfigManager configManager, CodeCenterServerWrapper codeCenterServerWrapper) throws Exception
     {
 	this.codeCenterConfigManager = configManager;
-
-	try
-	{
-	    // Always just one code center
-	    ServerBean ccBean = configManager.getServerBean();
-	    if (ccBean == null)
-		throw new Exception(
-			"No valid Code Center server configurations found");
-
-	    log.info("Using Code Center URL [{}]", ccBean.getServerName());
-	    
-	    codeCenterWrapper = new CodeCenterServerWrapper(ccBean,
-		    configManager);
-
-	} catch (Exception e)
-	{
-	    throw new Exception("Unable to establish Code Center connection: "
-		    + e.getMessage());
-	}
+	this.codeCenterWrapper = codeCenterServerWrapper;
+	
+//	This is now done by the caller
+//	try
+//	{
+//	    // Always just one code center
+//	    ServerBean ccBean = configManager.getServerBean();
+//	    if (ccBean == null)
+//		throw new Exception(
+//			"No valid Code Center server configurations found");
+//
+//	    log.info("Using Code Center URL [{}]", ccBean.getServerName());
+//	    
+//	    codeCenterWrapper = new CodeCenterServerWrapper(ccBean,
+//		    configManager);
+//
+//	} catch (Exception e)
+//	{
+//	    throw new Exception("Unable to establish Code Center connection: "
+//		    + e.getMessage());
+//	}
     }
 
     /**

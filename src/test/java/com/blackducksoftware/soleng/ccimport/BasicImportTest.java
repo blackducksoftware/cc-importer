@@ -83,7 +83,11 @@ public class BasicImportTest
 	    ccsw = new CodeCenterServerWrapper(ccConfig.getServerBean(),
 		    ccConfig);
 
-	    processor = new CCISingleServerProcessor(ccConfig, pConfig);
+	    // Construct the factory that the processor will use to create
+	    // the objects (run multi-threaded) to handle each subset of the project list
+	 	ProjectProcessorThreadWorkerFactory threadWorkerFactory = 
+	 				new ProjectProcessorThreadWorkerFactoryImpl(ccsw, ccConfig);
+	    processor = new CCISingleServerProcessor(ccConfig, pConfig, ccsw, threadWorkerFactory);
 	} catch (Exception e)
 	{
 	    Assert.fail(e.getMessage());
@@ -130,7 +134,12 @@ public class BasicImportTest
 	    // Create cc wrapper so that we can peform cleanup tasks
 	    ccsw = new CodeCenterServerWrapper(ccConfig.getServerBean(),
 		    ccConfig);
-	    processor = new CCISingleServerProcessor(ccConfig, pConfig);
+	    
+	    // Construct the factory that the processor will use to create
+	    // the objects (run multi-threaded) to handle each subset of the project list
+	 	ProjectProcessorThreadWorkerFactory threadWorkerFactory = 
+	 				new ProjectProcessorThreadWorkerFactoryImpl(ccsw, ccConfig);
+	    processor = new CCISingleServerProcessor(ccConfig, pConfig, ccsw, threadWorkerFactory);
 	} catch (Exception e)
 	{
 	    Assert.fail(e.getMessage());
@@ -166,7 +175,12 @@ public class BasicImportTest
 	    // Create cc wrapper so that we can peform cleanup tasks
 	    ccsw = new CodeCenterServerWrapper(ccConfig.getServerBean(),
 		    ccConfig);
-	    processor = new CCISingleServerProcessor(ccConfig, pConfig);
+	    
+	    // Construct the factory that the processor will use to create
+	    // the objects (run multi-threaded) to handle each subset of the project list
+	 	ProjectProcessorThreadWorkerFactory threadWorkerFactory = 
+	 				new ProjectProcessorThreadWorkerFactoryImpl(ccsw, ccConfig);
+	    processor = new CCISingleServerProcessor(ccConfig, pConfig, ccsw, threadWorkerFactory);
 	} catch (Exception e)
 	{
 	    Assert.fail(e.getMessage());

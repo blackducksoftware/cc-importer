@@ -15,6 +15,7 @@ import com.blackducksoftware.sdk.codecenter.client.util.CodeCenterServerProxyV6_
 import com.blackducksoftware.soleng.ccimporter.config.CodeCenterConfigManager;
 import com.blackducksoftware.soleng.ccimporter.config.ProtexConfigManager;
 
+import soleng.framework.standard.codecenter.CodeCenterServerWrapper;
 import soleng.framework.standard.datatable.DataTable;
 import soleng.framework.standard.datatable.Record;
 import soleng.framework.standard.datatable.writer.DataSetWriter;
@@ -69,8 +70,15 @@ public class ReportTest
 		ccConfigManager = new CodeCenterConfigManager(configPath);
 		protexConfigManager = new ProtexConfigManager(configPath);
 	
+		CodeCenterServerWrapper ccsw = new CodeCenterServerWrapper(ccConfigManager.getServerBean(),
+				ccConfigManager);
+		
+		// Construct the factory that the processor will use to create
+	    // the objects (run multi-threaded) to handle each subset of the project list
+	 	ProjectProcessorThreadWorkerFactory threadWorkerFactory = 
+	 				new ProjectProcessorThreadWorkerFactoryImpl(ccsw, ccConfigManager);
 		CCIProcessor processor = new CCISingleServerProcessor(ccConfigManager,
-			protexConfigManager);
+			protexConfigManager, ccsw, threadWorkerFactory);
 		processor.runReport();
 	
 		DataTable report = processor.getReportGen().getDataTable();
