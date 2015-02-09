@@ -77,7 +77,13 @@ public class NumericPrefixedAppAdjuster implements AppAdjuster {
 	private static final String PROJECT_STATE_PATTERN_STRING_PROPERTY = "numprefixed.appname.pattern.projectstatus";
 	private static final String PROJECT_STATE_PATTERN_STRING_DEFAULT = "CURRENT";
 	
+	private static final String APPEDIT_URL_ATTRNAME_PROPERTY = "numprefixed.app.attribute.appediturl";
+	private static final String APPEDIT_URL_VALUE_PROPERTY = "numprefixed.app.value.appediturl";
+
+	
 	public static final String NEW_APP_LIST_FILENAME_PROPERTY = "numprefixed.new.app.list.filename";
+	
+	public static final String UPDATE_APPEDITURL_ON_OLD_APPS_PROPERTY = "numprefixed.update.appediturl.on.old.apps";
 	
 	// These patterns are used to determine whether or not the app name includes the app description.
 	// That is: <sealid>-<workstream>-CURRENT vs. <sealid>-<appdescription>-<workstream>-CURRENT
@@ -100,6 +106,9 @@ public class NumericPrefixedAppAdjuster implements AppAdjuster {
 	private String projectStateAttrName=null;
 	private String projectStateValue=null;
 	
+	private String appEditUrlAttrName=null;
+	private String appEditUrlValue=null;
+	
 	private String dateFormatString;
 	
 	private CodeCenterServerWrapper ccWrapper;
@@ -109,6 +118,8 @@ public class NumericPrefixedAppAdjuster implements AppAdjuster {
 	
 	private String newAppListFilename = null;
 	private NumericPrefixedAppListFile newAppList = null;
+	
+	private boolean updateAppEditUrlOnOldApps = false;
 
 	public void init(CodeCenterServerWrapper ccWrapper, CCIConfigurationManager config, TimeZone tz) throws CodeCenterImportException {
 		this.ccWrapper = ccWrapper;
@@ -175,13 +186,24 @@ public class NumericPrefixedAppAdjuster implements AppAdjuster {
 		workStreamAttrName = config.getProperty(WORK_STREAM_ATTRNAME_PROPERTY);
 		projectStateAttrName = config.getProperty(PROJECT_STATE_ATTRNAME_PROPERTY);
 		
+		
 		String projectStateValue = config.getOptionalProperty(PROJECT_STATE_VALUE_PROPERTY);
 		if (projectStateValue == null) {
 			projectStateValue = PROJECT_STATE_VALUE_DEFAULT;
 		}
 		this.projectStateValue = projectStateValue;
 		
+		appEditUrlAttrName = config.getOptionalProperty(APPEDIT_URL_ATTRNAME_PROPERTY);
+		if (appEditUrlAttrName != null) {
+			this.appEditUrlValue = config.getProperty(APPEDIT_URL_VALUE_PROPERTY);
+		}
+		
 		dateFormatString = config.getProperty(DATE_FORMAT_STRING_PROPERTY);
+		
+		String updateAppEditUrlOnOldAppsString = config.getOptionalProperty(UPDATE_APPEDITURL_ON_OLD_APPS_PROPERTY);
+		if ("true".equalsIgnoreCase(updateAppEditUrlOnOldAppsString)) {
+			updateAppEditUrlOnOldApps = true;
+		}
 	}
 	
 	private void deriveNewAppListFilename(CCIConfigurationManager config) throws CodeCenterImportException{
@@ -244,6 +266,10 @@ public class NumericPrefixedAppAdjuster implements AppAdjuster {
 			setAttribute(app, metadata, "numeric prefix", numericPrefixAttrName, metadata.getNumericPrefix());
 			setAttribute(app, metadata, "work stream", workStreamAttrName, metadata.getWorkStream());
 			setAttribute(app, metadata, "project state", projectStateAttrName, projectStateValue);
+		}
+		
+		if (newApp || updateAppEditUrlOnOldApps) {
+			setAttribute(app, metadata, "AppEdit URL", appEditUrlAttrName, appEditUrlValue + "?appId=" + app.getId().getId());
 		}
 		
 		String analyzedDateString = getDateString(project.getAnalyzedDateValue(), tz, dateFormatString);
