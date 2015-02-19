@@ -7,22 +7,10 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import soleng.framework.core.exception.CommonFrameworkException;
+import soleng.framework.connector.protex.ProtexServerWrapper;
 import soleng.framework.standard.codecenter.CodeCenterServerWrapper;
 import soleng.framework.standard.codecenter.dao.ApplicationDataDao;
 import soleng.framework.standard.codecenter.dao.CodeCenter6_6_1Dao;
-import soleng.framework.standard.protex.ProtexProjectPojo;
-import soleng.framework.standard.protex.ProtexServerWrapper;
-
-import com.blackducksoftware.sdk.codecenter.administration.data.ProtexServer;
-import com.blackducksoftware.sdk.codecenter.administration.data.ServerNameOrIdToken;
-import com.blackducksoftware.sdk.codecenter.application.data.Application;
-import com.blackducksoftware.sdk.codecenter.application.data.ApplicationPageFilter;
-import com.blackducksoftware.sdk.fault.SdkFault;
-import com.blackducksoftware.soleng.ccimport.exception.CodeCenterImportException;
-import com.blackducksoftware.soleng.ccimporter.model.CCIProject;
-import com.blackducksoftware.soleng.ccimporter.model.CCIProjectList;
-
 import soleng.framework.standard.datatable.DataTable;
 import soleng.framework.standard.datatable.FieldDef;
 import soleng.framework.standard.datatable.FieldType;
@@ -30,7 +18,13 @@ import soleng.framework.standard.datatable.Record;
 import soleng.framework.standard.datatable.RecordDef;
 import soleng.framework.standard.datatable.writer.DataSetWriter;
 import soleng.framework.standard.datatable.writer.DataSetWriterExcel;
-import soleng.framework.standard.datatable.writer.DataSetWriterStdOut;
+
+import com.blackducksoftware.sdk.codecenter.application.data.Application;
+import com.blackducksoftware.sdk.codecenter.application.data.ApplicationPageFilter;
+import com.blackducksoftware.sdk.fault.SdkFault;
+import com.blackducksoftware.soleng.ccimport.exception.CodeCenterImportException;
+import com.blackducksoftware.soleng.ccimporter.model.CCIProject;
+import com.blackducksoftware.soleng.ccimporter.model.CCIProjectList;
 
 /**
  * Class responsible for the report generation portion of the CCI.

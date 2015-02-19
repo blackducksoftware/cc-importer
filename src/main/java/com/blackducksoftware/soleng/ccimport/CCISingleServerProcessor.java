@@ -15,15 +15,11 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import soleng.framework.core.config.ConfigConstants.APPLICATION;
+import soleng.framework.connector.protex.ProtexServerWrapper;
 import soleng.framework.core.config.server.ServerBean;
-import soleng.framework.core.exception.CommonFrameworkException;
 import soleng.framework.core.multithreading.ListDistributor;
 import soleng.framework.standard.codecenter.CodeCenterServerWrapper;
-import soleng.framework.standard.common.ProjectPojo;
-import soleng.framework.standard.protex.ProtexServerWrapper;
 
-import com.blackducksoftware.sdk.codecenter.application.data.Application;
 import com.blackducksoftware.sdk.fault.SdkFault;
 import com.blackducksoftware.sdk.protex.project.Project;
 import com.blackducksoftware.soleng.ccimport.exception.CodeCenterImportException;

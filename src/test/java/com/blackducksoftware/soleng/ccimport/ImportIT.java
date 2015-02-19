@@ -1,42 +1,32 @@
 package com.blackducksoftware.soleng.ccimport;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import junit.framework.Assert;
-
-import org.junit.BeforeClass;
 import org.junit.AfterClass;
-import org.junit.Rule;
+import org.junit.BeforeClass;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import soleng.framework.connector.protex.ProtexServerWrapper;
+import soleng.framework.standard.codecenter.CodeCenterServerWrapper;
+import soleng.framework.standard.protex.ProtexProjectPojo;
 
 import com.blackducksoftware.sdk.codecenter.application.data.Application;
 import com.blackducksoftware.sdk.codecenter.application.data.ApplicationIdToken;
 import com.blackducksoftware.sdk.codecenter.application.data.ApplicationNameVersionToken;
 import com.blackducksoftware.sdk.codecenter.application.data.ApplicationPageFilter;
 import com.blackducksoftware.sdk.codecenter.application.data.Project;
-import com.blackducksoftware.sdk.codecenter.client.util.CodeCenterServerProxyV6_6_0;
-import com.blackducksoftware.sdk.codecenter.fault.SdkFault;
 import com.blackducksoftware.soleng.ccimport.appadjuster.custom.MockAppAdjuster;
-import com.blackducksoftware.soleng.ccimport.exception.CodeCenterImportException;
-import com.blackducksoftware.soleng.ccimport.report.CCIReportSummary;
 import com.blackducksoftware.soleng.ccimporter.config.CodeCenterConfigManager;
 import com.blackducksoftware.soleng.ccimporter.config.ProtexConfigManager;
 import com.blackducksoftware.soleng.ccimporter.model.CCIProject;
-
-import soleng.framework.core.config.ConfigurationManager;
-import soleng.framework.core.config.ConfigConstants.APPLICATION;
-import soleng.framework.standard.codecenter.CodeCenterServerWrapper;
-import soleng.framework.standard.protex.ProtexProjectPojo;
-import soleng.framework.standard.protex.ProtexServerWrapper;
 
 /**
  * TODO: Make this an intergration test that is only run during 'install' phase

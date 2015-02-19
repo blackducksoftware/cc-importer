@@ -11,20 +11,18 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 
+import soleng.framework.connector.protex.ProtexServerWrapper;
+import soleng.framework.connector.protex.identification.DeclareIdentifier;
+import soleng.framework.connector.protex.identification.Identifier;
+import soleng.framework.connector.protex.identification.ProtexIdUtils;
+import soleng.framework.connector.protex.project.SimpleProtexProjectCreatorImpl;
 import soleng.framework.core.config.ConfigurationManager;
 import soleng.framework.standard.common.ProjectPojo;
 import soleng.framework.standard.protex.ProtexProjectPojo;
-import soleng.framework.standard.protex.ProtexServerWrapper;
-import soleng.framework.standard.protex.identification.DeclareIdentifier;
-import soleng.framework.standard.protex.identification.Identifier;
-import soleng.framework.standard.protex.identification.ProtexIdUtils;
 import soleng.framework.standard.protex.project.SimpleProtexProjectCreator;
-import soleng.framework.standard.protex.project.SimpleProtexProjectCreatorImpl;
 
 import com.blackducksoftware.sdk.fault.SdkFault;
-import com.blackducksoftware.sdk.protex.project.RapidIdentificationMode;
 import com.blackducksoftware.sdk.protex.project.codetree.CodeTreeNode;
 import com.blackducksoftware.sdk.protex.project.codetree.PartialCodeTree;
 import com.blackducksoftware.sdk.protex.project.codetree.discovery.CodeMatchDiscovery;

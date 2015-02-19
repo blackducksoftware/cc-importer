@@ -15,12 +15,9 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import soleng.framework.core.config.ConfigConstants.APPLICATION;
-import soleng.framework.core.config.server.ServerBean;
+import soleng.framework.connector.protex.ProtexServerWrapper;
 import soleng.framework.standard.codecenter.CodeCenterServerWrapper;
 import soleng.framework.standard.common.ProjectPojo;
-import soleng.framework.standard.protex.ProtexProjectPojo;
-import soleng.framework.standard.protex.ProtexServerWrapper;
 
 import com.blackducksoftware.soleng.ccimport.exception.CodeCenterImportException;
 import com.blackducksoftware.soleng.ccimport.report.CCIReportGenerator;

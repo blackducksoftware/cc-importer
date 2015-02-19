@@ -4,11 +4,10 @@
 
 	<groupId>com.blackducksoftware.soleng</groupId>
 	<artifactId>cc-importer</artifactId>
-	<version>1.2.2</version>
+	<version>1.2.3-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<name>cc-importer</name>
-	<url>http://maven.apache.org</url>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -48,7 +47,7 @@
 			<artifactId>postgresql</artifactId>
 			<version>9.3-1102-jdbc41</version>
 		</dependency>
-		<!--  To handle the date coming back from the DB -->
+		<!-- To handle the date coming back from the DB -->
 		<dependency>
 			<groupId>joda-time</groupId>
 			<artifactId>joda-time</artifactId>
@@ -59,9 +58,14 @@
 		<dependency>
 			<groupId>com.blackducksoftware.soleng</groupId>
 			<artifactId>common-framework</artifactId>
-			<version>1.3.3</version>
+			<version>1.4.1-SNAPSHOT</version>
 		</dependency>
-		
+		<dependency>
+			<groupId>com.blackducksoftware.soleng</groupId>
+			<artifactId>cf-6x-connector</artifactId>
+			<version>1.0.1</version>
+		</dependency>
+
 		<dependency>
 			<groupId>com.blackducksoftware.soleng</groupId>
 			<artifactId>cc-report</artifactId>
@@ -184,8 +188,8 @@
 					</archive>
 				</configuration>
 			</plugin>
-			
-						<plugin>
+
+			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<version>2.11</version>

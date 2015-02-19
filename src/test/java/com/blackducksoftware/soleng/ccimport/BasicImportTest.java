@@ -1,8 +1,7 @@
 package com.blackducksoftware.soleng.ccimport;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import junit.framework.Assert;
@@ -14,21 +13,18 @@ import org.junit.rules.ExpectedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import soleng.framework.standard.codecenter.CodeCenterServerWrapper;
+
 import com.blackducksoftware.sdk.codecenter.application.data.Application;
 import com.blackducksoftware.sdk.codecenter.application.data.ApplicationIdToken;
 import com.blackducksoftware.sdk.codecenter.application.data.ApplicationNameVersionToken;
 import com.blackducksoftware.sdk.codecenter.application.data.ApplicationPageFilter;
 import com.blackducksoftware.sdk.codecenter.application.data.Project;
-import com.blackducksoftware.sdk.codecenter.fault.SdkFault;
 import com.blackducksoftware.soleng.ccimport.exception.CodeCenterImportException;
 import com.blackducksoftware.soleng.ccimport.report.CCIReportSummary;
 import com.blackducksoftware.soleng.ccimporter.config.CodeCenterConfigManager;
 import com.blackducksoftware.soleng.ccimporter.config.ProtexConfigManager;
 import com.blackducksoftware.soleng.ccimporter.model.CCIProject;
-
-import soleng.framework.core.config.ConfigConstants.APPLICATION;
-import soleng.framework.standard.codecenter.CodeCenterServerWrapper;
-import soleng.framework.standard.protex.ProtexServerWrapper;
 
 /**
  * TODO: Make this an intergration test that is only run during 'install' phase

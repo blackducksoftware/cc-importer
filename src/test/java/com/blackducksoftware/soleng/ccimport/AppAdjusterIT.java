@@ -20,6 +20,10 @@ import org.junit.rules.ExpectedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import soleng.framework.connector.protex.ProtexServerWrapper;
+import soleng.framework.core.config.server.ServerBean;
+import soleng.framework.standard.codecenter.CodeCenterServerWrapper;
+
 import com.blackducksoftware.sdk.codecenter.application.data.Application;
 import com.blackducksoftware.sdk.codecenter.application.data.ApplicationIdToken;
 import com.blackducksoftware.sdk.codecenter.application.data.ApplicationNameVersionToken;
@@ -32,10 +36,6 @@ import com.blackducksoftware.soleng.ccimport.exception.CodeCenterImportException
 import com.blackducksoftware.soleng.ccimporter.config.CodeCenterConfigManager;
 import com.blackducksoftware.soleng.ccimporter.config.ProtexConfigManager;
 import com.blackducksoftware.soleng.ccimporter.model.CCIProject;
-
-import soleng.framework.core.config.server.ServerBean;
-import soleng.framework.standard.codecenter.CodeCenterServerWrapper;
-import soleng.framework.standard.protex.ProtexServerWrapper;
 
 /**
  * Test the mechanism that allows custom app adjusters to be plugged in via configuration
