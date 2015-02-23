@@ -4,7 +4,7 @@
 
 	<groupId>com.blackducksoftware.soleng</groupId>
 	<artifactId>cc-importer</artifactId>
-	<version>1.2.3-SNAPSHOT</version>
+	<version>1.2.3</version>
 	<packaging>jar</packaging>
 
 	<name>cc-importer</name>
@@ -58,7 +58,7 @@
 		<dependency>
 			<groupId>com.blackducksoftware.soleng</groupId>
 			<artifactId>common-framework</artifactId>
-			<version>1.4.1-SNAPSHOT</version>
+			<version>1.4.1</version>
 		</dependency>
 		<dependency>
 			<groupId>com.blackducksoftware.soleng</groupId>
