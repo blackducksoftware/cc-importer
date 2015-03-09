@@ -184,7 +184,8 @@ public class CCIConfigurationManager extends ConfigurationManager {
 	private List<CCIProject> buildProjectList(List<String> asList) {
 		List<CCIProject> projectList = new ArrayList<CCIProject>();
 
-		for (String userSuppliedProject : asList) {
+		for (String userSuppliedProjectRaw : asList) {
+			String userSuppliedProject = userSuppliedProjectRaw.trim();
 			CCIProject project = new CCIProject();
 			// First we attempt to tokenize the user supplied list to check for
 			// versions
