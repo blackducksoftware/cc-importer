@@ -76,7 +76,7 @@ public class CCIConstants {
 	
 	// Part of validate, should the requests be added?
 	protected static final String SUBMIT_PROPERTY = "cc.submit.request";
-//	public static final String SUBMIT_REQUESTS = "validate.requests.add";
+	protected static final String ADD_REQUESTS = "validate.requests.add";
 	
 	// Part of validate, should CC requests be deleted?
 	public static final String DELETE_REQUESTS = "validate.requests.delete";

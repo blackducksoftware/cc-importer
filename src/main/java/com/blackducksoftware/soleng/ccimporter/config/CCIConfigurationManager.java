@@ -110,7 +110,7 @@ public class CCIConfigurationManager extends ConfigurationManager {
 		performSmartValidate = getOptionalProperty(
 				CCIConstants.VALIDATE_SMART_APPLICATION_PROPERTY, false,
 				Boolean.class);
-		performAdd = getOptionalProperty(CCIConstants.SUBMIT_PROPERTY, true,
+		performAdd = getOptionalProperty(CCIConstants.ADD_REQUESTS, true,
 				Boolean.class);
 		performDelete = getOptionalProperty(CCIConstants.DELETE_REQUESTS,
 				false, Boolean.class);

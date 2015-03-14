@@ -68,6 +68,57 @@ public class CCIConfigurationManagerTest {
 	}
 	
 	@Test
+	public void testAddDeleteSubmit() {
+		Properties props = new Properties();
+		props.setProperty("protex.server.name", "http://se-menger.blackducksoftware.com");
+		props.setProperty("protex.user.name", "ccImportUser@blackducksoftware.com");
+		props.setProperty("protex.password", "blackduck");
+		props.setProperty("cc.server.name", "http://cc-integration/");
+		props.setProperty("cc.user.name", "ccImportUser");
+		props.setProperty("cc.password", "blackduck");
+		props.setProperty("protex.password.isplaintext", "true");
+		props.setProperty("cc.password.isplaintext", "true");
+		props.setProperty("cc.protex.name", "Menger");
+		props.setProperty("cc.default.app.version", APP_VERSION);
+		props.setProperty("cc.workflow", "Serial");
+		props.setProperty("cc.owner", APP_OWNER);
+		props.setProperty("protex.project.list", APP_NAME1);
+		props.setProperty("validate.application", "true");
+		
+		props.setProperty("cc.submit.request", "false");
+		props.setProperty("validate.requests.add", "false");
+		props.setProperty("validate.requests.delete", "false");
+		CodeCenterConfigManager ccConfig = new CodeCenterConfigManager(props);
+		assertFalse(ccConfig.isPerformAdd());
+		assertFalse(ccConfig.isPerformDelete());
+		assertFalse(ccConfig.isSubmit());
+		
+		props.setProperty("validate.requests.add", "true");
+		props.setProperty("validate.requests.delete", "true");
+		props.setProperty("cc.submit.request", "true");
+		ccConfig = new CodeCenterConfigManager(props);
+		assertTrue(ccConfig.isPerformAdd());
+		assertTrue(ccConfig.isPerformDelete());
+		assertTrue(ccConfig.isSubmit());
+		
+		props.setProperty("validate.requests.add", "true");
+		props.setProperty("validate.requests.delete", "true");
+		props.setProperty("cc.submit.request", "false");
+		ccConfig = new CodeCenterConfigManager(props);
+		assertTrue(ccConfig.isPerformAdd());
+		assertTrue(ccConfig.isPerformDelete());
+		assertFalse(ccConfig.isSubmit());
+		
+		props.setProperty("validate.requests.add", "false");
+		props.setProperty("validate.requests.delete", "true");
+		props.setProperty("cc.submit.request", "true");
+		ccConfig = new CodeCenterConfigManager(props);
+		assertFalse(ccConfig.isPerformAdd());
+		assertTrue(ccConfig.isPerformDelete());
+		assertTrue(ccConfig.isSubmit());
+	}
+	
+	@Test
 	public void testSpaceAfterComma() {
 		Properties props = new Properties();
 		props.setProperty("protex.server.name", "http://se-menger.blackducksoftware.com");
