@@ -35,9 +35,9 @@ import com.blackducksoftware.soleng.ccimporter.model.CCIProject;
 
 public class NumericPrefixedAppAdjusterIT {
 	private static final long TIME_VALUE_OF_JAN1_2000 = 946702800000L;
-	private static final String CUSTOM_ATTR_NAME = "Sample Textfield";
+	private static final String CUSTOM_ATTR_NAME = "NonRequiredTextField";
 	
-	private static final String CC_URL = "http://cc-integration.blackducksoftware.com/";
+	private static final String CC_URL = "http://int-cc-dev.blackducksoftware.com/";
 	public static final String SUPERUSER_USERNAME = "super";
 	public static final String SUPERUSER_PASSWORD = "super";
 	
@@ -112,7 +112,8 @@ public class NumericPrefixedAppAdjusterIT {
 		CodeCenterServerProxyV6_6_0 cc = ccWrapper.getInternalApiWrapper().getProxy();
 
     	TestUtils.createUser(cc, USER1_USERNAME, USER_PASSWORD);
-    	ApplicationIdToken appIdToken = TestUtils.createApplication(cc, APPLICATION1_NAME, APPLICATION_VERSION, USER1_USERNAME, USER_ROLE1);
+    	ApplicationIdToken appIdToken = TestUtils.createApplication(cc, APPLICATION1_NAME, APPLICATION_VERSION, USER1_USERNAME, USER_ROLE1,
+    			TestUtils.REQUIRED_ATTRNAME, "test");
     	Application app = TestUtils.getApplication(cc, appIdToken);
     	CCIApplication cciApp = new CCIApplication(app, false);
 		
@@ -161,7 +162,8 @@ public class NumericPrefixedAppAdjusterIT {
 		CodeCenterServerProxyV6_6_0 cc = ccWrapper.getInternalApiWrapper().getProxy();
 
     	TestUtils.createUser(cc, USER1a_USERNAME, USER_PASSWORD);
-    	ApplicationIdToken appIdToken = TestUtils.createApplication(cc, APPLICATION1a_NAME, APPLICATION_VERSION, USER1a_USERNAME, USER_ROLE1);
+    	ApplicationIdToken appIdToken = TestUtils.createApplication(cc, APPLICATION1a_NAME, APPLICATION_VERSION, USER1a_USERNAME, USER_ROLE1,
+    			TestUtils.REQUIRED_ATTRNAME, "test");
     	Application app = TestUtils.getApplication(cc, appIdToken);
     	CCIApplication cciApp = new CCIApplication(app, false);
 		
@@ -211,7 +213,8 @@ public class NumericPrefixedAppAdjusterIT {
 		CodeCenterServerProxyV6_6_0 cc = ccWrapper.getInternalApiWrapper().getProxy();
     	
     	TestUtils.createUser(cc, USER2_USERNAME, USER_PASSWORD);
-    	ApplicationIdToken appIdToken = TestUtils.createApplication(cc, APPLICATION2_NAME, APPLICATION_VERSION, USER2_USERNAME, USER_ROLE1);
+    	ApplicationIdToken appIdToken = TestUtils.createApplication(cc, APPLICATION2_NAME, APPLICATION_VERSION, USER2_USERNAME, USER_ROLE1,
+    			TestUtils.REQUIRED_ATTRNAME, "test");
     	Application app = TestUtils.getApplication(cc, appIdToken);
     	CCIApplication cciApp = new CCIApplication(app, false);
     	
@@ -262,7 +265,8 @@ public class NumericPrefixedAppAdjusterIT {
 		CodeCenterServerProxyV6_6_0 cc = ccWrapper.getInternalApiWrapper().getProxy();
     	
     	TestUtils.createUser(cc, USER2a_USERNAME, USER_PASSWORD);
-    	ApplicationIdToken appIdToken = TestUtils.createApplication(cc, APPLICATION2a_NAME, APPLICATION_VERSION, USER2a_USERNAME, USER_ROLE1);
+    	ApplicationIdToken appIdToken = TestUtils.createApplication(cc, APPLICATION2a_NAME, APPLICATION_VERSION, USER2a_USERNAME, USER_ROLE1,
+    			TestUtils.REQUIRED_ATTRNAME, "test");
     	Application app = TestUtils.getApplication(cc, appIdToken);
     	CCIApplication cciApp = new CCIApplication(app, false);
     	
@@ -313,7 +317,8 @@ public class NumericPrefixedAppAdjusterIT {
 		CodeCenterServerProxyV6_6_0 cc = ccWrapper.getInternalApiWrapper().getProxy();
     	
     	TestUtils.createUser(cc, USER3_USERNAME, USER_PASSWORD);
-    	ApplicationIdToken appIdToken = TestUtils.createApplication(cc, APPLICATION3_NAME, APPLICATION_VERSION, USER3_USERNAME, USER_ROLE1);
+    	ApplicationIdToken appIdToken = TestUtils.createApplication(cc, APPLICATION3_NAME, APPLICATION_VERSION, USER3_USERNAME, USER_ROLE1,
+    			TestUtils.REQUIRED_ATTRNAME, "test");
     	Application app = TestUtils.getApplication(cc, appIdToken);
     	CCIApplication cciApp = new CCIApplication(app, false);
     	

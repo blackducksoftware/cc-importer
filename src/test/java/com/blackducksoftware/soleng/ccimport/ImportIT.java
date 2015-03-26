@@ -308,7 +308,7 @@ public class ImportIT {
 		props.setProperty("protex.user.name", "ccImportUser@blackducksoftware.com");
 		props.setProperty("protex.password", "blackduck");
 
-		props.setProperty("cc.server.name", "http://cc-integration/");
+		props.setProperty("cc.server.name", "http://int-cc-dev/");
 //		props.setProperty("cc.server.name", "http://salescc/");
 		
 		props.setProperty("cc.user.name", "ccImportUser");

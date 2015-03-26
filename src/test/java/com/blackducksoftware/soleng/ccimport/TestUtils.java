@@ -37,11 +37,14 @@ import com.blackducksoftware.sdk.codecenter.user.data.UserNameToken;
 
 public class TestUtils {
 	public static final Long CONNECTION_TIMEOUT = 120 * 1000L;
+	public static final String REQUIRED_ATTRNAME = "Sample Textfield";
 
 	public static ApplicationIdToken createApplication(CodeCenterServerProxyV6_6_0 cc, String appName,
 			String appVersion, 
 			String applicationOwner,
-			String userRole) throws SdkFault {
+			String userRole,
+			String attrName,
+			String attrValue) throws SdkFault {
 		System.out.println("Creating application " + appName + " / " + appVersion);
 		
 		UserNameToken owner = new UserNameToken();
@@ -51,6 +54,12 @@ public class TestUtils {
 		appCreateBean.setName(appName);
 		appCreateBean.setVersion(appVersion);
 		appCreateBean.setOwnerId(owner);
+		AttributeValue attrValueObject = new AttributeValue();
+		AttributeNameToken attrNameToken = new AttributeNameToken();
+		attrNameToken.setName(attrName);
+		attrValueObject.setAttributeId(attrNameToken);
+		attrValueObject.getValues().add(attrValue);
+		appCreateBean.getAttributeValues().add(attrValueObject);
 		
 		RoleNameToken roleToken = new RoleNameToken();
 		roleToken.setName(userRole);
@@ -75,7 +84,7 @@ public class TestUtils {
 //		AttributePageFilter attrPageFilter = new AttributePageFilter();
 //		attrPageFilter.setFirstRowIndex(0);
 //		attrPageFilter.setLastRowIndex(Integer.MAX_VALUE);
-//		List<AbstractAttribute> attrs = cc.getAttributeApi().searchAttributes("Sample Textfield", attrPageFilter);
+//		List<AbstractAttribute> attrs = cc.getAttributeApi().searchAttributes("NonRequiredTextField", attrPageFilter);
 //		for (AbstractAttribute attr : attrs) {
 //			System.out.println("attr: " + attr.getName());
 //			if (attr.getName().equals(attrName)) {

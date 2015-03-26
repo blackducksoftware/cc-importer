@@ -53,10 +53,10 @@ public class CcTestUtils {
 	private static final String VULN_STATUS_STRING_IN_PROGRESS = "In Progress";
 	private static final int VULN_STATUS_ID_IN_PROGRESS = 286392;
 	public static final String CC_ROLE = "Application Administrator";
-	public static final String CC_URL = "http://cc-integration.blackducksoftware.com";
+	public static final String CC_URL = "http://int-cc-dev.blackducksoftware.com";
 	public static final String CC_PASSWORD = "blackduck";
 	public static final String CC_USER = "unitTester@blackducksoftware.com";
-	public static final String DB_SERVER = "cc-integration.blackducksoftware.com";
+	public static final String DB_SERVER = "int-cc-dev.blackducksoftware.com";
 	public static final String DB_PASSWORD = "mallard";
 	public static final String DB_USER = "blackduck";
 	public static final String DB_PORT = "55433";

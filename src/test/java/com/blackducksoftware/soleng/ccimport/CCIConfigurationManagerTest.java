@@ -40,7 +40,7 @@ public class CCIConfigurationManagerTest {
 		props.setProperty("protex.server.name", "http://se-menger.blackducksoftware.com");
 		props.setProperty("protex.user.name", "ccImportUser@blackducksoftware.com");
 		props.setProperty("protex.password", "blackduck");
-		props.setProperty("cc.server.name", "http://cc-integration/");
+		props.setProperty("cc.server.name", "http://int-cc-dev/");
 		props.setProperty("cc.user.name", "ccImportUser");
 		props.setProperty("cc.password", "blackduck");
 		props.setProperty("protex.password.isplaintext", "true");
@@ -73,7 +73,7 @@ public class CCIConfigurationManagerTest {
 		props.setProperty("protex.server.name", "http://se-menger.blackducksoftware.com");
 		props.setProperty("protex.user.name", "ccImportUser@blackducksoftware.com");
 		props.setProperty("protex.password", "blackduck");
-		props.setProperty("cc.server.name", "http://cc-integration/");
+		props.setProperty("cc.server.name", "http://int-cc-dev/");
 		props.setProperty("cc.user.name", "ccImportUser");
 		props.setProperty("cc.password", "blackduck");
 		props.setProperty("protex.password.isplaintext", "true");
@@ -124,7 +124,7 @@ public class CCIConfigurationManagerTest {
 		props.setProperty("protex.server.name", "http://se-menger.blackducksoftware.com");
 		props.setProperty("protex.user.name", "ccImportUser@blackducksoftware.com");
 		props.setProperty("protex.password", "blackduck");
-		props.setProperty("cc.server.name", "http://cc-integration/");
+		props.setProperty("cc.server.name", "http://int-cc-dev/");
 		props.setProperty("cc.user.name", "ccImportUser");
 		props.setProperty("cc.password", "blackduck");
 		props.setProperty("protex.password.isplaintext", "true");

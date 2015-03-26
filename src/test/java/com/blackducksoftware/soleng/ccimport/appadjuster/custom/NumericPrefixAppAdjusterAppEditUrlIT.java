@@ -39,7 +39,7 @@ public class NumericPrefixAppAdjusterAppEditUrlIT {
 	private static final long TIME_VALUE_OF_JAN1_2000 = 946702800000L;
 	private static final String CUSTOM_ATTR_NAME = "Application Editor";
 	
-	private static final String CC_URL = "http://cc-integration.blackducksoftware.com/";
+	private static final String CC_URL = "http://int-cc-dev.blackducksoftware.com/";
 	public static final String SUPERUSER_USERNAME = "super";
 	public static final String SUPERUSER_PASSWORD = "super";
 	
@@ -92,7 +92,8 @@ public class NumericPrefixAppAdjusterAppEditUrlIT {
 		CodeCenterServerWrapper ccWrapper = new CodeCenterServerWrapper(bean, ccConfigManager);
 		CodeCenterServerProxyV6_6_0 cc = ccWrapper.getInternalApiWrapper().getProxy();
 
-    	ApplicationIdToken appIdToken = TestUtils.createApplication(cc, APPLICATION1_NAME, APPLICATION_VERSION, OWNER, USER_ROLE1);
+    	ApplicationIdToken appIdToken = TestUtils.createApplication(cc, APPLICATION1_NAME, APPLICATION_VERSION, OWNER, USER_ROLE1,
+    			TestUtils.REQUIRED_ATTRNAME, "test");
     	Application app = TestUtils.getApplication(cc, appIdToken);
     	CCIApplication cciApp = new CCIApplication(app, false);
 		

@@ -23,7 +23,7 @@ import soleng.framework.standard.datatable.writer.DataSetWriterStdOut;
 
 public class ReportTest
 {
-	private static final String CC_URL = "http://cc-integration.blackducksoftware.com/";
+	private static final String CC_URL = "http://int-cc-dev.blackducksoftware.com/";
 	public static final String SUPERUSER_USERNAME = "super";
 	public static final String SUPERUSER_PASSWORD = "super";
 	private static String APPLICATION0_NAME = "ccImporterReportTestApp1";
@@ -63,7 +63,8 @@ public class ReportTest
     public void testReport() throws Exception
     {
     	TestUtils.createUser(cc, USER1_USERNAME, USER1_PASSWORD);
-    	TestUtils.createApplication(cc, APPLICATION0_NAME, APPLICATION_VERSION, USER1_USERNAME, USER_ROLE1);
+    	TestUtils.createApplication(cc, APPLICATION0_NAME, APPLICATION_VERSION, USER1_USERNAME, USER_ROLE1,
+    			TestUtils.REQUIRED_ATTRNAME, "test");
     	
 		String configPath = "src/test/resources/report.properties";
 	
