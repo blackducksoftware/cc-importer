@@ -338,42 +338,6 @@ public class NumericPrefixedAppAdjuster implements AppAdjuster {
 					"' does not conform to either of the supported formats");
 		}
 
-//		scanner.useDelimiter(separatorPattern);
-//		try {
-//			
-//			if (!scanner.hasNext(numericPrefixPattern)) {
-//				String msg = "Error parsing numeric prefix from app name " + appName;
-//				log.error(msg);
-//				throw new CodeCenterImportException(msg);
-//			}
-//			String numericPrefix = scanner.next(numericPrefixPattern);
-//			metadata.setNumericPrefix(numericPrefix);
-//
-//			if (!scanner.hasNext(workStreamPattern)) {
-//				String appNameString;
-//				try {
-//					appNameString = scanner.next();
-//				} catch (Exception e) { // Some parsing exceptions (like there's no more input) are runtime exceptions
-//					String msg = "Error parsing work stream from app name " + appName;
-//					log.error(msg);
-//					throw new CodeCenterImportException(msg);
-//				}
-//				metadata.setAppNameString(appNameString);
-//			}
-//			
-//			String workStream;
-//			try {
-//				workStream = scanner.next(workStreamPattern);
-//			} catch (Exception e) { // Some parsing exceptions (like there's no more input) are runtime exceptions
-//				String msg = "Error parsing work stream from app name " + appName;
-//				log.error(msg);
-//				throw new CodeCenterImportException(msg);
-//			}
-//			metadata.setWorkStream(workStream);
-//		
-//		} finally {
-//			scanner.close();
-//		}
 		return metadata;
 	}
 	

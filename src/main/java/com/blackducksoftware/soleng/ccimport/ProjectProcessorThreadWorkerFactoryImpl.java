@@ -1,5 +1,6 @@
 package com.blackducksoftware.soleng.ccimport;
 
+import java.lang.reflect.Method;
 import java.util.List;
 
 import soleng.framework.standard.codecenter.CodeCenterServerWrapper;
@@ -11,10 +12,15 @@ import com.blackducksoftware.soleng.ccimporter.model.CCIProject;
 public class ProjectProcessorThreadWorkerFactoryImpl implements ProjectProcessorThreadWorkerFactory {
 	private CodeCenterServerWrapper codeCenterWrapper;
 	private CodeCenterConfigManager codeCenterConfigManager;
+	private Object appAdjusterObject;
+	private Method appAdjusterMethod;
 	
-	public ProjectProcessorThreadWorkerFactoryImpl(CodeCenterServerWrapper codeCenterWrapper, CodeCenterConfigManager codeCenterConfigManager) {
+	public ProjectProcessorThreadWorkerFactoryImpl(CodeCenterServerWrapper codeCenterWrapper, CodeCenterConfigManager codeCenterConfigManager,
+			Object appAdjusterObject, Method appAdjusterMethod) {
 		this.codeCenterConfigManager = codeCenterConfigManager;
 		this.codeCenterWrapper = codeCenterWrapper;
+		this.appAdjusterObject = appAdjusterObject;
+		this.appAdjusterMethod = appAdjusterMethod;
 	}
 
 	/* (non-Javadoc)
@@ -25,7 +31,8 @@ public class ProjectProcessorThreadWorkerFactoryImpl implements ProjectProcessor
 			List<CCIReportSummary> synchronizedThreadsReportSummaryList) {
 		Runnable threadWorker = new ProjectProcessorThreadWorker(
 				codeCenterWrapper, codeCenterConfigManager,
-				partialProjectList, synchronizedThreadsReportSummaryList);
+				partialProjectList, synchronizedThreadsReportSummaryList,
+				appAdjusterObject, appAdjusterMethod);
 		return threadWorker;
 	}
 }

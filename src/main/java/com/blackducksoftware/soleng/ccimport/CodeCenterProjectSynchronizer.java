@@ -86,100 +86,17 @@ public class CodeCenterProjectSynchronizer
     // Keep track of project id/app id mappings
     private HashMap<String, String> projectAssociationMap  = null;
     
-    private TimeZone tz = null; // User-provided: the timezone of the server
-    
     public CodeCenterProjectSynchronizer(
 	    CodeCenterServerWrapper codeCenterWrapper,
-	    CCIConfigurationManager config) throws CodeCenterImportException
+	    CCIConfigurationManager config,
+	    Object appAdjusterObject, Method appAdjusterMethod) throws CodeCenterImportException
     {
 	this.ccWrapper = codeCenterWrapper;
 	this.configManager = config;
-	setTimeZone(config);
-	setAppAdjusterMethod(config);
+	this.appAdjusterObject = appAdjusterObject;
+	this.appAdjusterMethod = appAdjusterMethod;
     }
     
-    private void setTimeZone(CCIConfigurationManager config) {
-    	// TODO: Temporary workaround to provide timezones. This
-	    // handles the case whereby
-	    // utility is run against a server that is not in the same
-	    // time zone.
-	    String userSpecifiedTimeZone = configManager.getTimeZone();
-	    
-	    if (userSpecifiedTimeZone != null
-		    && !userSpecifiedTimeZone.isEmpty())
-	    {
-		tz = TimeZone.getTimeZone(userSpecifiedTimeZone);
-		log.info("User specified time zone recognized, using: "
-			+ tz.getDisplayName());
-	    } else
-	    {
-		tz = TimeZone.getDefault();
-	    }
-    }
-    
-    /**
-     * If a custom app adjuster (to modify app metadata after sync) has been configured, initialize it.
-     * @param config
-     * @throws CodeCenterImportException
-     */
-    private void setAppAdjusterMethod(CCIConfigurationManager config) throws CodeCenterImportException {
-    	
-    	// See if the user has configured a custom app adjuster
-    	String appAdjusterClassname = config.getAppAdjusterClassname();
-    	if (appAdjusterClassname == null) {
-    		return;  // No custom app adjuster has been configured
-    	}
-    	// Get the user-configured custom app adjuster class
-    	Class sourceClass = null;
-    	try {
-    		sourceClass = Class.forName(appAdjusterClassname);
-    	} catch (ClassNotFoundException e) {
-    		String msg = "Unable to convert name to class for custom app adjuster: Class not found: " + appAdjusterClassname;
-    		throw new CodeCenterImportException(msg);
-    	}
-    	
-    	// Create an instance of the custom app adjuster class
-    	try {
-    		appAdjusterObject = sourceClass.newInstance();
-    	} catch (IllegalAccessException e) {
-    		String msg = "Unable to create instance of app adjuster: Illegal access: " + appAdjusterClassname;
-    		throw new CodeCenterImportException(msg);
-    	} catch (InstantiationException e) {
-    		String msg = "Unable to create instance of app adjuster: Instantiation exception: " + appAdjusterClassname;
-    		throw new CodeCenterImportException(msg);
-    	}
-    	
-    	// Get the init method on the custom app adjuster class
-    	Method initMethod=null;
-    	Class[] initMethodArgTypes = { CodeCenterServerWrapper.class, CCIConfigurationManager.class, TimeZone.class };
-    	try {
-    		initMethod = sourceClass.getDeclaredMethod("init", initMethodArgTypes);
-    	} catch (NoSuchMethodException e) {
-    		String msg = "Unable to get init method: No such method exception: " + appAdjusterClassname;
-    		throw new CodeCenterImportException(msg);
-    	}
-    	
-    	// Get the adjustApp method on the custom app adjuster class
-    	Class[] adjustAppMethodArgTypes = { CCIApplication.class, CCIProject.class };
-    	try {
-    		appAdjusterMethod = sourceClass.getDeclaredMethod("adjustApp", adjustAppMethodArgTypes);
-    	} catch (NoSuchMethodException e) {
-    		String msg = "Unable to get app adjuster method: No such method exception: " + appAdjusterClassname;
-    		throw new CodeCenterImportException(msg);
-    	}
-    	
-    	// Call the init method to initialize the custom app adjuster
-    	try {
-    		initMethod.invoke(appAdjusterObject, ccWrapper, configManager, tz);
-    	} catch (InvocationTargetException e) {
-    		String msg = "Error initializing custom app adjuster: InvocationTargetException: " + e.getTargetException().getMessage();
-    		throw new CodeCenterImportException(msg);
-    	} catch (IllegalAccessException e) {
-    		String msg = "Error initializing custom app adjuster: IllegalAccessException: " + e.getMessage();
-    		throw new CodeCenterImportException(msg);
-    	}
-    }
-
     /**
      * Synchronizes a list of projects against the specified Code Center
      * Configuration
@@ -519,7 +436,7 @@ public class CodeCenterProjectSynchronizer
 		    // then proceed, otherwise get out.
 		    
 
-		    formatter.setTimeZone(tz);
+		    formatter.setTimeZone(TimeZone.getTimeZone(configManager.getTimeZone()));
 
 		    Date lastValidatedTime = formatter
 			    .parse(lastValidatedDateStr);

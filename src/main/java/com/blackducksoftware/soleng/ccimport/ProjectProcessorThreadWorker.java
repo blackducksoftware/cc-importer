@@ -5,6 +5,7 @@ All rights reserved. **/
 
 package com.blackducksoftware.soleng.ccimport;
 
+import java.lang.reflect.Method;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -25,20 +26,26 @@ public class ProjectProcessorThreadWorker implements Runnable {
 	private List<CCIProject> partialProjectList;
 	private List<CCIReportSummary> reportSummaryList;
 	private CodeCenterConfigManager codeCenterConfigManager;
+	private Object appAdjusterObject;
+	private Method appAdjusterMethod;
 
 	public ProjectProcessorThreadWorker(CodeCenterServerWrapper codeCenterWrapper, CodeCenterConfigManager codeCenterConfigManager,
-			List<CCIProject> partialProjectList, List<CCIReportSummary> reportSummaryList) {
+			List<CCIProject> partialProjectList, List<CCIReportSummary> reportSummaryList,
+			Object appAdjusterObject, Method appAdjusterMethod) {
 		this.codeCenterServerWrapper = codeCenterWrapper;
 		this.codeCenterConfigManager = codeCenterConfigManager;
 		this.partialProjectList = partialProjectList;
 		this.reportSummaryList = reportSummaryList;
+		this.appAdjusterObject = appAdjusterObject;
+		this.appAdjusterMethod = appAdjusterMethod;
 	}
 
 	public void run() {
 		logger.debug("run() called");
 		try {
 			CodeCenterProjectSynchronizer synchronizer = new CodeCenterProjectSynchronizer(
-					codeCenterServerWrapper, codeCenterConfigManager);
+					codeCenterServerWrapper, codeCenterConfigManager,
+					appAdjusterObject, appAdjusterMethod);
 			synchronizer.synchronize(partialProjectList);
 			synchronized(reportSummaryList) {
 				if (reportSummaryList.size() == 0)

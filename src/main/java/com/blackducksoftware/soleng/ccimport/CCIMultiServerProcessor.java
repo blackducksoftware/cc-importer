@@ -5,6 +5,7 @@ All rights reserved. **/
 
 package com.blackducksoftware.soleng.ccimport;
 
+import java.lang.reflect.Method;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -28,6 +29,8 @@ public class CCIMultiServerProcessor extends CCIProcessor
     private static Logger log = LoggerFactory.getLogger(CCIMultiServerProcessor.class.getName());
 
     private ProtexConfigManager protexConfig = null;
+    private Object appAdjusterObject;
+    private Method appAdjusterMethod;
     
     /**
      * @param configManager
@@ -36,13 +39,15 @@ public class CCIMultiServerProcessor extends CCIProcessor
      * @throws Exception
      */
     public CCIMultiServerProcessor(CodeCenterConfigManager configManager, ProtexConfigManager protexConfigManager,
-    		CodeCenterServerWrapper codeCenterServerWrapper)
+    		CodeCenterServerWrapper codeCenterServerWrapper,
+    		Object appAdjusterObject, Method appAdjusterMethod)
 	    throws Exception
     {
 	super(configManager, codeCenterServerWrapper);
 	
 	this.protexConfig = protexConfigManager;
-	
+	this.appAdjusterObject = appAdjusterObject;
+	this.appAdjusterMethod = appAdjusterMethod;
 	log.info("Using Protex URL [{}]", protexConfig.getServerBean().getServerName());
     }
 
@@ -59,7 +64,7 @@ public class CCIMultiServerProcessor extends CCIProcessor
 	List<CCIProject> userProjectList = codeCenterConfigManager.getProjectList();
 	List<ServerBean> protexServers = codeCenterConfigManager.getServerListByApplication(APPLICATION.PROTEX);
 	CodeCenterProjectSynchronizer synchronizer = new CodeCenterProjectSynchronizer(
-		codeCenterWrapper, codeCenterConfigManager);
+		codeCenterWrapper, codeCenterConfigManager, appAdjusterObject, appAdjusterMethod);
 	
 	if(userProjectList.size() > 0)
 	{

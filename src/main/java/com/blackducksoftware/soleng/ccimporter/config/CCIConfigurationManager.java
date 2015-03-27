@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
+import java.util.TimeZone;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang.StringUtils;
@@ -97,6 +98,7 @@ public class CCIConfigurationManager extends ConfigurationManager {
 
 		}
 
+		ensureTimeZoneIsSet();
 		owner = getProperty(CCIConstants.OWNER_PROPERTY);
 		appVersion = getProperty(CCIConstants.VERSION_PROPERTY);
 		workflow = getProperty(CCIConstants.WORKFLOW_PROPERTY);
@@ -450,6 +452,8 @@ public class CCIConfigurationManager extends ConfigurationManager {
 	}
 
 	public String getTimeZone() {
+		if ((timeZone == null) || (timeZone.length() == 0))
+				ensureTimeZoneIsSet();
 		return timeZone;
 	}
 
@@ -491,5 +495,27 @@ public class CCIConfigurationManager extends ConfigurationManager {
 
 	public int getNumThreads() {
 		return numThreads;
+	}
+	
+	/**
+	 * Make sure timezone is set to a valid timezone ID string
+	 */
+	private void ensureTimeZoneIsSet() {
+		// TODO: Temporary workaround to provide timezones. This
+		// handles the case whereby
+		// utility is run against a server that is not in the same
+		// time zone.
+		TimeZone tz;
+		String userSpecifiedTimeZone = this.timeZone;
+
+		if (userSpecifiedTimeZone != null && !userSpecifiedTimeZone.isEmpty()) {
+			tz = TimeZone.getTimeZone(userSpecifiedTimeZone);
+			log.info("User specified time zone recognized, using: "
+					+ tz.getDisplayName());
+		} else {
+			tz = TimeZone.getDefault();
+		}
+
+		this.setTimeZone(tz.getID());
 	}
 }

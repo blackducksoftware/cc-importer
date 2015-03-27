@@ -77,7 +77,7 @@ public class ReportTest
 		// Construct the factory that the processor will use to create
 	    // the objects (run multi-threaded) to handle each subset of the project list
 	 	ProjectProcessorThreadWorkerFactory threadWorkerFactory = 
-	 				new ProjectProcessorThreadWorkerFactoryImpl(ccsw, ccConfigManager);
+	 				new ProjectProcessorThreadWorkerFactoryImpl(ccsw, ccConfigManager, null, null);
 		CCIProcessor processor = new CCISingleServerProcessor(ccConfigManager,
 			protexConfigManager, ccsw, threadWorkerFactory);
 		processor.runReport();

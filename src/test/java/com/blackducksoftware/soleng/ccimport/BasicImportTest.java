@@ -82,7 +82,7 @@ public class BasicImportTest
 	    // Construct the factory that the processor will use to create
 	    // the objects (run multi-threaded) to handle each subset of the project list
 	 	ProjectProcessorThreadWorkerFactory threadWorkerFactory = 
-	 				new ProjectProcessorThreadWorkerFactoryImpl(ccsw, ccConfig);
+	 				new ProjectProcessorThreadWorkerFactoryImpl(ccsw, ccConfig, null, null);
 	    processor = new CCISingleServerProcessor(ccConfig, pConfig, ccsw, threadWorkerFactory);
 	} catch (Exception e)
 	{
@@ -134,7 +134,7 @@ public class BasicImportTest
 	    // Construct the factory that the processor will use to create
 	    // the objects (run multi-threaded) to handle each subset of the project list
 	 	ProjectProcessorThreadWorkerFactory threadWorkerFactory = 
-	 				new ProjectProcessorThreadWorkerFactoryImpl(ccsw, ccConfig);
+	 				new ProjectProcessorThreadWorkerFactoryImpl(ccsw, ccConfig, null, null);
 	    processor = new CCISingleServerProcessor(ccConfig, pConfig, ccsw, threadWorkerFactory);
 	} catch (Exception e)
 	{
@@ -175,7 +175,7 @@ public class BasicImportTest
 	    // Construct the factory that the processor will use to create
 	    // the objects (run multi-threaded) to handle each subset of the project list
 	 	ProjectProcessorThreadWorkerFactory threadWorkerFactory = 
-	 				new ProjectProcessorThreadWorkerFactoryImpl(ccsw, ccConfig);
+	 				new ProjectProcessorThreadWorkerFactoryImpl(ccsw, ccConfig, null, null);
 	    processor = new CCISingleServerProcessor(ccConfig, pConfig, ccsw, threadWorkerFactory);
 	} catch (Exception e)
 	{

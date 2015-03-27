@@ -6,6 +6,7 @@ import static org.junit.Assert.assertTrue;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -53,16 +54,19 @@ public class AppAdjusterIT {
 	public static final String SUPERUSER_PASSWORD = "super";
 	
 	private static final String NUMPREFIX1_ATTR_VALUE = "123456";
-	private static final String APP_NAME_STRING = "my application";
+	private static final String APP_NAME_STRING1 = "my application1";
+	private static final String APP_NAME_STRING2 = "my application2";
 	private static final String WORK_STREAM = "RC3";
-	private static String APPLICATION1_NAME = NUMPREFIX1_ATTR_VALUE + "-" + APP_NAME_STRING + "-" + WORK_STREAM + "-CURRENT";
+	private static String APPLICATION1_NAME = NUMPREFIX1_ATTR_VALUE + "-" + APP_NAME_STRING1 + "-" + WORK_STREAM + "-CURRENT";
+	private static String APPLICATION2_NAME = NUMPREFIX1_ATTR_VALUE + "-" + APP_NAME_STRING2 + "-" + WORK_STREAM + "-CURRENT";
 	
 	private static String APPLICATION_VERSION = "TestVersion";
 	private static Logger log = LoggerFactory.getLogger(AppAdjusterIT.class.getName());
 
 	public static String CONFIG_FILE = "src/test/resources/adjuster_test.properties";
 
-	private static String protexProjectIdOrig;
+	private static String protexProjectIdOrig1;
+	private static String protexProjectIdOrig2;
 	
 	@Rule
 	public ExpectedException exception = ExpectedException.none();
@@ -86,8 +90,10 @@ public class AppAdjusterIT {
 		CodeCenterServerProxyV6_6_0 cc = ccWrapper.getInternalApiWrapper().getProxy();
     	
 		ProtexServerWrapper protexServerWrapper = ProtexTestUtils.initProtexServerWrapper(protexConfigManager);
-		ProtexTestUtils.deleteProjectById(protexServerWrapper, protexProjectIdOrig);
+		ProtexTestUtils.deleteProjectById(protexServerWrapper, protexProjectIdOrig1);
+		ProtexTestUtils.deleteProjectById(protexServerWrapper, protexProjectIdOrig2);
 		TestUtils.removeApplication(cc, APPLICATION1_NAME, APPLICATION_VERSION);
+		TestUtils.removeApplication(cc, APPLICATION2_NAME, APPLICATION_VERSION);
 	}
 
 	@Test
@@ -106,16 +112,21 @@ public class AppAdjusterIT {
     	
     	// Create protex project to import into CC
     	ProtexServerWrapper protexServerWrapper = ProtexTestUtils.initProtexServerWrapper(protexConfigManager);
-		protexProjectIdOrig = ProtexTestUtils.createProject(protexServerWrapper, protexConfigManager, APPLICATION1_NAME,
+		protexProjectIdOrig1 = ProtexTestUtils.createProject(protexServerWrapper, protexConfigManager, APPLICATION1_NAME,
+				"src/test/resources/source");
+		protexProjectIdOrig2 = ProtexTestUtils.createProject(protexServerWrapper, protexConfigManager, APPLICATION2_NAME,
 				"src/test/resources/source");
     	
 		String[] args = {"-config", "config.properties", "-new-app-list-filename", NEW_APPS_LIST_FILENAME};
 		ccConfigManager.setCmdLineArgs(args);
 		
+		Object appAdjusterObject = CCIProjectImporterHarness.getAppAdjusterObject(ccWrapper, ccConfigManager);
+		Method appAdjusterMethod = CCIProjectImporterHarness.getAppAdjusterMethod(ccWrapper, ccConfigManager, appAdjusterObject);
+		
 		// Construct the factory that the processor will use to create
 		// the objects (run multi-threaded) to handle each subset of the project list
 		ProjectProcessorThreadWorkerFactory threadWorkerFactory = 
-				new ProjectProcessorThreadWorkerFactoryImpl(ccWrapper, ccConfigManager);
+				new ProjectProcessorThreadWorkerFactoryImpl(ccWrapper, ccConfigManager, appAdjusterObject, appAdjusterMethod);
     	CCISingleServerProcessor processor = new CCISingleServerProcessor(ccConfigManager, protexConfigManager, ccWrapper,
     			threadWorkerFactory);
 
@@ -129,13 +140,24 @@ public class AppAdjusterIT {
 			// Run the sync
 			processor.performSynchronize();
 
-			// Now check to see if the application(s) actually exists.
+			// Now check to see if both applications actually exists.
 			boolean exists = checkCcApp(ccWrapper, projects);
 			Assert.assertEquals(true, exists);
 			
+			// Now check to see if both applications got written to the "new apps" output file
 			BufferedReader br = new BufferedReader(new FileReader(NEW_APPS_LIST_FILENAME));
-			String line = br.readLine();
-			assertEquals(APPLICATION1_NAME, line);
+			boolean app1Listed=false;
+			boolean app2Listed=false;
+			for (int i=0; i < 2; i++) {
+				String line = br.readLine();
+				if (APPLICATION1_NAME.equals(line)) {
+					app1Listed = true;
+				} else if (APPLICATION2_NAME.equals(line)) {
+					app2Listed = true;
+				}
+			}
+			assertTrue(app1Listed);
+			assertTrue(app2Listed);
 
 		} catch (CodeCenterImportException e) {
 			Assert.fail(e.getMessage());

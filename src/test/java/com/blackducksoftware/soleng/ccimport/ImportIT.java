@@ -3,6 +3,7 @@ package com.blackducksoftware.soleng.ccimport;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -88,7 +89,7 @@ public class ImportIT {
 		// Construct the factory that the processor will use to create
 	    // the objects (run multi-threaded) to handle each subset of the project list
 	 	ProjectProcessorThreadWorkerFactory threadWorkerFactory = 
-	 				new ProjectProcessorThreadWorkerFactoryImpl(ccsw, ccConfig);
+	 				new ProjectProcessorThreadWorkerFactoryImpl(ccsw, ccConfig, null, null);
 		processor = new CCISingleServerProcessor(ccConfig, pConfig, ccsw, threadWorkerFactory);
 		
 		
@@ -111,10 +112,13 @@ public class ImportIT {
 		ccConfig = new CodeCenterConfigManager(props);
 		pConfig = new ProtexConfigManager(props);
 		
+		Object appAdjusterObject = CCIProjectImporterHarness.getAppAdjusterObject(ccsw, ccConfig);
+		Method appAdjusterMethod = CCIProjectImporterHarness.getAppAdjusterMethod(ccsw, ccConfig, appAdjusterObject);
+		
 		// Construct the factory that the processor will use to create
 	    // the objects (run multi-threaded) to handle each subset of the project list
 	 	ProjectProcessorThreadWorkerFactory threadWorkerFactory = 
-	 				new ProjectProcessorThreadWorkerFactoryImpl(ccsw, ccConfig);
+	 				new ProjectProcessorThreadWorkerFactoryImpl(ccsw, ccConfig, appAdjusterObject, appAdjusterMethod);
 		processor = new CCISingleServerProcessor(ccConfig, pConfig, ccsw, threadWorkerFactory);
 		projectId1 = ProtexTestUtils.createProject(psw, pConfig, APP_NAME1, "src/test/resources/source");
 
@@ -140,10 +144,14 @@ public class ImportIT {
 		ccConfig = new CodeCenterConfigManager(props);
 		pConfig = new ProtexConfigManager(props);
 		
+		// Switch to Mock app adjuster
+		appAdjusterObject = CCIProjectImporterHarness.getAppAdjusterObject(ccsw, ccConfig);
+		appAdjusterMethod = CCIProjectImporterHarness.getAppAdjusterMethod(ccsw, ccConfig, appAdjusterObject);
+		
 		// Construct the factory that the processor will use to create
 	    // the objects (run multi-threaded) to handle each subset of the project list
 	 	threadWorkerFactory = 
-	 				new ProjectProcessorThreadWorkerFactoryImpl(ccsw, ccConfig);
+	 				new ProjectProcessorThreadWorkerFactoryImpl(ccsw, ccConfig, appAdjusterObject, appAdjusterMethod);
 		processor = new CCISingleServerProcessor(ccConfig, pConfig, ccsw, threadWorkerFactory);
 				
 		// Change the project BOM
@@ -173,7 +181,7 @@ public class ImportIT {
 		// Construct the factory that the processor will use to create
 	    // the objects (run multi-threaded) to handle each subset of the project list
 	 	threadWorkerFactory = 
-	 				new ProjectProcessorThreadWorkerFactoryImpl(ccsw, ccConfig);
+	 				new ProjectProcessorThreadWorkerFactoryImpl(ccsw, ccConfig, null, null);
 		processor = new CCISingleServerProcessor(ccConfig, pConfig, ccsw, threadWorkerFactory);
 		
 		// Delete the app
@@ -198,7 +206,7 @@ public class ImportIT {
 		// Construct the factory that the processor will use to create
 	    // the objects (run multi-threaded) to handle each subset of the project list
 	 	ProjectProcessorThreadWorkerFactory threadWorkerFactory = 
-	 				new ProjectProcessorThreadWorkerFactoryImpl(ccsw, ccConfig);
+	 				new ProjectProcessorThreadWorkerFactoryImpl(ccsw, ccConfig, null, null);
 		processor = new CCISingleServerProcessor(ccConfig, pConfig, ccsw, threadWorkerFactory);
 		
 		projectId2 = ProtexTestUtils.createProject(psw, pConfig, APP_NAME2, "src/test/resources/source");
@@ -228,7 +236,7 @@ public class ImportIT {
 		// Construct the factory that the processor will use to create
 	    // the objects (run multi-threaded) to handle each subset of the project list
 	 	threadWorkerFactory = 
-	 				new ProjectProcessorThreadWorkerFactoryImpl(ccsw, ccConfig);
+	 				new ProjectProcessorThreadWorkerFactoryImpl(ccsw, ccConfig, null, null);
 		processor = new CCISingleServerProcessor(ccConfig, pConfig, ccsw, threadWorkerFactory);
 		
 		// Run the sync. This should clear the validation error
