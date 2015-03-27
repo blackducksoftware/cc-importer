@@ -15,6 +15,12 @@ import com.blackducksoftware.soleng.ccimporter.config.CCIConfigurationManager;
 import com.blackducksoftware.soleng.ccimporter.model.CCIApplication;
 import com.blackducksoftware.soleng.ccimporter.model.CCIProject;
 
+/**
+ * AppAdjusters make changes to each app after it is imported.
+ * Must be thread-safe.
+ * @author sbillings
+ *
+ */
 public interface AppAdjuster {
 	public void init(CodeCenterServerWrapper ccWrapper, CCIConfigurationManager config, TimeZone tz) throws CodeCenterImportException;
 	public void adjustApp(CCIApplication app, CCIProject project) throws CodeCenterImportException;

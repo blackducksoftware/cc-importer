@@ -38,6 +38,11 @@ import com.blackducksoftware.soleng.ccimporter.config.CCIConstants;
 import com.blackducksoftware.soleng.ccimporter.model.CCIApplication;
 import com.blackducksoftware.soleng.ccimporter.model.CCIProject;
 
+/**
+ * A custom appAdjuster for ccimporter.
+ * @author sbillings
+ *
+ */
 public class NumericPrefixedAppAdjuster implements AppAdjuster {
 	private static final String NEW_APP_LIST_FILENAME_CMDLINE_ARG = "--new-app-list-filename";
 
@@ -244,14 +249,18 @@ public class NumericPrefixedAppAdjuster implements AppAdjuster {
 
 		if (app.isJustCreated()) {
 			if (newAppList != null) {
-				log.info("Adding app " + app.getApp().getName() + " to list of created applications");
-				newAppList.addApp(app.getApp().getName());
-				try {
-					newAppList.save(this.newAppListFilename); // save current list, in case this is the last one
-				} catch (IOException e) {
-					String msg = "Unable to save new application list to file (" + newAppListFilename + "): " + e.getMessage();
-					log.error(msg);
-					throw new CodeCenterImportException(msg);
+				
+				// Make other threads wait while we add to, and write out (to file), newAppList
+				synchronized(newAppList) {
+					log.info("Adding app " + app.getApp().getName() + " to list of created applications");
+					newAppList.addApp(app.getApp().getName());
+					try {
+						newAppList.save(this.newAppListFilename); // save current list, in case this is the last one
+					} catch (IOException e) {
+						String msg = "Unable to save new application list to file (" + newAppListFilename + "): " + e.getMessage();
+						log.error(msg);
+						throw new CodeCenterImportException(msg);
+					}
 				}
 			}
 		}
