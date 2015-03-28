@@ -23,6 +23,7 @@ import soleng.framework.standard.protex.ProtexProjectPojo;
 import soleng.framework.standard.protex.project.SimpleProtexProjectCreator;
 
 import com.blackducksoftware.sdk.fault.SdkFault;
+import com.blackducksoftware.sdk.protex.project.CloneOption;
 import com.blackducksoftware.sdk.protex.project.codetree.CodeTreeNode;
 import com.blackducksoftware.sdk.protex.project.codetree.PartialCodeTree;
 import com.blackducksoftware.sdk.protex.project.codetree.discovery.CodeMatchDiscovery;
@@ -93,6 +94,20 @@ public class ProtexTestUtils {
 		ProjectPojo projectPojo1 = projectCreator.createProjectAsPojo(projectName, "test", false);
 		projectCreator.analyzeProject(projectPojo1, sourcePath);
 		return projectPojo1.getProjectKey();
+	}
+	
+	public static String cloneProject(ProtexServerWrapper protexServerWrapper, ConfigurationManager config, 
+			String cloneFromProjectId, String projectName) throws Exception {
+		
+//		SimpleProtexProjectCreator projectCreator = new SimpleProtexProjectCreatorImpl(config, protexServerWrapper);
+//		
+//		// create and analyze project
+//		ProjectPojo projectPojo1 = projectCreator.createProjectAsPojo(projectName, "test", false);
+//		projectCreator.analyzeProject(projectPojo1, sourcePath);
+//		return projectPojo1.getProjectKey();
+		
+		List<CloneOption> cloneOptions = new ArrayList<CloneOption>();
+		return protexServerWrapper.getInternalApiWrapper().getProjectApi().cloneProject(cloneFromProjectId, projectName, cloneOptions, false, null);
 	}
 	
 	public static void deleteProjectById(ProtexServerWrapper protexServerWrapper, String projectId) {

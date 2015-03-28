@@ -82,6 +82,9 @@ public class CCISingleServerProcessor extends CCIProcessor
 		setLastAnalyzedDates(protexWrapper, projectList);
 
 		log.info("Processing {} projects for synchronization", projectList);
+		if (projectList.size() == 0) {
+			throw new CodeCenterImportException("No valid projects were specified.");
+		}
 
 		ListDistributor distrib = new ListDistributor(numThreads,
 				projectList.size());
