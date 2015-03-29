@@ -49,7 +49,7 @@ import com.blackducksoftware.soleng.ccimporter.model.CCIProject;
 public class AppAdjusterIT {
 	
 	// parameters for multi-threaded new app list file generation test
-	private static final int NUM_THREADS = 20;
+	private static final int NUM_THREADS = 20; // 20 is a pretty good test; 3/29/2015: successfully tested 100 
 	private static final int APP_COUNT = NUM_THREADS*2;
 
 	private static final String NEW_APPS_LIST_FILENAME = "unit_test_new_apps.txt";
@@ -216,7 +216,7 @@ public class AppAdjusterIT {
 	private Properties createPropertiesManyThreads(int numThreads) {
 		Properties props = createBasicProperties();
 		props.setProperty("app.adjuster.classname", "com.blackducksoftware.soleng.ccimport.appadjuster.custom.NumericPrefixedAppAdjuster");
-		
+		props.setProperty("num.threads", Integer.toString(numThreads));
 		props.setProperty("numprefixed.app.attribute.numericprefix", CUSTOM_ATTR);
 		props.setProperty("numprefixed.app.attribute.analyzeddate", "null");
 		props.setProperty("numprefixed.app.attribute.workstream", "null");
