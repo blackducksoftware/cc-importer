@@ -24,7 +24,7 @@ import soleng.framework.standard.codecenter.CodeCenterServerWrapper;
 import com.blackducksoftware.sdk.codecenter.application.data.Application;
 import com.blackducksoftware.sdk.codecenter.application.data.ApplicationIdToken;
 import com.blackducksoftware.sdk.codecenter.attribute.data.AttributeIdToken;
-import com.blackducksoftware.sdk.codecenter.client.util.CodeCenterServerProxyV6_6_0;
+import com.blackducksoftware.sdk.codecenter.client.util.CodeCenterServerProxyV7_0;
 import com.blackducksoftware.sdk.codecenter.common.data.AttributeValue;
 import com.blackducksoftware.soleng.ccimport.TestUtils;
 import com.blackducksoftware.soleng.ccimport.appadjuster.custom.NumericPrefixedAppAdjuster;
@@ -80,7 +80,7 @@ public class NumericPrefixedAppAdjusterIT {
 		bean.setPassword(SUPERUSER_PASSWORD);
 		
 		CodeCenterServerWrapper ccWrapper = new CodeCenterServerWrapper(bean, ccConfigManager);
-		CodeCenterServerProxyV6_6_0 cc = ccWrapper.getInternalApiWrapper().getProxy();
+		CodeCenterServerProxyV7_0 cc = ccWrapper.getInternalApiWrapper().getProxy();
     	
 		TestUtils.removeApplication(cc, APPLICATION1_NAME, APPLICATION_VERSION);
 		TestUtils.removeApplication(cc, APPLICATION1a_NAME, APPLICATION_VERSION);
@@ -109,7 +109,7 @@ public class NumericPrefixedAppAdjusterIT {
 		bean.setPassword(SUPERUSER_PASSWORD);
 		
 		CodeCenterServerWrapper ccWrapper = new CodeCenterServerWrapper(bean, ccConfigManager);
-		CodeCenterServerProxyV6_6_0 cc = ccWrapper.getInternalApiWrapper().getProxy();
+		CodeCenterServerProxyV7_0 cc = ccWrapper.getInternalApiWrapper().getProxy();
 
     	TestUtils.createUser(cc, USER1_USERNAME, USER_PASSWORD);
     	ApplicationIdToken appIdToken = TestUtils.createApplication(cc, APPLICATION1_NAME, APPLICATION_VERSION, USER1_USERNAME, USER_ROLE1,
@@ -159,7 +159,7 @@ public class NumericPrefixedAppAdjusterIT {
 		bean.setPassword(SUPERUSER_PASSWORD);
 		
 		CodeCenterServerWrapper ccWrapper = new CodeCenterServerWrapper(bean, ccConfigManager);
-		CodeCenterServerProxyV6_6_0 cc = ccWrapper.getInternalApiWrapper().getProxy();
+		CodeCenterServerProxyV7_0 cc = ccWrapper.getInternalApiWrapper().getProxy();
 
     	TestUtils.createUser(cc, USER1a_USERNAME, USER_PASSWORD);
     	ApplicationIdToken appIdToken = TestUtils.createApplication(cc, APPLICATION1a_NAME, APPLICATION_VERSION, USER1a_USERNAME, USER_ROLE1,
@@ -210,7 +210,7 @@ public class NumericPrefixedAppAdjusterIT {
 		bean.setPassword(SUPERUSER_PASSWORD);
 		
 		CodeCenterServerWrapper ccWrapper = new CodeCenterServerWrapper(bean, ccConfigManager);
-		CodeCenterServerProxyV6_6_0 cc = ccWrapper.getInternalApiWrapper().getProxy();
+		CodeCenterServerProxyV7_0 cc = ccWrapper.getInternalApiWrapper().getProxy();
     	
     	TestUtils.createUser(cc, USER2_USERNAME, USER_PASSWORD);
     	ApplicationIdToken appIdToken = TestUtils.createApplication(cc, APPLICATION2_NAME, APPLICATION_VERSION, USER2_USERNAME, USER_ROLE1,
@@ -262,7 +262,7 @@ public class NumericPrefixedAppAdjusterIT {
 		bean.setPassword(SUPERUSER_PASSWORD);
 		
 		CodeCenterServerWrapper ccWrapper = new CodeCenterServerWrapper(bean, ccConfigManager);
-		CodeCenterServerProxyV6_6_0 cc = ccWrapper.getInternalApiWrapper().getProxy();
+		CodeCenterServerProxyV7_0 cc = ccWrapper.getInternalApiWrapper().getProxy();
     	
     	TestUtils.createUser(cc, USER2a_USERNAME, USER_PASSWORD);
     	ApplicationIdToken appIdToken = TestUtils.createApplication(cc, APPLICATION2a_NAME, APPLICATION_VERSION, USER2a_USERNAME, USER_ROLE1,
@@ -314,7 +314,7 @@ public class NumericPrefixedAppAdjusterIT {
 		bean.setPassword(SUPERUSER_PASSWORD);
 		
 		CodeCenterServerWrapper ccWrapper = new CodeCenterServerWrapper(bean, ccConfigManager);
-		CodeCenterServerProxyV6_6_0 cc = ccWrapper.getInternalApiWrapper().getProxy();
+		CodeCenterServerProxyV7_0 cc = ccWrapper.getInternalApiWrapper().getProxy();
     	
     	TestUtils.createUser(cc, USER3_USERNAME, USER_PASSWORD);
     	ApplicationIdToken appIdToken = TestUtils.createApplication(cc, APPLICATION3_NAME, APPLICATION_VERSION, USER3_USERNAME, USER_ROLE1,

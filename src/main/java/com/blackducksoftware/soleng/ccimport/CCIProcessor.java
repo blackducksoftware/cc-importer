@@ -152,7 +152,7 @@ public abstract class CCIProcessor
 	for(CCIProject project : projectList)
 	{
 	    try{
-		Date refreshDate = protexWrapper.getInternalApiWrapper().bomApi.getLastBomRefreshFinishDate(project.getProjectKey());
+		Date refreshDate = protexWrapper.getInternalApiWrapper().getBomApi().getLastBomRefreshFinishDate(project.getProjectKey());
 		project.setLastBOMRefreshDate(refreshDate);
 	    } catch (Exception e)
 	    {

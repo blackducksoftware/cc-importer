@@ -11,9 +11,9 @@ import soleng.framework.standard.codecenter.pojo.ComponentPojo;
 import soleng.framework.standard.codecenter.pojo.ComponentPojoImpl;
 import soleng.framework.standard.common.ProjectPojo;
 
-import com.blackducksoftware.sdk.protex.common.Component;
 import com.blackducksoftware.sdk.protex.common.ComponentType;
 import com.blackducksoftware.sdk.protex.project.bom.BomComponent;
+import com.blackducksoftware.sdk.protex.common.ComponentInfo;
 
 public class ProtexComponentCollector extends ComponentCollector {
 	private static Logger log = LoggerFactory
@@ -39,29 +39,29 @@ public class ProtexComponentCollector extends ComponentCollector {
 
 		String projectIdFromProtex = protexProject.getProjectKey();
 		
-		List<BomComponent> bomComps = protexWrapper.getInternalApiWrapper().bomApi.getBomComponents(protexProjectId);
+		List<BomComponent> bomComps = protexWrapper.getInternalApiWrapper().getBomApi().getBomComponents(protexProjectId);
 		compPojoList = new TreeSet<ComponentPojo>();
 		for(BomComponent bomcomponent : bomComps)
 		{
 
-			Component component = protexWrapper.getInternalApiWrapper().projectApi.getComponentById(protexProjectId, 
-					bomcomponent.getComponentId());
+			ComponentInfo componentInfo = protexWrapper.getInternalApiWrapper().getProjectApi().getComponentByKey(protexProjectId, 
+					bomcomponent.getComponentKey());
 		
-			log.debug("Comp " + component.getName() + ": Comp Type: " + component.getType());
-			log.debug("Comp " + component.getName() + ": BomComp Type: " + bomcomponent.getType());
-			log.debug("Comp " + component.getName() + ": BomComp VersionID: " + bomcomponent.getVersionId());
+			log.debug("Comp " + componentInfo.getComponentName() + ": Comp Type: " + componentInfo.getComponentType());
+			log.debug("Comp " + componentInfo.getComponentName() + ": BomComp Type: " + bomcomponent.getType());
+			log.debug("Comp " + componentInfo.getComponentName() + ": BomComp VersionName: " + bomcomponent.getVersionName());
 			
-			log.debug("\tBomComp approval state: " + bomcomponent.getApprovalInfo().getApproved().name());
-			log.debug("\tBomComp file count identified: " + bomcomponent.getFileCountIdentified());
-			log.debug("\tBomComp file count rapidId identified: " + bomcomponent.getFileCountRapidIdIdentifications());	
+//			log.debug("\tBomComp approval state: " + bomcomponent.getApprovalInfo().getApproved().name());
+//			log.debug("\tBomComp file count identified: " + bomcomponent.getFileCountIdentified());
+//			log.debug("\tBomComp file count rapidId identified: " + bomcomponent.getFileCountRapidIdIdentifications());	
 			
-			if (component.getType() == ComponentType.PROJECT) {
+			if (componentInfo.getComponentType() == ComponentType.PROJECT) {
 				continue;
 			}
-			ComponentPojo compPojo = new ComponentPojoImpl(bomcomponent.getComponentId(),
-					component.getName(),
+			ComponentPojo compPojo = new ComponentPojoImpl(bomcomponent.getComponentKey().getComponentId(),
+					componentInfo.getComponentName(),
 					bomcomponent.getBomVersionName(),
-					bomcomponent.getComponentId());
+					bomcomponent.getComponentKey().getComponentId());
 			compPojoList.add(compPojo);
 		}
 	}

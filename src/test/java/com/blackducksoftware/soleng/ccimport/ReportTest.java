@@ -11,7 +11,7 @@ import org.junit.contrib.java.lang.system.ExpectedSystemExit;
 
 import soleng.framework.core.config.server.ServerBean;
 
-import com.blackducksoftware.sdk.codecenter.client.util.CodeCenterServerProxyV6_6_0;
+import com.blackducksoftware.sdk.codecenter.client.util.CodeCenterServerProxyV7_0;
 import com.blackducksoftware.soleng.ccimporter.config.CodeCenterConfigManager;
 import com.blackducksoftware.soleng.ccimporter.config.ProtexConfigManager;
 
@@ -31,7 +31,7 @@ public class ReportTest
 	private static String USER1_USERNAME = "JUnit_ccimporter_report_user1";
 	private static String USER1_PASSWORD = "password";
 	private static final String USER_ROLE1 = "Application Developer";
-	private static CodeCenterServerProxyV6_6_0 cc;
+	private static CodeCenterServerProxyV7_0 cc;
 	
     @Rule
     public final ExpectedSystemExit exit = ExpectedSystemExit.none();
@@ -42,7 +42,7 @@ public class ReportTest
 
     @BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		cc = new CodeCenterServerProxyV6_6_0(
+		cc = new CodeCenterServerProxyV7_0(
 				CC_URL, SUPERUSER_USERNAME, SUPERUSER_PASSWORD, TestUtils.CONNECTION_TIMEOUT);
 	}
 

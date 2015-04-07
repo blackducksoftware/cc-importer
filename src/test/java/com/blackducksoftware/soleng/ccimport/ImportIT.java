@@ -155,7 +155,7 @@ public class ImportIT {
 		processor = new CCISingleServerProcessor(ccConfig, pConfig, ccsw, threadWorkerFactory);
 				
 		// Change the project BOM
-		ProtexTestUtils.makeSomeMatches(pConfig, APP_NAME1, true);
+		ProtexTestUtils.makeSomeIds(pConfig, APP_NAME1, true);
 
 		// Run sync
 		int lastAdjusterCount = MockAppAdjuster.getAdjustAppCalledCount();
@@ -222,7 +222,7 @@ public class ImportIT {
 		CcTestUtils.checkApplication(ccsw, APP_NAME2, APP_VERSION, APP_DESCRIPTION, false, null, true);
 		
 		// Change the project BOM
-		ProtexTestUtils.makeSomeMatches(pConfig, APP_NAME2, true);
+		ProtexTestUtils.makeSomeIds(pConfig, APP_NAME2, true);
 		
 		// Run the sync to create the app; this should leave validation status = ERROR
 		processor.performSynchronize();

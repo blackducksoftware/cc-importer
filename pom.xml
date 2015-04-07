@@ -4,7 +4,7 @@
 
 	<groupId>com.blackducksoftware.soleng</groupId>
 	<artifactId>cc-importer</artifactId>
-	<version>1.2.5</version>
+	<version>1.3.0-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<name>cc-importer</name>
@@ -57,20 +57,10 @@
 
 		<dependency>
 			<groupId>com.blackducksoftware.soleng</groupId>
-			<artifactId>common-framework</artifactId>
-			<version>1.4.1</version>
-		</dependency>
-		<dependency>
-			<groupId>com.blackducksoftware.soleng</groupId>
-			<artifactId>cf-6x-connector</artifactId>
-			<version>1.0.1</version>
+			<artifactId>cf-7x-connector</artifactId>
+			<version>1.2.1-SNAPSHOT</version>
 		</dependency>
 
-		<dependency>
-			<groupId>com.blackducksoftware.soleng</groupId>
-			<artifactId>cc-report</artifactId>
-			<version>1.0.1</version>
-		</dependency>
 	</dependencies>
 
 	<build>

@@ -44,7 +44,7 @@ import com.blackducksoftware.sdk.codecenter.fault.SdkFault;
 import com.blackducksoftware.sdk.codecenter.request.data.RequestApplicationComponentToken;
 import com.blackducksoftware.sdk.codecenter.request.data.RequestCreate;
 import com.blackducksoftware.sdk.codecenter.request.data.RequestIdToken;
-import com.blackducksoftware.sdk.codecenter.user.data.RoleNameToken;
+import com.blackducksoftware.sdk.codecenter.role.data.RoleNameToken;
 import com.blackducksoftware.sdk.codecenter.user.data.UserNameToken;
 import com.blackducksoftware.soleng.ccimporter.config.CodeCenterConfigManager;
 

@@ -24,7 +24,7 @@ import com.blackducksoftware.sdk.codecenter.application.data.Application;
 import com.blackducksoftware.sdk.codecenter.application.data.ApplicationUpdate;
 import com.blackducksoftware.sdk.codecenter.attribute.data.AttributeIdToken;
 import com.blackducksoftware.sdk.codecenter.attribute.data.AttributeNameToken;
-import com.blackducksoftware.sdk.codecenter.client.util.CodeCenterServerProxyV6_6_0;
+import com.blackducksoftware.sdk.codecenter.client.util.CodeCenterServerProxyV7_0;
 import com.blackducksoftware.sdk.codecenter.common.data.AttributeValue;
 import com.blackducksoftware.sdk.codecenter.fault.SdkFault;
 import com.blackducksoftware.soleng.ccimport.CCIMultiServerProcessor;

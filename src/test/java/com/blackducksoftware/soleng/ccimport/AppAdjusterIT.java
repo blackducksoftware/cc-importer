@@ -33,7 +33,7 @@ import com.blackducksoftware.sdk.codecenter.application.data.ApplicationNameVers
 import com.blackducksoftware.sdk.codecenter.application.data.ApplicationPageFilter;
 import com.blackducksoftware.sdk.codecenter.application.data.Project;
 import com.blackducksoftware.sdk.codecenter.attribute.data.AttributeIdToken;
-import com.blackducksoftware.sdk.codecenter.client.util.CodeCenterServerProxyV6_6_0;
+import com.blackducksoftware.sdk.codecenter.client.util.CodeCenterServerProxyV7_0;
 import com.blackducksoftware.sdk.codecenter.common.data.AttributeValue;
 import com.blackducksoftware.soleng.ccimport.exception.CodeCenterImportException;
 import com.blackducksoftware.soleng.ccimporter.config.CodeCenterConfigManager;
@@ -101,7 +101,7 @@ public class AppAdjusterIT {
 		bean.setPassword(SUPERUSER_PASSWORD);
 		
 		CodeCenterServerWrapper ccWrapper = new CodeCenterServerWrapper(bean, ccConfigManager);
-		CodeCenterServerProxyV6_6_0 cc = ccWrapper.getInternalApiWrapper().getProxy();
+		CodeCenterServerProxyV7_0 cc = ccWrapper.getInternalApiWrapper().getProxy();
     	
 		ProtexServerWrapper protexServerWrapper = ProtexTestUtils.initProtexServerWrapper(protexConfigManager);
 		for (String protexProjectId : protexProjectIds) {
@@ -127,7 +127,7 @@ public class AppAdjusterIT {
 		bean.setPassword(SUPERUSER_PASSWORD);
 		
 		CodeCenterServerWrapper ccWrapper = new CodeCenterServerWrapper(bean, ccConfigManager);
-		CodeCenterServerProxyV6_6_0 cc = ccWrapper.getInternalApiWrapper().getProxy();
+		CodeCenterServerProxyV7_0 cc = ccWrapper.getInternalApiWrapper().getProxy();
     	
     	// Create protex project to import into CC
     	ProtexServerWrapper protexServerWrapper = ProtexTestUtils.initProtexServerWrapper(protexConfigManager);
@@ -255,7 +255,7 @@ public class AppAdjusterIT {
 		bean.setPassword(SUPERUSER_PASSWORD);
 		
 		CodeCenterServerWrapper ccWrapper = new CodeCenterServerWrapper(bean, ccConfigManager);
-		CodeCenterServerProxyV6_6_0 cc = ccWrapper.getInternalApiWrapper().getProxy();
+		CodeCenterServerProxyV7_0 cc = ccWrapper.getInternalApiWrapper().getProxy();
     	
     	// Create protex projects to import into CC
     	ProtexServerWrapper protexServerWrapper = ProtexTestUtils.initProtexServerWrapper(protexConfigManager);

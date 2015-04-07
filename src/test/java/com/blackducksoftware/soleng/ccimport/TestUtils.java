@@ -23,13 +23,13 @@ import com.blackducksoftware.sdk.codecenter.attribute.data.AttributeGroupPageFil
 import com.blackducksoftware.sdk.codecenter.attribute.data.AttributeGroupTypeEnum;
 import com.blackducksoftware.sdk.codecenter.attribute.data.AttributeNameToken;
 import com.blackducksoftware.sdk.codecenter.attribute.data.AttributePageFilter;
-import com.blackducksoftware.sdk.codecenter.client.util.CodeCenterServerProxyV6_6_0;
+import com.blackducksoftware.sdk.codecenter.client.util.CodeCenterServerProxyV7_0;
 import com.blackducksoftware.sdk.codecenter.common.data.AttributeValue;
 import com.blackducksoftware.sdk.codecenter.common.data.UserRolePageFilter;
 import com.blackducksoftware.sdk.codecenter.fault.SdkFault;
-import com.blackducksoftware.sdk.codecenter.user.data.RoleAssignment;
-import com.blackducksoftware.sdk.codecenter.user.data.RoleNameOrIdToken;
-import com.blackducksoftware.sdk.codecenter.user.data.RoleNameToken;
+import com.blackducksoftware.sdk.codecenter.role.data.ApplicationRoleAssignment;
+import com.blackducksoftware.sdk.codecenter.role.data.RoleNameOrIdToken;
+import com.blackducksoftware.sdk.codecenter.role.data.RoleNameToken;
 import com.blackducksoftware.sdk.codecenter.user.data.User;
 import com.blackducksoftware.sdk.codecenter.user.data.UserCreate;
 import com.blackducksoftware.sdk.codecenter.user.data.UserNameOrIdToken;
@@ -39,7 +39,7 @@ public class TestUtils {
 	public static final Long CONNECTION_TIMEOUT = 120 * 1000L;
 	public static final String REQUIRED_ATTRNAME = "Sample Textfield";
 
-	public static ApplicationIdToken createApplication(CodeCenterServerProxyV6_6_0 cc, String appName,
+	public static ApplicationIdToken createApplication(CodeCenterServerProxyV7_0 cc, String appName,
 			String appVersion, 
 			String applicationOwner,
 			String userRole,
@@ -68,11 +68,11 @@ public class TestUtils {
 		return cc.getApplicationApi().createApplication(appCreateBean);
 	}
 	
-	public static Application getApplication(CodeCenterServerProxyV6_6_0 cc, ApplicationIdToken idToken) throws SdkFault {
+	public static Application getApplication(CodeCenterServerProxyV7_0 cc, ApplicationIdToken idToken) throws SdkFault {
 		return cc.getApplicationApi().getApplication(idToken);
 	}
 	
-	public static void setAppCustomAttributeTextField(CodeCenterServerProxyV6_6_0 cc, Application app, String attrName, String attrValue)
+	public static void setAppCustomAttributeTextField(CodeCenterServerProxyV7_0 cc, Application app, String attrName, String attrValue)
 			 throws SdkFault {
 		
 		System.out.println("Setting app custom attr text field");
@@ -112,7 +112,7 @@ public class TestUtils {
         
 	}
 	
-	public static void removeApplication(CodeCenterServerProxyV6_6_0 cc, String appName, String appVersion) {
+	public static void removeApplication(CodeCenterServerProxyV7_0 cc, String appName, String appVersion) {
 		System.out.println("Removing application " + appName + " / " + appVersion);
 		
 		ApplicationNameVersionToken appToken = new ApplicationNameVersionToken();
@@ -126,7 +126,7 @@ public class TestUtils {
 		}
 	}
 	
-	public static ApplicationIdToken createApplicationWithAttrValue(CodeCenterServerProxyV6_6_0 cc,
+	public static ApplicationIdToken createApplicationWithAttrValue(CodeCenterServerProxyV7_0 cc,
 			String applicationName, String applicationVersion,
 			String applicationOwner, String applicationRole,
 			String attrName, String attrValue) throws SdkFault {
@@ -167,7 +167,7 @@ public class TestUtils {
             return appId;
 	}
 	
-	public static boolean isUserAssignedToApp(CodeCenterServerProxyV6_6_0 cc, String appName, String appVersion,
+	public static boolean isUserAssignedToApp(CodeCenterServerProxyV7_0 cc, String appName, String appVersion,
 			String user) throws SdkFault {
 		
 		ApplicationNameVersionToken appToken = new ApplicationNameVersionToken();
@@ -177,7 +177,7 @@ public class TestUtils {
 		UserRolePageFilter filter = new UserRolePageFilter();
 		filter.setFirstRowIndex(0);
 		filter.setLastRowIndex(Integer.MAX_VALUE);
-		List<RoleAssignment> roles = cc.getApplicationApi().searchUserInApplicationTeam(appToken, user, filter);
+		List<ApplicationRoleAssignment> roles = cc.getApplicationApi().searchUserInApplicationTeam(appToken, user, filter);
 		if (roles.size() > 0) {
 			return true;
 		}
@@ -185,7 +185,7 @@ public class TestUtils {
 		
 	}
 	
-	public static void removeUserFromAppAndCc(CodeCenterServerProxyV6_6_0 cc, String appName, String appVersion,
+	public static void removeUserFromAppAndCc(CodeCenterServerProxyV7_0 cc, String appName, String appVersion,
 			String user,
 			String[] userRolesToRemove) throws Exception {
 		System.out.println("Removing user " + user + " from app " + appName +
@@ -218,7 +218,7 @@ public class TestUtils {
 		}
 	}
 	
-	public static void addUserToApplication(CodeCenterServerProxyV6_6_0 cc, String appName, String appVersion,
+	public static void addUserToApplication(CodeCenterServerProxyV7_0 cc, String appName, String appVersion,
 			String username, String role) throws Exception {
 		
 		ApplicationNameVersionToken appToken = new ApplicationNameVersionToken();
@@ -246,7 +246,7 @@ public class TestUtils {
 				applicationRoleIds);
 	}
 	
-	public static void removeUserFromCc(CodeCenterServerProxyV6_6_0 cc, String userName) {
+	public static void removeUserFromCc(CodeCenterServerProxyV7_0 cc, String userName) {
 		System.out.println("Removing user " + userName);
 		UserNameToken userToken = new UserNameToken();
 		userToken.setName(userName);
@@ -257,7 +257,7 @@ public class TestUtils {
 		}
 	}
 	
-	public static void createUser(CodeCenterServerProxyV6_6_0 cc, String username, String password) throws SdkFault {
+	public static void createUser(CodeCenterServerProxyV7_0 cc, String username, String password) throws SdkFault {
 		System.out.println("Creating user " + username);
 		
         UserCreate uc = new UserCreate();

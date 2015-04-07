@@ -24,7 +24,7 @@ import soleng.framework.standard.codecenter.CodeCenterServerWrapper;
 import com.blackducksoftware.sdk.codecenter.application.data.Application;
 import com.blackducksoftware.sdk.codecenter.application.data.ApplicationIdToken;
 import com.blackducksoftware.sdk.codecenter.attribute.data.AttributeIdToken;
-import com.blackducksoftware.sdk.codecenter.client.util.CodeCenterServerProxyV6_6_0;
+import com.blackducksoftware.sdk.codecenter.client.util.CodeCenterServerProxyV7_0;
 import com.blackducksoftware.sdk.codecenter.common.data.AttributeValue;
 import com.blackducksoftware.soleng.ccimport.TestUtils;
 import com.blackducksoftware.soleng.ccimport.appadjuster.custom.NumericPrefixedAppAdjuster;
@@ -70,7 +70,7 @@ public class NumericPrefixAppAdjusterAppEditUrlIT {
 		bean.setPassword(SUPERUSER_PASSWORD);
 		
 		CodeCenterServerWrapper ccWrapper = new CodeCenterServerWrapper(bean, ccConfigManager);
-		CodeCenterServerProxyV6_6_0 cc = ccWrapper.getInternalApiWrapper().getProxy();
+		CodeCenterServerProxyV7_0 cc = ccWrapper.getInternalApiWrapper().getProxy();
     	
 		TestUtils.removeApplication(cc, APPLICATION1_NAME, APPLICATION_VERSION);
 	}
@@ -90,7 +90,7 @@ public class NumericPrefixAppAdjusterAppEditUrlIT {
 		bean.setPassword(SUPERUSER_PASSWORD);
 		
 		CodeCenterServerWrapper ccWrapper = new CodeCenterServerWrapper(bean, ccConfigManager);
-		CodeCenterServerProxyV6_6_0 cc = ccWrapper.getInternalApiWrapper().getProxy();
+		CodeCenterServerProxyV7_0 cc = ccWrapper.getInternalApiWrapper().getProxy();
 
     	ApplicationIdToken appIdToken = TestUtils.createApplication(cc, APPLICATION1_NAME, APPLICATION_VERSION, OWNER, USER_ROLE1,
     			TestUtils.REQUIRED_ATTRNAME, "test");

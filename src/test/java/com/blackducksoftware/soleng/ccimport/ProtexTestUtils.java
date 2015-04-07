@@ -23,9 +23,9 @@ import soleng.framework.standard.protex.ProtexProjectPojo;
 import soleng.framework.standard.protex.project.SimpleProtexProjectCreator;
 
 import com.blackducksoftware.sdk.fault.SdkFault;
+import com.blackducksoftware.sdk.protex.obligation.ObligationCategory;
 import com.blackducksoftware.sdk.protex.project.CloneOption;
 import com.blackducksoftware.sdk.protex.project.codetree.CodeTreeNode;
-import com.blackducksoftware.sdk.protex.project.codetree.PartialCodeTree;
 import com.blackducksoftware.sdk.protex.project.codetree.discovery.CodeMatchDiscovery;
 import com.blackducksoftware.sdk.protex.project.codetree.discovery.Discovery;
 import com.blackducksoftware.sdk.protex.user.User;
@@ -107,7 +107,9 @@ public class ProtexTestUtils {
 //		return projectPojo1.getProjectKey();
 		
 		List<CloneOption> cloneOptions = new ArrayList<CloneOption>();
-		return protexServerWrapper.getInternalApiWrapper().getProjectApi().cloneProject(cloneFromProjectId, projectName, cloneOptions, false, null);
+		List<ObligationCategory> includeFulfillmentOnObligationCategories = new ArrayList<ObligationCategory>();
+		return protexServerWrapper.getInternalApiWrapper().getProjectApi().cloneProject(cloneFromProjectId, projectName, cloneOptions,
+				includeFulfillmentOnObligationCategories);
 	}
 	
 	public static void deleteProjectById(ProtexServerWrapper protexServerWrapper, String projectId) {
@@ -130,7 +132,7 @@ public class ProtexTestUtils {
 		return protexServerWrapper;
 	}
 	
-	public static void makeSomeMatches(ConfigurationManager config,
+	public static void makeSomeIds(ConfigurationManager config,
 			String projectName, boolean includeBomRefresh) throws Exception {		
 		Identifier identifier = new DeclareIdentifier("test");
 		ProtexIdUtils idUtils = new ProtexIdUtils(config, identifier,
@@ -142,24 +144,17 @@ public class ProtexTestUtils {
 	
 	
 	private static void makeIdentifications(ProtexIdUtils codeMatchUtils) throws Exception {
-
-		String path = "/";
-		PartialCodeTree fullTreeFiles = 
-				codeMatchUtils.getAllCodeTreeFiles(path);
-		
-		PartialCodeTree rootDir = 
-				codeMatchUtils.getCodeTreeDir(path);
+		List<CodeTreeNode> codeTreeNodes = codeMatchUtils.getAllCodeTreeNodes();
 	
-		boolean keepGoing = codeMatchUtils.hasPendingIds(rootDir);
+		boolean keepGoing = codeMatchUtils.hasPendingIds();
 		while (keepGoing) {
-			doIt(codeMatchUtils, path, fullTreeFiles);
-			keepGoing = codeMatchUtils.isMultiPassIdStrategy() && codeMatchUtils.hasPendingIds(rootDir);
+			makeIds(codeMatchUtils, "/", codeTreeNodes);
+			keepGoing = codeMatchUtils.isMultiPassIdStrategy() && codeMatchUtils.hasPendingIds();
 		}
 		codeMatchUtils.refreshBom();
 	}
 	
-	private static void doIt(ProtexIdUtils codeMatchUtils, String path, PartialCodeTree fullTreeFiles) throws SdkFault {
-		List<CodeTreeNode> fileNodes = fullTreeFiles.getNodes();
+	private static void makeIds(ProtexIdUtils codeMatchUtils, String path, List<CodeTreeNode> fileNodes) throws SdkFault {
 		List<CodeMatchDiscovery> codeMatchDiscoveries = collectDiscoveries(codeMatchUtils,
 				path, fileNodes);
 		Map<String, List<CodeMatchDiscovery>> discoveryListMap = 
