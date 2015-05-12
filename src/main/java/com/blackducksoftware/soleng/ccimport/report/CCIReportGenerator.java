@@ -270,8 +270,9 @@ public class CCIReportGenerator {
     	
 		ComponentCollector ccComponentCollector;
 		try {
-			ApplicationDataDao ccDao = new CodeCenterDao(codeCenterWrapper, 1, false);
-	    	ccComponentCollector = new CodeCenterComponentCollector(ccDao, ccApp.getId().getId());
+			ApplicationDataDao ccDao = new CodeCenterDao(codeCenterWrapper, false,
+					ccApp);
+	    	ccComponentCollector = new CodeCenterComponentCollector(ccDao);
 		} catch (com.blackducksoftware.sdk.codecenter.fault.SdkFault e) {
 			throw new SdkFault(e.getMessage());
 		}

@@ -18,8 +18,8 @@ public class CodeCenterComponentCollector extends ComponentCollector {
 		    .getLogger(CodeCenterComponentCollector.class.getName());
 	private ApplicationDataDao dao;
 
-	public CodeCenterComponentCollector(ApplicationDataDao dao, String appId) throws Exception {
+	public CodeCenterComponentCollector(ApplicationDataDao dao) throws Exception {
 		this.dao = dao;
-		compPojoList = dao.getComponents(appId);
+		compPojoList = dao.getComponentsSorted();
 	}
 }
