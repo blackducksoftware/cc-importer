@@ -68,12 +68,12 @@ public class CcTestUtils {
 		token.setName(appName);
 		token.setVersion(appVersion);
 		try {
-			ccServerWrapper.getInternalApiWrapper().applicationApi.lockApplication(token, false);
+			ccServerWrapper.getInternalApiWrapper().getApplicationApi().lockApplication(token, false);
 		} catch (SdkFault e) {
 			System.out.println("Error unlocking cloned CC app (prior to deleting it)");
 		}
 		try {
-			ccServerWrapper.getInternalApiWrapper().applicationApi.deleteApplication(token);
+			ccServerWrapper.getInternalApiWrapper().getApplicationApi().deleteApplication(token);
 		} catch (SdkFault e) {
 			System.out.println("Error deleting cloned CC app");
 		}
@@ -134,7 +134,7 @@ public class CcTestUtils {
 			appCreate.getAttributeValues().addAll(attributesValues);
 		}
 
-		ApplicationIdToken token = ccServerWrapper.getInternalApiWrapper().applicationApi.createApplication(appCreate);
+		ApplicationIdToken token = ccServerWrapper.getInternalApiWrapper().getApplicationApi().createApplication(appCreate);
 		return token.getId();
 	}
 	
@@ -162,7 +162,7 @@ public class CcTestUtils {
         createRequest.setApplicationComponentToken(request);
         createRequest.setSubmit(true);
         
-        RequestIdToken requestId = ccServerWrapper.getInternalApiWrapper().requestApi.createRequest(createRequest);
+        RequestIdToken requestId = ccServerWrapper.getInternalApiWrapper().getRequestApi().createRequest(createRequest);
 		
 	}
 	
@@ -204,7 +204,7 @@ public class CcTestUtils {
 		ApplicationNameVersionToken token = new ApplicationNameVersionToken();
 		token.setName(appName);
 		token.setVersion(appVersion);
-		Application app = ccServerWrapper.getInternalApiWrapper().applicationApi.getApplication(token);
+		Application app = ccServerWrapper.getInternalApiWrapper().getApplicationApi().getApplication(token);
 		assertEquals(appName, app.getName());
 		if (appDescription != null) {
 			assertEquals(appDescription, app.getDescription());
@@ -231,7 +231,7 @@ public class CcTestUtils {
 		token.setName(appName);
 		token.setVersion(appVersion);
 		try {
-			Application app = ccServerWrapper.getInternalApiWrapper().applicationApi.getApplication(token);
+			Application app = ccServerWrapper.getInternalApiWrapper().getApplicationApi().getApplication(token);
 			fail("Application " + app.getName() + " / " + app.getVersion() + " should not exist");
 		} catch (SdkFault e) {
 			System.out.println("As expected, got error checking on app that should not exist: " + e.getMessage());
@@ -245,7 +245,7 @@ public class CcTestUtils {
 		Map<String, String> actualAttrValuesMap = new HashMap<String, String>();
 		for (AttributeValue actualAttrValue : actualAttrValues) {
 			AttributeNameOrIdToken actualAttrIdToken = actualAttrValue.getAttributeId();
-			AbstractAttribute actualAttrDef = ccServerWrapper.getInternalApiWrapper().attributeApi.getAttribute(actualAttrIdToken);
+			AbstractAttribute actualAttrDef = ccServerWrapper.getInternalApiWrapper().getAttributeApi().getAttribute(actualAttrIdToken);
 
 			String actualAttrName = actualAttrDef.getName();
 			actualAttrValuesMap.put(actualAttrName, actualAttrValue.getValues().get(0));
@@ -262,7 +262,7 @@ public class CcTestUtils {
 //	public static void confirmByAppIdLocked(CodeCenterServerWrapper ccServerWrapper, String appId) throws Exception {
 //		ApplicationIdToken token = new ApplicationIdToken();
 //		token.setId(appId);
-//		Application app = ccServerWrapper.getInternalApiWrapper().applicationApi.getApplication(token);
+//		Application app = ccServerWrapper.getInternalApiWrapper().getApplicationApi().getApplication(token);
 //		assertTrue(app.isLocked());
 //	}
 //	
@@ -270,7 +270,7 @@ public class CcTestUtils {
 //		ApplicationNameVersionToken token = new ApplicationNameVersionToken();
 //		token.setName(appName);
 //		token.setVersion(appVersion);
-//		Application app = ccServerWrapper.getInternalApiWrapper().applicationApi.getApplication(token);
+//		Application app = ccServerWrapper.getInternalApiWrapper().getApplicationApi().getApplication(token);
 //		
 //		String appId = app.getId().getId();
 //		confirmByAppIdLocked(ccServerWrapper, appId);

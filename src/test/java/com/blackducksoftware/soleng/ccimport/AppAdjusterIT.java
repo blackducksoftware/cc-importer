@@ -48,6 +48,8 @@ import com.blackducksoftware.soleng.ccimporter.model.CCIProject;
  */
 public class AppAdjusterIT {
 	
+	private static final String CC_IMPORT_USER_PASSWORD = "blackduck";
+	private static final String CC_IMPORT_USERNAME = "ccImportUser";
 	// parameters for multi-threaded new app list file generation test
 	private static final int NUM_THREADS = 20; // 20 is a pretty good test; 3/29/2015: successfully tested 100 
 	private static final int APP_COUNT = NUM_THREADS*2;
@@ -123,8 +125,8 @@ public class AppAdjusterIT {
 		
     	ServerBean bean = new ServerBean();
 		bean.setServerName(CC_URL);
-		bean.setUserName(SUPERUSER_USERNAME);
-		bean.setPassword(SUPERUSER_PASSWORD);
+		bean.setUserName(CC_IMPORT_USERNAME);
+		bean.setPassword(CC_IMPORT_USER_PASSWORD);
 		
 		CodeCenterServerWrapper ccWrapper = new CodeCenterServerWrapper(bean, ccConfigManager);
 		CodeCenterServerProxyV7_0 cc = ccWrapper.getInternalApiWrapper().getProxy();
@@ -191,16 +193,16 @@ public class AppAdjusterIT {
 		Properties props = new Properties();
 		props.setProperty("protex.server.name", "http://se-menger.blackducksoftware.com");
 		props.setProperty("protex.user.name", "ccImportUser@blackducksoftware.com");
-		props.setProperty("protex.password", "blackduck");
+		props.setProperty("protex.password", CC_IMPORT_USER_PASSWORD);
 
 		props.setProperty("cc.server.name", "http://int-cc-dev/");
-		props.setProperty("cc.user.name", "ccImportUser");
-		props.setProperty("cc.password", "blackduck");
+		props.setProperty("cc.user.name", CC_IMPORT_USERNAME);
+		props.setProperty("cc.password", CC_IMPORT_USER_PASSWORD);
 		
 		props.setProperty("protex.password.isplaintext", "true");
 		props.setProperty("cc.password.isplaintext", "true");
 		
-		props.setProperty("cc.protex.name", "Menger2");
+		props.setProperty("cc.protex.name", "Menger");
 		props.setProperty("cc.default.app.version", APPLICATION_VERSION);
 		props.setProperty("cc.workflow", WORKFLOW);
 		props.setProperty("cc.owner", APP_OWNER);
@@ -251,8 +253,8 @@ public class AppAdjusterIT {
 		
     	ServerBean bean = new ServerBean();
 		bean.setServerName(CC_URL);
-		bean.setUserName(SUPERUSER_USERNAME);
-		bean.setPassword(SUPERUSER_PASSWORD);
+		bean.setUserName(CC_IMPORT_USERNAME);
+		bean.setPassword(CC_IMPORT_USER_PASSWORD);
 		
 		CodeCenterServerWrapper ccWrapper = new CodeCenterServerWrapper(bean, ccConfigManager);
 		CodeCenterServerProxyV7_0 cc = ccWrapper.getInternalApiWrapper().getProxy();
@@ -350,13 +352,13 @@ public class AppAdjusterIT {
 				apf.setFirstRowIndex(0);
 				apf.setLastRowIndex(1);
 
-				List<Application> applications = ccsw.getInternalApiWrapper().applicationApi
+				List<Application> applications = ccsw.getInternalApiWrapper().getApplicationApi()
 						.searchApplications(project.getProjectName(), apf);
 
 				for (Application app : applications) {
 					// No errors here guarantees existence
 					ApplicationIdToken token = app.getId();
-					Project associatedProject = ccsw.getInternalApiWrapper().applicationApi
+					Project associatedProject = ccsw.getInternalApiWrapper().getApplicationApi()
 							.getAssociatedProtexProject(token);
 
 					String associatedProjectName = associatedProject.getName();
@@ -410,7 +412,7 @@ public class AppAdjusterIT {
 				ApplicationNameVersionToken token = new ApplicationNameVersionToken();
 				token.setName(project.getProjectName());
 				token.setVersion(project.getProjectVersion());
-				Application appToDelete = ccsw.getInternalApiWrapper().applicationApi
+				Application appToDelete = ccsw.getInternalApiWrapper().getApplicationApi()
 						.getApplication(token);
 
 				if (appToDelete == null) {
@@ -418,7 +420,7 @@ public class AppAdjusterIT {
 					return;
 				} else {
 					// Delete it
-					ccsw.getInternalApiWrapper().applicationApi
+					ccsw.getInternalApiWrapper().getApplicationApi()
 							.deleteApplication(appToDelete.getId());
 					log.info("Deleted application [{}] as part of cleanup",
 							project);

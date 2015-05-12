@@ -220,13 +220,13 @@ public class BasicImportTest
 		    apf.setLastRowIndex(1);
 		    
 		    List<Application> applications = 
-			    ccsw.getInternalApiWrapper().applicationApi.searchApplications(project.getProjectName(), apf);
+			    ccsw.getInternalApiWrapper().getApplicationApi().searchApplications(project.getProjectName(), apf);
 		    
 		    for(Application app : applications)
 		    {
 			// No errors here guarantees existence
 			ApplicationIdToken token = app.getId();
-			Project associatedProject = ccsw.getInternalApiWrapper().applicationApi.getAssociatedProtexProject(token);
+			Project associatedProject = ccsw.getInternalApiWrapper().getApplicationApi().getAssociatedProtexProject(token);
 			
 			String associatedProjectName = associatedProject.getName();
 			log.info("Found association of application {} to Protex project {}", app.getName()+":"+app.getVersion(), associatedProjectName);
@@ -259,7 +259,7 @@ public class BasicImportTest
 		ApplicationNameVersionToken token = new ApplicationNameVersionToken();
 		token.setName(project.getProjectName());
 		token.setVersion(project.getProjectVersion());
-		Application appToDelete = ccsw.getInternalApiWrapper().applicationApi.getApplication(token);
+		Application appToDelete = ccsw.getInternalApiWrapper().getApplicationApi().getApplication(token);
 
 		if (appToDelete == null)
 		{
@@ -268,7 +268,7 @@ public class BasicImportTest
 		} else
 		{
 		    // Delete it
-		    ccsw.getInternalApiWrapper().applicationApi
+		    ccsw.getInternalApiWrapper().getApplicationApi()
 			    .deleteApplication(appToDelete.getId());
 		    log.info("Deleted application [{}] as part of cleanup",
 			    project);

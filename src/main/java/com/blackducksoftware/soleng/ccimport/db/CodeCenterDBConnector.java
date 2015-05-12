@@ -68,7 +68,7 @@ public class CodeCenterDBConnector
         		hostNameForDB = hostName;
         	    } else
         	    {
-        		String serverURL = configManager.getServerName();
+        		String serverURL = configManager.getServerBean().getServerName();
         		try
         		{
         		    URIBuilder builder = new URIBuilder(serverURL);

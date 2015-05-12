@@ -350,13 +350,13 @@ public class ImportIT {
 				apf.setFirstRowIndex(0);
 				apf.setLastRowIndex(1);
 
-				List<Application> applications = ccsw.getInternalApiWrapper().applicationApi
+				List<Application> applications = ccsw.getInternalApiWrapper().getApplicationApi()
 						.searchApplications(project.getProjectName(), apf);
 
 				for (Application app : applications) {
 					// No errors here guarantees existence
 					ApplicationIdToken token = app.getId();
-					Project associatedProject = ccsw.getInternalApiWrapper().applicationApi
+					Project associatedProject = ccsw.getInternalApiWrapper().getApplicationApi()
 							.getAssociatedProtexProject(token);
 
 					String associatedProjectName = associatedProject.getName();
@@ -391,7 +391,7 @@ public class ImportIT {
 				ApplicationNameVersionToken token = new ApplicationNameVersionToken();
 				token.setName(project.getProjectName());
 				token.setVersion(project.getProjectVersion());
-				Application appToDelete = ccsw.getInternalApiWrapper().applicationApi
+				Application appToDelete = ccsw.getInternalApiWrapper().getApplicationApi()
 						.getApplication(token);
 
 				if (appToDelete == null) {
@@ -399,7 +399,7 @@ public class ImportIT {
 					return;
 				} else {
 					// Delete it
-					ccsw.getInternalApiWrapper().applicationApi
+					ccsw.getInternalApiWrapper().getApplicationApi()
 							.deleteApplication(appToDelete.getId());
 					log.info("Deleted application [{}] as part of cleanup",
 							project);

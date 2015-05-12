@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
 import soleng.framework.connector.protex.ProtexServerWrapper;
 import soleng.framework.standard.codecenter.CodeCenterServerWrapper;
 import soleng.framework.standard.codecenter.dao.ApplicationDataDao;
-import soleng.framework.standard.codecenter.dao.CodeCenter6_6_1Dao;
+import soleng.framework.standard.codecenter.dao.CodeCenterDao;
 import soleng.framework.standard.datatable.DataTable;
 import soleng.framework.standard.datatable.FieldDef;
 import soleng.framework.standard.datatable.FieldType;
@@ -177,7 +177,7 @@ public class CCIReportGenerator {
 			com.blackducksoftware.sdk.codecenter.application.data.Project associatedProject = null;
 
 			try {
-				associatedProject = this.codeCenterWrapper.getInternalApiWrapper().applicationApi
+				associatedProject = this.codeCenterWrapper.getInternalApiWrapper().getApplicationApi()
 						.getAssociatedProtexProject(ccApp.getId());
 			} catch (com.blackducksoftware.sdk.codecenter.fault.SdkFault e) {
 				log.warn("[" + appName + ":" + appVersion + "] no association found in CC (cause: " + e.getMessage() + ")");
@@ -270,8 +270,7 @@ public class CCIReportGenerator {
     	
 		ComponentCollector ccComponentCollector;
 		try {
-			ApplicationDataDao ccDao = new CodeCenter6_6_1Dao(codeCenterWrapper);
-			ccDao.setSkipNonKbComponents(false);
+			ApplicationDataDao ccDao = new CodeCenterDao(codeCenterWrapper, 1, false);
 	    	ccComponentCollector = new CodeCenterComponentCollector(ccDao, ccApp.getId().getId());
 		} catch (com.blackducksoftware.sdk.codecenter.fault.SdkFault e) {
 			throw new SdkFault(e.getMessage());
@@ -314,7 +313,7 @@ public class CCIReportGenerator {
 		
 		try{
 			log.info("Getting Code Center applications...");
-			apps = codeCenterWrapper.getInternalApiWrapper().applicationApi.searchApplications("", apf);
+			apps = codeCenterWrapper.getInternalApiWrapper().getApplicationApi().searchApplications("", apf);
 			log.info("Returned {} applications.", apps.size());
 		} catch (Exception ccie)
 		{

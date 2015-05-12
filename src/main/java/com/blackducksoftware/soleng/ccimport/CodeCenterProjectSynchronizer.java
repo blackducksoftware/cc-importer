@@ -210,7 +210,7 @@ public class CodeCenterProjectSynchronizer
 		String applicationName = app.getName();
 		ApplicationIdToken appIdToken = app.getId();
 		try {
-			ccWrapper.getInternalApiWrapper().applicationApi.validate(appIdToken, false, false);
+			ccWrapper.getInternalApiWrapper().getApplicationApi().validate(appIdToken, false, false);
 		} catch (SdkFault e) {
 			log.error("Re-validate (after BOM change) failed: " + e.getMessage());
 		}
@@ -222,7 +222,7 @@ public class CodeCenterProjectSynchronizer
 		appToken.setName(project.getProjectName());
 		appToken.setVersion(project.getProjectVersion());
 		try {
-			ccWrapper.getInternalApiWrapper().applicationApi.disassociateProtexProject(appToken);
+			ccWrapper.getInternalApiWrapper().getApplicationApi().disassociateProtexProject(appToken);
 		} catch (SdkFault sdkFault) {
 			log.error("Disassociate on app " + project.getProjectName() +
 					" / " + project.getProjectVersion() + 
@@ -280,7 +280,7 @@ public class CodeCenterProjectSynchronizer
 
 		try
 		{
-		    Application app = ccWrapper.getInternalApiWrapper().applicationApi
+		    Application app = ccWrapper.getInternalApiWrapper().getApplicationApi()
 			    .getApplication(token);
 		    cciApp = new CCIApplication(app, false);
 
@@ -472,7 +472,7 @@ public class CodeCenterProjectSynchronizer
 		    "[{}] Attempting validation with Protex. This may take some time, depending on the number of components...",
 		    applicationName);
 
-	    ccWrapper.getInternalApiWrapper().applicationApi.validate(appIdToken, false, false);
+	    ccWrapper.getInternalApiWrapper().getApplicationApi().validate(appIdToken, false, false);
 	    reportSummary.addToTotalValidatesPerfomed();
 	    log.info("[{}] validation completed. ", applicationName);
 	} catch (Exception sfe)
@@ -516,7 +516,7 @@ public class CodeCenterProjectSynchronizer
 	try
 	{
 		log.info("Fetching components to add");
-	    protexOnlyComponents = ccWrapper.getInternalApiWrapper().applicationApi
+	    protexOnlyComponents = ccWrapper.getInternalApiWrapper().getApplicationApi()
 		    .getProtexOnlyComponentsFromLastValidation(app.getId());
 
 	    // Keep track of success versus potentials
@@ -556,7 +556,7 @@ public class CodeCenterProjectSynchronizer
 		    request.setApplicationComponentToken(token);
 
 		    newRequests
-			    .add(ccWrapper.getInternalApiWrapper().requestApi
+			    .add(ccWrapper.getInternalApiWrapper().getRequestApi()
 				    .createRequest(request));
 
 		    requestsAdded++;
@@ -596,7 +596,7 @@ public class CodeCenterProjectSynchronizer
 	try
 	{
 		log.info("Fetching components to delete");
-	    ccOnlyComps = ccWrapper.getInternalApiWrapper().applicationApi
+	    ccOnlyComps = ccWrapper.getInternalApiWrapper().getApplicationApi()
 		    .getCodeCenterOnlyComponentsFromLastValidation(app.getId());
 
 	    summary.addTotalPotentialDeletes(ccOnlyComps.size());
@@ -615,7 +615,7 @@ public class CodeCenterProjectSynchronizer
 	    {
 		for (RequestSummary request : ccOnlyComps)
 		{
-		    ccWrapper.getInternalApiWrapper().requestApi
+		    ccWrapper.getInternalApiWrapper().getRequestApi()
 			    .deleteRequest(request.getId());
 		    totalRequestsDeleted++;
 		}
@@ -661,7 +661,7 @@ public class CodeCenterProjectSynchronizer
 	try
 	{
 	    // Check if Application exists
-	    app = ccWrapper.getInternalApiWrapper().applicationApi
+	    app = ccWrapper.getInternalApiWrapper().getApplicationApi()
 		    .getApplication(appNameVersionToken);
 	    log.info("[{}] Exists in Code Center.", applicationName);
 
@@ -716,11 +716,11 @@ public class CodeCenterProjectSynchronizer
 		appCreate.setOwnerRoleId(role);
 
 		// create Application
-		appIdToken = ccWrapper.getInternalApiWrapper().applicationApi
+		appIdToken = ccWrapper.getInternalApiWrapper().getApplicationApi()
 			.createApplication(appCreate);
 
 		// retrieve it
-		app = ccWrapper.getInternalApiWrapper().applicationApi
+		app = ccWrapper.getInternalApiWrapper().getApplicationApi()
 			.getApplication(appIdToken);
 
 		// wrap it in a CCIApplication, which tracks whether it's new or not
@@ -762,7 +762,7 @@ public class CodeCenterProjectSynchronizer
 	com.blackducksoftware.sdk.codecenter.application.data.Project associatedProject = null;
 	try
 	{
-	    associatedProject = ccWrapper.getInternalApiWrapper().applicationApi
+	    associatedProject = ccWrapper.getInternalApiWrapper().getApplicationApi()
 		    .getAssociatedProtexProject(app.getId());
 
 	    log.info("[{}] Application is already associated!", projectName);
@@ -799,11 +799,11 @@ public class CodeCenterProjectSynchronizer
 		protexServerToken.setName(ccProtexAliasName);
 		projectToken.setServerId(protexServerToken);
 
-		ccWrapper.getInternalApiWrapper().applicationApi
+		ccWrapper.getInternalApiWrapper().getApplicationApi()
 			.associateProtexProject(app.getId(), projectToken);
 
 		// Get it
-		associatedProject = ccWrapper.getInternalApiWrapper().applicationApi
+		associatedProject = ccWrapper.getInternalApiWrapper().getApplicationApi()
 			.getAssociatedProtexProject(app.getId());
 
 	    } catch (SdkFault e)
