@@ -1,19 +1,12 @@
 package com.blackducksoftware.soleng.ccimport.report;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
 import java.util.SortedSet;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import soleng.framework.standard.codecenter.pojo.ComponentPojo;
-
-import com.blackducksoftware.sdk.codecenter.fault.SdkFault;
 
 
 public abstract class ComponentCollector {
@@ -24,7 +17,7 @@ public abstract class ComponentCollector {
 	public String getDiffString(Object o) {
 		String diffString = null; // Null means they ComponentCollections are identical
 		if (o == null) {
-			return "Compared component lists are not of the same class: " + this.getClass().getName() + " and " + o.getClass().getName();
+			return "ComponentCollector.getDiffString(): The given object reference is null";
 		}
 		if (! (o instanceof ComponentCollector)) {
 			return "Compared component list should be of type ComponentCollector, but is type " + o.getClass().getName();
@@ -84,7 +77,7 @@ public abstract class ComponentCollector {
 		return null; // means compared ComponentCollectors are identical
 	}
 	
-	public SortedSet getSortedSet() {
+	public SortedSet<ComponentPojo> getSortedSet() {
 		return compPojoList;
 	}
 	

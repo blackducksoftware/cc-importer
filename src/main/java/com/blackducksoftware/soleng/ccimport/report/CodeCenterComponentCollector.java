@@ -9,16 +9,16 @@ import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import soleng.framework.standard.codecenter.dao.ApplicationDataDao;
+import soleng.framework.standard.codecenter.dao.ApplicationDao;
 
 import com.blackducksoftware.sdk.codecenter.fault.SdkFault;
 
 public class CodeCenterComponentCollector extends ComponentCollector {
 	private static Logger log = LoggerFactory
 		    .getLogger(CodeCenterComponentCollector.class.getName());
-	private ApplicationDataDao dao;
+	private ApplicationDao dao;
 
-	public CodeCenterComponentCollector(ApplicationDataDao dao) throws Exception {
+	public CodeCenterComponentCollector(ApplicationDao dao) throws Exception {
 		this.dao = dao;
 		compPojoList = dao.getComponentsSorted();
 	}

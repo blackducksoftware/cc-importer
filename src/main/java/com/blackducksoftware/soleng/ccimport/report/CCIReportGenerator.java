@@ -9,8 +9,8 @@ import org.slf4j.LoggerFactory;
 
 import soleng.framework.connector.protex.ProtexServerWrapper;
 import soleng.framework.standard.codecenter.CodeCenterServerWrapper;
-import soleng.framework.standard.codecenter.dao.ApplicationDataDao;
-import soleng.framework.standard.codecenter.dao.CodeCenterDao;
+import soleng.framework.standard.codecenter.dao.ApplicationDao;
+import soleng.framework.standard.codecenter.dao.CodeCenterApplicationDao;
 import soleng.framework.standard.datatable.DataTable;
 import soleng.framework.standard.datatable.FieldDef;
 import soleng.framework.standard.datatable.FieldType;
@@ -270,7 +270,7 @@ public class CCIReportGenerator {
     	
 		ComponentCollector ccComponentCollector;
 		try {
-			ApplicationDataDao ccDao = new CodeCenterDao(codeCenterWrapper, false,
+			ApplicationDao ccDao = new CodeCenterApplicationDao(codeCenterWrapper, false,
 					ccApp);
 	    	ccComponentCollector = new CodeCenterComponentCollector(ccDao);
 		} catch (com.blackducksoftware.sdk.codecenter.fault.SdkFault e) {

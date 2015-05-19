@@ -6,12 +6,10 @@ All rights reserved. **/
 package com.blackducksoftware.soleng.ccimport;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,14 +18,6 @@ import java.util.Properties;
 import soleng.framework.core.config.ConfigurationManager;
 import soleng.framework.core.config.server.ServerBean;
 import soleng.framework.standard.codecenter.CodeCenterServerWrapper;
-import soleng.framework.standard.codecenter.dao.ApplicationDataDao;
-import soleng.framework.standard.codecenter.dao.CodeCenter6_6_1Dao;
-import soleng.framework.standard.codecenter.dao.CodeCenterDaoConfigManager;
-import soleng.framework.standard.codecenter.dao.CodeCenterDaoConfigManagerImpl;
-import soleng.framework.standard.codecenter.pojo.ApplicationPojo;
-import soleng.framework.standard.codecenter.pojo.ComponentPojo;
-import soleng.framework.standard.codecenter.pojo.ComponentUsePojo;
-import soleng.framework.standard.codecenter.pojo.VulnerabilityPojo;
 
 import com.blackducksoftware.sdk.codecenter.application.data.Application;
 import com.blackducksoftware.sdk.codecenter.application.data.ApplicationCreate;
@@ -43,15 +33,11 @@ import com.blackducksoftware.sdk.codecenter.common.data.AttributeValue;
 import com.blackducksoftware.sdk.codecenter.fault.SdkFault;
 import com.blackducksoftware.sdk.codecenter.request.data.RequestApplicationComponentToken;
 import com.blackducksoftware.sdk.codecenter.request.data.RequestCreate;
-import com.blackducksoftware.sdk.codecenter.request.data.RequestIdToken;
 import com.blackducksoftware.sdk.codecenter.role.data.RoleNameToken;
 import com.blackducksoftware.sdk.codecenter.user.data.UserNameToken;
 import com.blackducksoftware.soleng.ccimporter.config.CodeCenterConfigManager;
 
 public class CcTestUtils {
-	private static final String VULN_STATUS_COMMENT_VALUE = "Added to orig app by JUnit test";
-	private static final String VULN_STATUS_STRING_IN_PROGRESS = "In Progress";
-	private static final int VULN_STATUS_ID_IN_PROGRESS = 286392;
 	public static final String CC_ROLE = "Application Administrator";
 	public static final String CC_URL = "http://int-cc-dev.blackducksoftware.com";
 	public static final String CC_PASSWORD = "blackduck";
@@ -162,8 +148,7 @@ public class CcTestUtils {
         createRequest.setApplicationComponentToken(request);
         createRequest.setSubmit(true);
         
-        RequestIdToken requestId = ccServerWrapper.getInternalApiWrapper().getRequestApi().createRequest(createRequest);
-		
+        ccServerWrapper.getInternalApiWrapper().getRequestApi().createRequest(createRequest);
 	}
 	
 	public static CodeCenterServerWrapper initCcServerWrapper(ConfigurationManager config) throws Exception {
@@ -172,14 +157,6 @@ public class CcTestUtils {
 		return ccServerWrapper;
 	}	
 
-//	public static void checkApplication(CodeCenterServerWrapper ccServerWrapper,
-//			String appName, String appVersion, String appDescription) throws Exception {
-//		checkApplication(ccServerWrapper, appName, appVersion, appDescription, false);
-//	}
-//	public static void checkApplicationAndUseProtexstatus(CodeCenterServerWrapper ccServerWrapper,
-//			String appName, String appVersion, String appDescription) throws Exception {
-//		checkApplication(ccServerWrapper, appName, appVersion, appDescription, true);
-//	}
 	public static void checkApplication(CodeCenterServerWrapper ccServerWrapper,
 			String appName, String appVersion, String appDescription,
 			Map<String, String> expectedAttrValues) throws Exception {
@@ -216,7 +193,6 @@ public class CcTestUtils {
 		if (confirmValidationStatusOk) {
 			assertEquals(ValidationStatusEnum.PASSED, app.getValidationStatus());
 		}
-//		assertTrue(app.isObligationFulFillment()); // Don't know any way to get this to pass
 		
 		if (expectedAttrValues != null) {
 			List<AttributeValue> actualAttrValues = app.getAttributeValues();
@@ -256,119 +232,4 @@ public class CcTestUtils {
 			assertEquals(expectedAttrValues.get(expectedAttrName), actualAttrValue);
 		}
 	}
-	
-	
-	
-//	public static void confirmByAppIdLocked(CodeCenterServerWrapper ccServerWrapper, String appId) throws Exception {
-//		ApplicationIdToken token = new ApplicationIdToken();
-//		token.setId(appId);
-//		Application app = ccServerWrapper.getInternalApiWrapper().getApplicationApi().getApplication(token);
-//		assertTrue(app.isLocked());
-//	}
-//	
-//	public static void confirmLocked(CodeCenterServerWrapper ccServerWrapper, String appName, String appVersion) throws Exception {
-//		ApplicationNameVersionToken token = new ApplicationNameVersionToken();
-//		token.setName(appName);
-//		token.setVersion(appVersion);
-//		Application app = ccServerWrapper.getInternalApiWrapper().getApplicationApi().getApplication(token);
-//		
-//		String appId = app.getId().getId();
-//		confirmByAppIdLocked(ccServerWrapper, appId);
-//	}
-	
-	// Start comp / vuln methods
-	
-//	public static void setAllTargetRemediationDates(String appName, String version) throws Exception {
-//		Properties props = new Properties();
-//		props.setProperty("cc.server.name", CC_URL);
-//		props.setProperty("cc.user.name", CC_USER);
-//		props.setProperty("cc.password", CC_PASSWORD);
-//
-//		props.setProperty("cc.database.server.name", DB_SERVER);
-//		props.setProperty("cc.database.port", DB_PORT);
-//		props.setProperty("cc.database.user.name", DB_USER);
-//		props.setProperty("cc.database.password", DB_PASSWORD);
-//		
-//		CodeCenterDaoConfigManager config = new CodeCenterDaoConfigManagerImpl(props);
-//		ApplicationDataDao dataSource=null;
-//		
-//
-//		dataSource = new CodeCenter6_6_1Dao(config);
-//
-//		try {
-//			System.out.println("Fetching application: " + appName + " version " + version);
-//			ApplicationPojo app = dataSource.getApplication(appName, version);
-//			assertNotNull(app);
-//	
-//			System.out.println("Fetching components and vulnerabilities");
-//	
-//			System.out.println("Application: " + app.getName() + " version " + app.getVersion());
-//			
-//			collectDataApplication(dataSource, app);
-//		} finally {
-//			dataSource.close();
-//		}
-//	}
-	
-//	private static void collectDataApplication(ApplicationDataDao dataSource,
-//			ApplicationPojo app) throws Exception {
-//		List<ComponentUsePojo> compUses = dataSource.getComponentUses(app);
-//		for (ComponentUsePojo compUse : compUses) {
-//			collectDataComponentUse(dataSource, app, compUse);	
-//		}
-//	}
-//	private static void collectDataComponentUse(ApplicationDataDao dataSource,
-//			ApplicationPojo app, ComponentUsePojo compUse) throws Exception {
-//		ComponentPojo comp = dataSource.getComponent(compUse);
-//		collectDataComponent(dataSource, app, compUse, comp);
-//	}
-	
-//	private static void collectDataComponent(ApplicationDataDao dataSource,
-//			ApplicationPojo app, ComponentUsePojo compUse,
-//			ComponentPojo comp) throws Exception {
-//		
-//		Date now = new Date();
-//		
-////		int loopLimit = 3; // we only need to process a handful
-//		int vulnCount= 0;
-//		List<VulnerabilityPojo> vulns = dataSource.getVulnerabilities(comp, compUse);
-//		for (VulnerabilityPojo vuln : vulns) {
-//			System.out.println("Vulnerability: " + vuln.getName());
-//			
-//			Date origTargetRemDate = vuln.getTargetRemediationDate();
-//			Date origActualRemDate = vuln.getActualRemediationDate();
-//			System.out.println("Orig rem dates: target: " + origTargetRemDate + ", actual: " + origActualRemDate);
-//			
-//			vuln.setTargetRemediationDate(now);
-//			vuln.setActualRemediationDate(now);
-//			vuln.setStatusId(VULN_STATUS_ID_IN_PROGRESS);
-//			vuln.setStatus(VULN_STATUS_STRING_IN_PROGRESS);
-//			vuln.setStatusComment(VULN_STATUS_COMMENT_VALUE);
-//			dataSource.updateCompUseVulnData(compUse, vuln);		
-//
-////			if (++vulnCount >= loopLimit)
-////				break;
-//		}
-//		
-//		// Re-read the vulnerabilites, and make sure the remediation dates have changed
-//		vulnCount= 0;
-//		vulns = dataSource.getVulnerabilities(comp, compUse);
-//		for (VulnerabilityPojo vuln : vulns) {
-//			System.out.println("Vulnerability: " + vuln.getName());
-//
-//			Date newTargetRemDate = vuln.getTargetRemediationDate();
-//			Date newActualRemDate = vuln.getActualRemediationDate();
-//			
-//			System.out.println("New rem dates: target: " + newTargetRemDate + ", actual: " + newActualRemDate);
-//			
-//			assertEquals(now, newTargetRemDate);
-//			assertEquals(now, newActualRemDate);
-//			assertEquals(VULN_STATUS_STRING_IN_PROGRESS, vuln.getStatus());
-//			assertEquals(VULN_STATUS_COMMENT_VALUE, vuln.getStatusComment());
-//			
-////			if (++vulnCount >= loopLimit)
-////				break;
-//		}
-//		
-//	}
 }
