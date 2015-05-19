@@ -17,11 +17,8 @@ import org.slf4j.LoggerFactory;
 
 import soleng.framework.standard.codecenter.CodeCenterServerWrapper;
 
-import com.blackducksoftware.sdk.codecenter.application.data.Application;
 import com.blackducksoftware.soleng.ccimport.exception.CodeCenterImportException;
-import com.blackducksoftware.soleng.ccimport.validate.CodeCenterValidator;
 import com.blackducksoftware.soleng.ccimporter.config.CCIConfigurationManager;
-import com.blackducksoftware.soleng.ccimporter.model.CCIProject;
 
 /**
  *  Helper class that connects to the Database

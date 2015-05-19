@@ -59,7 +59,6 @@ import com.blackducksoftware.sdk.codecenter.user.data.UserNameToken;
 import com.blackducksoftware.soleng.ccimport.appadjuster.AppAdjuster;
 import com.blackducksoftware.soleng.ccimport.exception.CodeCenterImportException;
 import com.blackducksoftware.soleng.ccimport.report.CCIReportSummary;
-import com.blackducksoftware.soleng.ccimport.validate.CodeCenterValidator;
 import com.blackducksoftware.soleng.ccimporter.config.CCIConfigurationManager;
 import com.blackducksoftware.soleng.ccimporter.config.CCIConstants;
 import com.blackducksoftware.soleng.ccimporter.model.CCIApplication;
@@ -404,16 +403,7 @@ public class CodeCenterProjectSynchronizer
 	    {
 		if (this.configManager.isPerformSmartValidate() && !forceValidation)
 		{
-		    // Our formatter
-		    SimpleDateFormat formatter = new SimpleDateFormat(
-			    "yyyy-MM-dd HH:mm:ss");
-		    
-		    CodeCenterValidator validator = new CodeCenterValidator(
-			    this.configManager, this.ccWrapper, app,
-			    importedProject);
-
 		    // Grab the BOM Refresh date
-
 		    Date lastRefreshDate = importedProject
 			    .getLastBOMRefreshDate();
 
@@ -422,39 +412,28 @@ public class CodeCenterProjectSynchronizer
 				"The last BOM refresh date is null, cannot perfom smart validate");
 		    
 		    // Grab the validation date
-		    String lastValidatedDateStr = validator
-			    .getLastValidatedDate();
-		    if (lastValidatedDateStr == null)
-		    {
-			log.warn("Could not determine last validate date for application: [{}] using BOM refresh date",applicationName);
-			lastValidatedDateStr = formatter.format(lastRefreshDate);
-		    }
+		    Date lastValidatedTime = app.getLastValidationDate();
+		    log.info("Last validation date from app " + app.getName() + ": " + lastValidatedTime);
 		    
 		    // Compare the two dates, if the validate date happened
 		    // before
 		    // the last refresh
 		    // then proceed, otherwise get out.
-		    
-
-		    formatter.setTimeZone(TimeZone.getTimeZone(configManager.getTimeZone()));
-
-		    Date lastValidatedTime = formatter
-			    .parse(lastValidatedDateStr);
 
 		    // We want to check before or equals, since identical dates will return false on just a 'before' check.
-		    boolean before = lastValidatedTime.before(lastRefreshDate) || lastValidatedTime.equals(lastRefreshDate);
+		    boolean before = (lastValidatedTime == null) || lastValidatedTime.before(lastRefreshDate) || lastValidatedTime.equals(lastRefreshDate);
 
 		    if (before)
 		    {
 			log.info(
 				"[{}] Validation date {} is before refresh date {} proceeding with validation",
-				applicationName, lastValidatedTime.toString(),
+				applicationName, lastValidatedTime,
 				lastRefreshDate.toString());
 		    } else
 		    {
 			log.info(
 				"[{}] Validation date {} is after refresh date {}, skipping validation.",
-				applicationName, lastValidatedTime.toString(),
+				applicationName, lastValidatedTime,
 				lastRefreshDate.toString());
 			summary.addToTotalValidatesSkipped();
 			return ccBomChanged;

@@ -20,7 +20,6 @@ import org.slf4j.LoggerFactory;
 import soleng.framework.standard.codecenter.CodeCenterServerWrapper;
 
 import com.blackducksoftware.soleng.ccimport.db.CodeCenterDBConnector;
-import com.blackducksoftware.soleng.ccimport.validate.CodeCenterValidator;
 import com.blackducksoftware.soleng.ccimporter.config.CCIConfigurationManager;
 
 /**
