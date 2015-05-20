@@ -18,6 +18,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.ExpectedSystemExit;
 
+import soleng.framework.connector.protex.ProtexServerWrapper;
 import soleng.framework.core.config.server.ServerBean;
 import soleng.framework.standard.codecenter.CodeCenterServerWrapper;
 
@@ -26,6 +27,7 @@ import com.blackducksoftware.sdk.codecenter.application.data.ApplicationIdToken;
 import com.blackducksoftware.sdk.codecenter.attribute.data.AttributeIdToken;
 import com.blackducksoftware.sdk.codecenter.client.util.CodeCenterServerProxyV7_0;
 import com.blackducksoftware.sdk.codecenter.common.data.AttributeValue;
+import com.blackducksoftware.soleng.ccimport.ProtexTestUtils;
 import com.blackducksoftware.soleng.ccimport.TestUtils;
 import com.blackducksoftware.soleng.ccimport.appadjuster.custom.NumericPrefixedAppAdjuster;
 import com.blackducksoftware.soleng.ccimporter.config.CodeCenterConfigManager;
@@ -47,6 +49,7 @@ public class NumericPrefixAppAdjusterAppEditUrlIT {
 	private static final String APP_NAME_STRING = "appediturl test app";
 	private static final String WORK_STREAM = "PROD";
 	private static String APPLICATION1_NAME = NUMPREFIX1_ATTR_VALUE + "-" + APP_NAME_STRING + "-" + WORK_STREAM + "-CURRENT";
+	private static String application1ProjectId=null;
 	
 	private static String APPLICATION_VERSION = "v123";
 	private static String OWNER = "unitTester@blackducksoftware.com";
@@ -55,6 +58,7 @@ public class NumericPrefixAppAdjusterAppEditUrlIT {
 
     @BeforeClass
 	public static void setUpBeforeClass() throws Exception {
+    	
 	}
 
 	@AfterClass
@@ -72,7 +76,10 @@ public class NumericPrefixAppAdjusterAppEditUrlIT {
 		CodeCenterServerWrapper ccWrapper = new CodeCenterServerWrapper(bean, ccConfigManager);
 		CodeCenterServerProxyV7_0 cc = ccWrapper.getInternalApiWrapper().getProxy();
     	
+		ProtexServerWrapper protexServerWrapper = new ProtexServerWrapper(bean, ccConfigManager, false);
+		
 		TestUtils.removeApplication(cc, APPLICATION1_NAME, APPLICATION_VERSION);
+		ProtexTestUtils.deleteProjectById(protexServerWrapper, application1ProjectId);
 	}
 	
 
@@ -84,13 +91,11 @@ public class NumericPrefixAppAdjusterAppEditUrlIT {
         CodeCenterConfigManager ccConfigManager = ccConfigManager = new CodeCenterConfigManager(configPath);
         ProtexConfigManager protexConfigManager = protexConfigManager = new ProtexConfigManager(configPath);
 		
-    	ServerBean bean = new ServerBean();
-		bean.setServerName(CC_URL);
-		bean.setUserName(SUPERUSER_USERNAME);
-		bean.setPassword(SUPERUSER_PASSWORD);
-		
-		CodeCenterServerWrapper ccWrapper = new CodeCenterServerWrapper(bean, ccConfigManager);
+		CodeCenterServerWrapper ccWrapper = new CodeCenterServerWrapper(ccConfigManager.getServerBean(), ccConfigManager);
 		CodeCenterServerProxyV7_0 cc = ccWrapper.getInternalApiWrapper().getProxy();
+		
+		ProtexServerWrapper protexWrapper = new ProtexServerWrapper(protexConfigManager.getServerBean(), protexConfigManager, false);
+		application1ProjectId = ProtexTestUtils.createProject(protexWrapper, protexConfigManager, APPLICATION1_NAME, "src/test/resources/source");
 
     	ApplicationIdToken appIdToken = TestUtils.createApplication(cc, APPLICATION1_NAME, APPLICATION_VERSION, OWNER, USER_ROLE1,
     			TestUtils.REQUIRED_ATTRNAME, "test");
@@ -100,11 +105,10 @@ public class NumericPrefixAppAdjusterAppEditUrlIT {
 		CCIProject project = new CCIProject();
 		project.setProjectName(APPLICATION1_NAME);
 		Date testDateValue = new Date();
-		project.setAnalyzedDateValue(testDateValue);
 
 		NumericPrefixedAppAdjuster appAdjuster = new NumericPrefixedAppAdjuster();
 		TimeZone tz = TimeZone.getDefault();
-		appAdjuster.init(ccWrapper, ccConfigManager, tz);
+		appAdjuster.init(ccWrapper, protexWrapper, ccConfigManager, tz);
 		cciApp.setJustCreated(false);
 		appAdjuster.adjustApp(cciApp, project);
 		

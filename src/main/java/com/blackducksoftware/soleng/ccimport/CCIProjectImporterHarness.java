@@ -8,6 +8,7 @@ import java.util.TimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import soleng.framework.connector.protex.ProtexServerWrapper;
 import soleng.framework.core.config.server.ServerBean;
 import soleng.framework.standard.codecenter.CodeCenterServerWrapper;
 
@@ -61,8 +62,9 @@ public class CCIProjectImporterHarness {
 		
 		try {
 			CodeCenterServerWrapper codeCenterServerWrapper = createCodeCenterServerWrapper(ccConfigManager);
-			Object appAdjusterObject = getAppAdjusterObject(codeCenterServerWrapper, ccConfigManager);
-			Method appAdjusterMethod = getAppAdjusterMethod(codeCenterServerWrapper, ccConfigManager, appAdjusterObject);
+			ProtexServerWrapper protexServerWrapper = createProtexServerWrapper(protexConfigManager);
+			Object appAdjusterObject = getAppAdjusterObject(ccConfigManager);
+			Method appAdjusterMethod = getAppAdjusterMethod(codeCenterServerWrapper, protexServerWrapper, ccConfigManager, appAdjusterObject);
 			/**
 			 * Here we determine whether we do single or multi-protex support.
 			 * By simply checking the server list size we have our answer
@@ -128,8 +130,28 @@ public class CCIProjectImporterHarness {
 		return codeCenterWrapper;
 	}
 	
-	static Object getAppAdjusterObject(CodeCenterServerWrapper ccWrapper, 
-    		CCIConfigurationManager config) throws CodeCenterImportException {
+	private static ProtexServerWrapper createProtexServerWrapper(
+			ProtexConfigManager configManager) throws Exception {
+		ProtexServerWrapper protexWrapper;
+		try {
+			// Always just one code center
+			ServerBean ccBean = configManager.getServerBean();
+			if (ccBean == null)
+				throw new Exception("No valid Protex server configurations found");
+
+			log.info("Using Protex URL [{}]", ccBean.getServerName());
+
+			protexWrapper = new ProtexServerWrapper(ccBean,
+					configManager, false);
+
+		} catch (Exception e) {
+			throw new Exception("Unable to establish Protex connection: "
+					+ e.getMessage());
+		}
+		return protexWrapper;
+	}
+	
+	static Object getAppAdjusterObject(CCIConfigurationManager config) throws CodeCenterImportException {
 		
 		// See if the user has configured a custom app adjuster
     	String appAdjusterClassname = config.getAppAdjusterClassname();
@@ -165,7 +187,7 @@ public class CCIProjectImporterHarness {
      * @param config
      * @throws CodeCenterImportException
      */
-    static Method getAppAdjusterMethod(CodeCenterServerWrapper ccWrapper, 
+    static Method getAppAdjusterMethod(CodeCenterServerWrapper ccWrapper, ProtexServerWrapper protexWrapper,
     		CCIConfigurationManager config, Object appAdjusterObject) throws CodeCenterImportException {
 
     	// See if the user has configured a custom app adjuster
@@ -184,7 +206,7 @@ public class CCIProjectImporterHarness {
     	
     	// Get the init method on the custom app adjuster class
     	Method initMethod=null;
-    	Class[] initMethodArgTypes = { CodeCenterServerWrapper.class, CCIConfigurationManager.class, TimeZone.class };
+    	Class[] initMethodArgTypes = { CodeCenterServerWrapper.class, ProtexServerWrapper.class, CCIConfigurationManager.class, TimeZone.class };
     	try {
     		initMethod = sourceClass.getDeclaredMethod("init", initMethodArgTypes);
     	} catch (NoSuchMethodException e) {
@@ -206,7 +228,7 @@ public class CCIProjectImporterHarness {
     	
     	// Call the init method to initialize the custom app adjuster
     	try {
-    		initMethod.invoke(appAdjusterObject, ccWrapper, config, tz);
+    		initMethod.invoke(appAdjusterObject, ccWrapper, protexWrapper, config, tz);
     	} catch (InvocationTargetException e) {
     		String msg = "Error initializing custom app adjuster: InvocationTargetException: " + e.getTargetException().getMessage();
     		throw new CodeCenterImportException(msg);

@@ -7,6 +7,7 @@ package com.blackducksoftware.soleng.ccimport.appadjuster;
 
 import java.util.TimeZone;
 
+import soleng.framework.connector.protex.ProtexServerWrapper;
 import soleng.framework.standard.codecenter.CodeCenterServerWrapper;
 
 import com.blackducksoftware.sdk.codecenter.application.data.Application;
@@ -22,6 +23,6 @@ import com.blackducksoftware.soleng.ccimporter.model.CCIProject;
  *
  */
 public interface AppAdjuster {
-	public void init(CodeCenterServerWrapper ccWrapper, CCIConfigurationManager config, TimeZone tz) throws CodeCenterImportException;
+	public void init(CodeCenterServerWrapper ccWrapper, ProtexServerWrapper protexWrapper, CCIConfigurationManager config, TimeZone tz) throws CodeCenterImportException;
 	public void adjustApp(CCIApplication app, CCIProject project) throws CodeCenterImportException;
 }

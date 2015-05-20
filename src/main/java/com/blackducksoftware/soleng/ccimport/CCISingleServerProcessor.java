@@ -79,7 +79,6 @@ public class CCISingleServerProcessor extends CCIProcessor
 	public void performSynchronize() throws CodeCenterImportException {
 
 		List<CCIProject> projectList = getProjects().getList();
-		setLastAnalyzedDates(protexWrapper, projectList);
 
 		log.info("Processing {} projects for synchronization", projectList);
 		if (projectList.size() == 0) {
@@ -136,18 +135,6 @@ public class CCISingleServerProcessor extends CCIProcessor
 	public String getThreadExceptionMessages() {
 		return this.threadExceptionMessages;
 	}
-    
-    public static void setLastAnalyzedDates(ProtexServerWrapper protexWrapper, List<CCIProject> projectList) throws CodeCenterImportException {
-    	for (CCIProject project : projectList) {
-    		Project sdkProject = null;
-    		try {
-    			sdkProject = protexWrapper.getInternalApiWrapper().getProjectApi().getProjectById(project.getProjectKey());
-    		} catch (SdkFault e) {
-    			throw new CodeCenterImportException("Error getting project: " + project.getProjectName() + " in order to get lastAnalyzedDate: " + e.getMessage());
-    		}
-    		project.setAnalyzedDateValue(sdkProject.getLastAnalyzedDate());
-    	}
-    }
 
     private CCIProjectList getProjects() throws CodeCenterImportException
     {

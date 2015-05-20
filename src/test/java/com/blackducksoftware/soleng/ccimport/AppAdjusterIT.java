@@ -145,8 +145,8 @@ public class AppAdjusterIT {
 		String[] args = {"-config", "config.properties", "-new-app-list-filename", NEW_APPS_LIST_FILENAME};
 		ccConfigManager.setCmdLineArgs(args);
 		
-		Object appAdjusterObject = CCIProjectImporterHarness.getAppAdjusterObject(ccWrapper, ccConfigManager);
-		Method appAdjusterMethod = CCIProjectImporterHarness.getAppAdjusterMethod(ccWrapper, ccConfigManager, appAdjusterObject);
+		Object appAdjusterObject = CCIProjectImporterHarness.getAppAdjusterObject(ccConfigManager);
+		Method appAdjusterMethod = CCIProjectImporterHarness.getAppAdjusterMethod(ccWrapper, protexServerWrapper, ccConfigManager, appAdjusterObject);
 		
 		// Construct the factory that the processor will use to create
 		// the objects (run multi-threaded) to handle each subset of the project list
@@ -251,14 +251,11 @@ public class AppAdjusterIT {
         CodeCenterConfigManager ccConfigManager = new CodeCenterConfigManager(props);
         ProtexConfigManager protexConfigManager = new ProtexConfigManager(props);
 		
-    	ServerBean bean = new ServerBean();
-		bean.setServerName(CC_URL);
-		bean.setUserName(CC_IMPORT_USERNAME);
-		bean.setPassword(CC_IMPORT_USER_PASSWORD);
-		
-		CodeCenterServerWrapper ccWrapper = new CodeCenterServerWrapper(bean, ccConfigManager);
+		CodeCenterServerWrapper ccWrapper = new CodeCenterServerWrapper(ccConfigManager.getServerBean(), ccConfigManager);
 		CodeCenterServerProxyV7_0 cc = ccWrapper.getInternalApiWrapper().getProxy();
     	
+		ProtexServerWrapper protexWrapper = new ProtexServerWrapper(protexConfigManager.getServerBean(), protexConfigManager, false);
+		
     	// Create protex projects to import into CC
     	ProtexServerWrapper protexServerWrapper = ProtexTestUtils.initProtexServerWrapper(protexConfigManager);
     	
@@ -284,8 +281,8 @@ public class AppAdjusterIT {
 		String[] args = {"-config", "config.properties", "-new-app-list-filename", NEW_APPS_LIST_FILENAME_MANY_THREADS};
 		ccConfigManager.setCmdLineArgs(args);
 		
-		Object appAdjusterObject = CCIProjectImporterHarness.getAppAdjusterObject(ccWrapper, ccConfigManager);
-		Method appAdjusterMethod = CCIProjectImporterHarness.getAppAdjusterMethod(ccWrapper, ccConfigManager, appAdjusterObject);
+		Object appAdjusterObject = CCIProjectImporterHarness.getAppAdjusterObject(ccConfigManager);
+		Method appAdjusterMethod = CCIProjectImporterHarness.getAppAdjusterMethod(ccWrapper, protexWrapper, ccConfigManager, appAdjusterObject);
 		
 		// Construct the factory that the processor will use to create
 		// the objects (run multi-threaded) to handle each subset of the project list

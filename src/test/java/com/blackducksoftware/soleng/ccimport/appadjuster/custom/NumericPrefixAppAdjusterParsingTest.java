@@ -53,7 +53,7 @@ public class NumericPrefixAppAdjusterParsingTest {
 		CCIConfigurationManager config = new CCIConfigurationManager(props, APPLICATION.CODECENTER);
 		NumericPrefixedAppAdjuster adjuster = new NumericPrefixedAppAdjuster();
 		TimeZone tz = TimeZone.getDefault();
-		adjuster.init(null, config, tz);
+		adjuster.init(null, null, config, tz);
 		
 		metadata = adjuster.parse("79926-PROD-CURRENT");
 		assertEquals("79926", metadata.getNumericPrefix());

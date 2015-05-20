@@ -39,7 +39,7 @@ public class NumericPrefixedAppAdjusterTest {
 		CCIConfigurationManager config = new CCIConfigurationManager(props, APPLICATION.CODECENTER);
 		NumericPrefixedAppAdjuster adjuster = new NumericPrefixedAppAdjuster();
 		TimeZone tz = TimeZone.getDefault();
-		adjuster.init(null, config, tz);
+		adjuster.init(null, null, config, tz);
 		
 		metadata = adjuster.parse("123-some application-PROD-CURRENT");
 		assertEquals("123", metadata.getNumericPrefix());
@@ -87,7 +87,7 @@ public class NumericPrefixedAppAdjusterTest {
 		CCIConfigurationManager config = new CCIConfigurationManager(props, APPLICATION.CODECENTER);
 		NumericPrefixedAppAdjuster adjuster = new NumericPrefixedAppAdjuster();
 		TimeZone tz = TimeZone.getDefault();
-		adjuster.init(null, config, tz);
+		adjuster.init(null, null, config, tz);
 		
 		metadata = adjuster.parse("abc_123_PPPP_CURRENT");
 		assertEquals("abc", metadata.getNumericPrefix());
@@ -131,7 +131,7 @@ public class NumericPrefixedAppAdjusterTest {
 		CCIConfigurationManager config = new CCIConfigurationManager(props, APPLICATION.CODECENTER);
 		NumericPrefixedAppAdjuster adjuster = new NumericPrefixedAppAdjuster();
 		TimeZone tz = TimeZone.getDefault();
-		adjuster.init(null, config, tz);
+		adjuster.init(null, null, config, tz);
 		
 		String generatedDate = adjuster.getDateString(new Date(TIME_VALUE_OF_JAN1_2000), TimeZone.getDefault(), dateFormat);
 		assertEquals("2000-01-01 00:00:00", generatedDate);
@@ -153,7 +153,7 @@ public class NumericPrefixedAppAdjusterTest {
 		CCIConfigurationManager config = new CCIConfigurationManager(props, APPLICATION.CODECENTER);
 		NumericPrefixedAppAdjuster adjuster = new NumericPrefixedAppAdjuster();
 		TimeZone tz = TimeZone.getDefault();
-		adjuster.init(null, config, tz);
+		adjuster.init(null, null, config, tz);
 		
 		try {
 			adjuster.parse("30165-Chargeback imaging system");

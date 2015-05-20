@@ -11,7 +11,6 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Scanner;
 import java.util.TimeZone;
@@ -22,19 +21,17 @@ import org.slf4j.LoggerFactory;
 
 import com.blackducksoftware.sdk.codecenter.application.data.Application;
 import com.blackducksoftware.sdk.codecenter.application.data.ApplicationUpdate;
-import com.blackducksoftware.sdk.codecenter.attribute.data.AttributeIdToken;
 import com.blackducksoftware.sdk.codecenter.attribute.data.AttributeNameToken;
-import com.blackducksoftware.sdk.codecenter.client.util.CodeCenterServerProxyV7_0;
 import com.blackducksoftware.sdk.codecenter.common.data.AttributeValue;
 import com.blackducksoftware.sdk.codecenter.fault.SdkFault;
-import com.blackducksoftware.soleng.ccimport.CCIMultiServerProcessor;
+import com.blackducksoftware.sdk.protex.project.Project;
 import com.blackducksoftware.soleng.ccimport.appadjuster.AppAdjuster;
 
+import soleng.framework.connector.protex.ProtexServerWrapper;
 import soleng.framework.standard.codecenter.CodeCenterServerWrapper;
 
 import com.blackducksoftware.soleng.ccimport.exception.CodeCenterImportException;
 import com.blackducksoftware.soleng.ccimporter.config.CCIConfigurationManager;
-import com.blackducksoftware.soleng.ccimporter.config.CCIConstants;
 import com.blackducksoftware.soleng.ccimporter.model.CCIApplication;
 import com.blackducksoftware.soleng.ccimporter.model.CCIProject;
 
@@ -117,6 +114,8 @@ public class NumericPrefixedAppAdjuster implements AppAdjuster {
 	private String dateFormatString;
 	
 	private CodeCenterServerWrapper ccWrapper;
+	private ProtexServerWrapper protexWrapper;
+	
 	private TimeZone tz;
 	
 	private String analyzedDateNeverString=null;
@@ -126,8 +125,10 @@ public class NumericPrefixedAppAdjuster implements AppAdjuster {
 	
 	private boolean updateAppEditUrlOnOldApps = false;
 
-	public void init(CodeCenterServerWrapper ccWrapper, CCIConfigurationManager config, TimeZone tz) throws CodeCenterImportException {
+	public void init(CodeCenterServerWrapper ccWrapper, ProtexServerWrapper protexWrapper,
+			CCIConfigurationManager config, TimeZone tz) throws CodeCenterImportException {
 		this.ccWrapper = ccWrapper;
+		this.protexWrapper = protexWrapper;
 		this.tz = tz;
 
 		String numericPrefixPatternString = config.getOptionalProperty(NUMERIC_PREFIX_PATTERN_STRING_PROPERTY);
@@ -281,8 +282,18 @@ public class NumericPrefixedAppAdjuster implements AppAdjuster {
 			setAttribute(app, metadata, "AppEdit URL", appEditUrlAttrName, appEditUrlValue + "?appId=" + app.getId().getId());
 		}
 		
-		String analyzedDateString = getDateString(project.getAnalyzedDateValue(), tz, dateFormatString);
+		String analyzedDateString = getDateString(getLastAnalyzedDate(project), tz, dateFormatString);
 		setAttribute(app, metadata, "analyzed date", analyzedDateAttrName, analyzedDateString);
+	}
+	
+	private Date getLastAnalyzedDate(CCIProject project) throws CodeCenterImportException {
+		Project sdkProject;
+		try {
+			sdkProject = protexWrapper.getInternalApiWrapper().getProjectApi().getProjectByName(project.getProjectName());
+		} catch (com.blackducksoftware.sdk.fault.SdkFault e) {
+			throw new CodeCenterImportException("Error getting project: " + project.getProjectName() + " in order to get lastAnalyzedDate: " + e.getMessage());
+		}
+		return sdkProject.getLastAnalyzedDate();
 	}
 	
 	String getDateString(Date date, TimeZone tz, String dateFormatString) {

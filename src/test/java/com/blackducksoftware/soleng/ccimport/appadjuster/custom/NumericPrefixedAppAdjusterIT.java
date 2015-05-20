@@ -7,6 +7,9 @@ package com.blackducksoftware.soleng.ccimport.appadjuster.custom;
 
 import static org.junit.Assert.*;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
@@ -18,6 +21,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.ExpectedSystemExit;
 
+import soleng.framework.connector.protex.ProtexServerWrapper;
 import soleng.framework.core.config.server.ServerBean;
 import soleng.framework.standard.codecenter.CodeCenterServerWrapper;
 
@@ -26,6 +30,7 @@ import com.blackducksoftware.sdk.codecenter.application.data.ApplicationIdToken;
 import com.blackducksoftware.sdk.codecenter.attribute.data.AttributeIdToken;
 import com.blackducksoftware.sdk.codecenter.client.util.CodeCenterServerProxyV7_0;
 import com.blackducksoftware.sdk.codecenter.common.data.AttributeValue;
+import com.blackducksoftware.soleng.ccimport.ProtexTestUtils;
 import com.blackducksoftware.soleng.ccimport.TestUtils;
 import com.blackducksoftware.soleng.ccimport.appadjuster.custom.NumericPrefixedAppAdjuster;
 import com.blackducksoftware.soleng.ccimporter.config.CodeCenterConfigManager;
@@ -63,6 +68,8 @@ public class NumericPrefixedAppAdjusterIT {
 	private static String USER_PASSWORD = "password";
 	private static final String USER_ROLE1 = "Application Developer";
 
+	private static List<String> projectIdsToDelete = new ArrayList<String>();
+	
     @BeforeClass
 	public static void setUpBeforeClass() throws Exception {
 	}
@@ -74,14 +81,11 @@ public class NumericPrefixedAppAdjusterIT {
         CodeCenterConfigManager ccConfigManager = ccConfigManager = new CodeCenterConfigManager(configPath);
         ProtexConfigManager protexConfigManager = protexConfigManager = new ProtexConfigManager(configPath);
 		
-    	ServerBean bean = new ServerBean();
-		bean.setServerName(CC_URL);
-		bean.setUserName(SUPERUSER_USERNAME);
-		bean.setPassword(SUPERUSER_PASSWORD);
-		
-		CodeCenterServerWrapper ccWrapper = new CodeCenterServerWrapper(bean, ccConfigManager);
+		CodeCenterServerWrapper ccWrapper = new CodeCenterServerWrapper(ccConfigManager.getServerBean(), ccConfigManager);
 		CodeCenterServerProxyV7_0 cc = ccWrapper.getInternalApiWrapper().getProxy();
     	
+		ProtexServerWrapper protexWrapper = new ProtexServerWrapper(protexConfigManager.getServerBean(), protexConfigManager, false);
+		
 		TestUtils.removeApplication(cc, APPLICATION1_NAME, APPLICATION_VERSION);
 		TestUtils.removeApplication(cc, APPLICATION1a_NAME, APPLICATION_VERSION);
 		TestUtils.removeApplication(cc, APPLICATION2_NAME, APPLICATION_VERSION);
@@ -92,6 +96,10 @@ public class NumericPrefixedAppAdjusterIT {
 		TestUtils.removeUserFromCc(cc, USER2_USERNAME);
 		TestUtils.removeUserFromCc(cc, USER2a_USERNAME);
 		TestUtils.removeUserFromCc(cc, USER3_USERNAME);
+		
+		for (String projectId : projectIdsToDelete) {
+			ProtexTestUtils.deleteProjectById(protexWrapper, projectId);
+		}
 	}
 	
 
@@ -103,14 +111,13 @@ public class NumericPrefixedAppAdjusterIT {
         CodeCenterConfigManager ccConfigManager = ccConfigManager = new CodeCenterConfigManager(configPath);
         ProtexConfigManager protexConfigManager = protexConfigManager = new ProtexConfigManager(configPath);
 		
-    	ServerBean bean = new ServerBean();
-		bean.setServerName(CC_URL);
-		bean.setUserName(SUPERUSER_USERNAME);
-		bean.setPassword(SUPERUSER_PASSWORD);
-		
-		CodeCenterServerWrapper ccWrapper = new CodeCenterServerWrapper(bean, ccConfigManager);
+		CodeCenterServerWrapper ccWrapper = new CodeCenterServerWrapper(ccConfigManager.getServerBean(), ccConfigManager);
 		CodeCenterServerProxyV7_0 cc = ccWrapper.getInternalApiWrapper().getProxy();
 
+		ProtexServerWrapper protexWrapper = new ProtexServerWrapper(protexConfigManager.getServerBean(), protexConfigManager, false);
+		String projectId = ProtexTestUtils.createProject(protexWrapper, protexConfigManager, APPLICATION1_NAME, "src/test/resources/source");
+		projectIdsToDelete.add(projectId);
+		
     	TestUtils.createUser(cc, USER1_USERNAME, USER_PASSWORD);
     	ApplicationIdToken appIdToken = TestUtils.createApplication(cc, APPLICATION1_NAME, APPLICATION_VERSION, USER1_USERNAME, USER_ROLE1,
     			TestUtils.REQUIRED_ATTRNAME, "test");
@@ -120,16 +127,15 @@ public class NumericPrefixedAppAdjusterIT {
 		CCIProject project = new CCIProject();
 		project.setProjectName(APPLICATION1_NAME);
 		Date testDateValue = new Date();
-		project.setAnalyzedDateValue(testDateValue);
 
 		NumericPrefixedAppAdjuster appAdjuster = new NumericPrefixedAppAdjuster();
 		TimeZone tz = TimeZone.getDefault();
-		appAdjuster.init(ccWrapper, ccConfigManager, tz);
+		appAdjuster.init(ccWrapper, protexWrapper, ccConfigManager, tz);
 		cciApp.setJustCreated(true);
 		appAdjuster.adjustApp(cciApp, project);
 		
 		boolean foundNumPrefixAttr = false;
-		Application app2 = cc.getApplicationApi().getApplication(appIdToken); // Not sure why we have to get it again... weird
+		Application app2 = cc.getApplicationApi().getApplication(appIdToken);
 		List<AttributeValue> attrValues = app2.getAttributeValues();
 		for (AttributeValue attrValue : attrValues) {
 			AttributeIdToken a = (AttributeIdToken) attrValue.getAttributeId();
@@ -153,14 +159,13 @@ public class NumericPrefixedAppAdjusterIT {
         CodeCenterConfigManager ccConfigManager = ccConfigManager = new CodeCenterConfigManager(configPath);
         ProtexConfigManager protexConfigManager = protexConfigManager = new ProtexConfigManager(configPath);
 		
-    	ServerBean bean = new ServerBean();
-		bean.setServerName(CC_URL);
-		bean.setUserName(SUPERUSER_USERNAME);
-		bean.setPassword(SUPERUSER_PASSWORD);
-		
-		CodeCenterServerWrapper ccWrapper = new CodeCenterServerWrapper(bean, ccConfigManager);
+		CodeCenterServerWrapper ccWrapper = new CodeCenterServerWrapper(ccConfigManager.getServerBean(), ccConfigManager);
 		CodeCenterServerProxyV7_0 cc = ccWrapper.getInternalApiWrapper().getProxy();
 
+		ProtexServerWrapper protexWrapper = new ProtexServerWrapper(protexConfigManager.getServerBean(), protexConfigManager, false);
+		String projectId = ProtexTestUtils.createProject(protexWrapper, protexConfigManager, APPLICATION1a_NAME, "src/test/resources/source");
+		projectIdsToDelete.add(projectId);
+		
     	TestUtils.createUser(cc, USER1a_USERNAME, USER_PASSWORD);
     	ApplicationIdToken appIdToken = TestUtils.createApplication(cc, APPLICATION1a_NAME, APPLICATION_VERSION, USER1a_USERNAME, USER_ROLE1,
     			TestUtils.REQUIRED_ATTRNAME, "test");
@@ -169,17 +174,15 @@ public class NumericPrefixedAppAdjusterIT {
 		
 		CCIProject project = new CCIProject();
 		project.setProjectName(APPLICATION1a_NAME);
-		Date testDateValue = new Date();
-		project.setAnalyzedDateValue(testDateValue);
 
 		NumericPrefixedAppAdjuster appAdjuster = new NumericPrefixedAppAdjuster();
 		TimeZone tz = TimeZone.getDefault();
-		appAdjuster.init(ccWrapper, ccConfigManager, tz);
+		appAdjuster.init(ccWrapper, protexWrapper, ccConfigManager, tz);
 		cciApp.setJustCreated(false);
 		appAdjuster.adjustApp(cciApp, project);
 		
 		boolean foundNumPrefixAttr = false;
-		Application app2 = cc.getApplicationApi().getApplication(appIdToken); // Not sure why we have to get it again... weird
+		Application app2 = cc.getApplicationApi().getApplication(appIdToken); 
 		List<AttributeValue> attrValues = app2.getAttributeValues();
 		for (AttributeValue attrValue : attrValues) {
 			AttributeIdToken a = (AttributeIdToken) attrValue.getAttributeId();
@@ -204,13 +207,12 @@ public class NumericPrefixedAppAdjusterIT {
     	CodeCenterConfigManager ccConfigManager = ccConfigManager = new CodeCenterConfigManager(configPath);
         ProtexConfigManager protexConfigManager = protexConfigManager = new ProtexConfigManager(configPath);
 		
-    	ServerBean bean = new ServerBean();
-		bean.setServerName(CC_URL);
-		bean.setUserName(SUPERUSER_USERNAME);
-		bean.setPassword(SUPERUSER_PASSWORD);
-		
-		CodeCenterServerWrapper ccWrapper = new CodeCenterServerWrapper(bean, ccConfigManager);
+		CodeCenterServerWrapper ccWrapper = new CodeCenterServerWrapper(ccConfigManager.getServerBean(), ccConfigManager);
 		CodeCenterServerProxyV7_0 cc = ccWrapper.getInternalApiWrapper().getProxy();
+		
+		ProtexServerWrapper protexWrapper = new ProtexServerWrapper(protexConfigManager.getServerBean(), protexConfigManager, false);
+		String projectId = ProtexTestUtils.createProject(protexWrapper, protexConfigManager, APPLICATION2_NAME, "src/test/resources/source");
+    	projectIdsToDelete.add(projectId);
     	
     	TestUtils.createUser(cc, USER2_USERNAME, USER_PASSWORD);
     	ApplicationIdToken appIdToken = TestUtils.createApplication(cc, APPLICATION2_NAME, APPLICATION_VERSION, USER2_USERNAME, USER_ROLE1,
@@ -220,18 +222,18 @@ public class NumericPrefixedAppAdjusterIT {
     	
 		CCIProject project = new CCIProject();
 		project.setProjectName(APPLICATION2_NAME);
-		Date testDateValue = new Date(TIME_VALUE_OF_JAN1_2000);
-		project.setAnalyzedDateValue(testDateValue);
+		Date testDateValue = new Date();
+		DateFormat df = new SimpleDateFormat("MM-dd-yyyy");
 
 		NumericPrefixedAppAdjuster appAdjuster = new NumericPrefixedAppAdjuster();
 		TimeZone tz = TimeZone.getDefault();
-		appAdjuster.init(ccWrapper, ccConfigManager, tz);
+		appAdjuster.init(ccWrapper, protexWrapper, ccConfigManager, tz);
 		cciApp.setJustCreated(true);
 		appAdjuster.adjustApp(cciApp, project);
 		
 		boolean foundNumPrefixAttr = false;
 		System.out.println("==============\nGetting attr values:");
-		Application app2 = cc.getApplicationApi().getApplication(appIdToken); // Not sure why we have to get it again... weird
+		Application app2 = cc.getApplicationApi().getApplication(appIdToken);
 		List<AttributeValue> attrValues = app2.getAttributeValues();
 		for (AttributeValue attrValue : attrValues) {
 			AttributeIdToken a = (AttributeIdToken) attrValue.getAttributeId();
@@ -242,7 +244,7 @@ public class NumericPrefixedAppAdjusterIT {
 			
 			if (CUSTOM_ATTR_NAME.equals(curAttrName)) {
 				foundNumPrefixAttr = true;
-				assertEquals("01-01-2000", curAttrValue);
+				assertEquals(df.format(testDateValue), curAttrValue);
 			}
 		}
 		assertTrue(foundNumPrefixAttr);
@@ -256,14 +258,13 @@ public class NumericPrefixedAppAdjusterIT {
     	CodeCenterConfigManager ccConfigManager = ccConfigManager = new CodeCenterConfigManager(configPath);
         ProtexConfigManager protexConfigManager = protexConfigManager = new ProtexConfigManager(configPath);
 		
-    	ServerBean bean = new ServerBean();
-		bean.setServerName(CC_URL);
-		bean.setUserName(SUPERUSER_USERNAME);
-		bean.setPassword(SUPERUSER_PASSWORD);
-		
-		CodeCenterServerWrapper ccWrapper = new CodeCenterServerWrapper(bean, ccConfigManager);
+		CodeCenterServerWrapper ccWrapper = new CodeCenterServerWrapper(ccConfigManager.getServerBean(), ccConfigManager);
 		CodeCenterServerProxyV7_0 cc = ccWrapper.getInternalApiWrapper().getProxy();
     	
+		ProtexServerWrapper protexWrapper = new ProtexServerWrapper(protexConfigManager.getServerBean(), protexConfigManager, false);
+		String projectId = ProtexTestUtils.createProject(protexWrapper, protexConfigManager, APPLICATION2a_NAME, "src/test/resources/source");
+		projectIdsToDelete.add(projectId);
+		
     	TestUtils.createUser(cc, USER2a_USERNAME, USER_PASSWORD);
     	ApplicationIdToken appIdToken = TestUtils.createApplication(cc, APPLICATION2a_NAME, APPLICATION_VERSION, USER2a_USERNAME, USER_ROLE1,
     			TestUtils.REQUIRED_ATTRNAME, "test");
@@ -272,18 +273,18 @@ public class NumericPrefixedAppAdjusterIT {
     	
 		CCIProject project = new CCIProject();
 		project.setProjectName(APPLICATION2a_NAME);
-		Date testDateValue = new Date(TIME_VALUE_OF_JAN1_2000);
-		project.setAnalyzedDateValue(testDateValue);
+		Date testDateValue = new Date();
+		DateFormat df = new SimpleDateFormat("MM-dd-yyyy");
 
 		NumericPrefixedAppAdjuster appAdjuster = new NumericPrefixedAppAdjuster();
 		TimeZone tz = TimeZone.getDefault();
-		appAdjuster.init(ccWrapper, ccConfigManager, tz);
+		appAdjuster.init(ccWrapper, protexWrapper, ccConfigManager, tz);
 		cciApp.setJustCreated(false);
 		appAdjuster.adjustApp(cciApp, project);
 		
 		boolean foundNumPrefixAttr = false;
 		System.out.println("==============\nGetting attr values:");
-		Application app2 = cc.getApplicationApi().getApplication(appIdToken); // Not sure why we have to get it again... weird
+		Application app2 = cc.getApplicationApi().getApplication(appIdToken);
 		List<AttributeValue> attrValues = app2.getAttributeValues();
 		for (AttributeValue attrValue : attrValues) {
 			AttributeIdToken a = (AttributeIdToken) attrValue.getAttributeId();
@@ -294,7 +295,7 @@ public class NumericPrefixedAppAdjusterIT {
 			
 			if (CUSTOM_ATTR_NAME.equals(curAttrName)) {
 				foundNumPrefixAttr = true;
-				assertEquals("01-01-2000", curAttrValue);
+				assertEquals(df.format(testDateValue), curAttrValue);
 			}
 		}
 		assertTrue(foundNumPrefixAttr);
@@ -308,14 +309,13 @@ public class NumericPrefixedAppAdjusterIT {
     	CodeCenterConfigManager ccConfigManager = ccConfigManager = new CodeCenterConfigManager(configPath);
         ProtexConfigManager protexConfigManager = protexConfigManager = new ProtexConfigManager(configPath);
 		
-    	ServerBean bean = new ServerBean();
-		bean.setServerName(CC_URL);
-		bean.setUserName(SUPERUSER_USERNAME);
-		bean.setPassword(SUPERUSER_PASSWORD);
-		
-		CodeCenterServerWrapper ccWrapper = new CodeCenterServerWrapper(bean, ccConfigManager);
+		CodeCenterServerWrapper ccWrapper = new CodeCenterServerWrapper(ccConfigManager.getServerBean(), ccConfigManager);
 		CodeCenterServerProxyV7_0 cc = ccWrapper.getInternalApiWrapper().getProxy();
     	
+		ProtexServerWrapper protexWrapper = new ProtexServerWrapper(protexConfigManager.getServerBean(), protexConfigManager, false);
+		String projectId = ProtexTestUtils.createProject(protexWrapper, protexConfigManager, APPLICATION3_NAME, "src/test/resources/source");
+		projectIdsToDelete.add(projectId);
+		
     	TestUtils.createUser(cc, USER3_USERNAME, USER_PASSWORD);
     	ApplicationIdToken appIdToken = TestUtils.createApplication(cc, APPLICATION3_NAME, APPLICATION_VERSION, USER3_USERNAME, USER_ROLE1,
     			TestUtils.REQUIRED_ATTRNAME, "test");
@@ -325,17 +325,17 @@ public class NumericPrefixedAppAdjusterIT {
 		CCIProject project = new CCIProject();
 		project.setProjectName(APPLICATION3_NAME);
 		Date testDateValue = new Date(TIME_VALUE_OF_JAN1_2000);
-		project.setAnalyzedDateValue(testDateValue);
+
 
 		NumericPrefixedAppAdjuster appAdjuster = new NumericPrefixedAppAdjuster();
 		TimeZone tz = TimeZone.getDefault();
-		appAdjuster.init(ccWrapper, ccConfigManager, tz);
+		appAdjuster.init(ccWrapper, protexWrapper, ccConfigManager, tz);
 		cciApp.setJustCreated(true);
 		appAdjuster.adjustApp(cciApp, project);
 		
 		boolean foundProjectStatus = false;
 		System.out.println("==============\nGetting attr values:");
-		Application app2 = cc.getApplicationApi().getApplication(appIdToken); // Not sure why we have to get it again... weird
+		Application app2 = cc.getApplicationApi().getApplication(appIdToken);
 		List<AttributeValue> attrValues = app2.getAttributeValues();
 		for (AttributeValue attrValue : attrValues) {
 			AttributeIdToken a = (AttributeIdToken) attrValue.getAttributeId();

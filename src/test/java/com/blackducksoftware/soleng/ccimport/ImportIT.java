@@ -112,8 +112,8 @@ public class ImportIT {
 		ccConfig = new CodeCenterConfigManager(props);
 		pConfig = new ProtexConfigManager(props);
 		
-		Object appAdjusterObject = CCIProjectImporterHarness.getAppAdjusterObject(ccsw, ccConfig);
-		Method appAdjusterMethod = CCIProjectImporterHarness.getAppAdjusterMethod(ccsw, ccConfig, appAdjusterObject);
+		Object appAdjusterObject = CCIProjectImporterHarness.getAppAdjusterObject(ccConfig);
+		Method appAdjusterMethod = CCIProjectImporterHarness.getAppAdjusterMethod(ccsw, psw, ccConfig, appAdjusterObject);
 		
 		// Construct the factory that the processor will use to create
 	    // the objects (run multi-threaded) to handle each subset of the project list
@@ -145,8 +145,8 @@ public class ImportIT {
 		pConfig = new ProtexConfigManager(props);
 		
 		// Switch to Mock app adjuster
-		appAdjusterObject = CCIProjectImporterHarness.getAppAdjusterObject(ccsw, ccConfig);
-		appAdjusterMethod = CCIProjectImporterHarness.getAppAdjusterMethod(ccsw, ccConfig, appAdjusterObject);
+		appAdjusterObject = CCIProjectImporterHarness.getAppAdjusterObject(ccConfig);
+		appAdjusterMethod = CCIProjectImporterHarness.getAppAdjusterMethod(ccsw, psw, ccConfig, appAdjusterObject);
 		
 		// Construct the factory that the processor will use to create
 	    // the objects (run multi-threaded) to handle each subset of the project list
