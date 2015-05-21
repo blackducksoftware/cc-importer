@@ -407,10 +407,6 @@ public class CodeCenterProjectSynchronizer
 	    {
 		if (this.configManager.isPerformSmartValidate() && !forceValidation)
 		{
-		    // Grab the BOM Refresh date
-//		    Date lastRefreshDate = importedProject
-//			    .getLastBOMRefreshDate();
-		    
 		    // get BOM refresh date from Protex
 			Date lastRefreshDate=null;
 			try {

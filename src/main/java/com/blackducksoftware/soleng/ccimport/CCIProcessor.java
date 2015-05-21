@@ -131,37 +131,10 @@ public abstract class CCIProcessor
         	}
 	}
 	
-	if(codeCenterConfigManager.isPerformSmartValidate())
-	{
-	    log.info("Populating BOM refresh dates for all projects");
-	    populateBOMRefreshDate(projectList, protexWrapper); // TODO move this to CodeCenterProjectSynchronizer
-	}
-
 	listObject.setList(projectList);
 	return listObject;
 
     }
-
-    /**
-     * Run through each project, and grab its last BOM refresh date
-     * @param projectList
-     * @param protexWrapper 
-     */
-    private void populateBOMRefreshDate(List<CCIProject> projectList, ProtexServerWrapper protexWrapper)
-    {
-	for(CCIProject project : projectList)
-	{
-	    try{
-		Date refreshDate = protexWrapper.getInternalApiWrapper().getBomApi().getLastBomRefreshFinishDate(project.getProjectKey());
-		project.setLastBOMRefreshDate(refreshDate);
-	    } catch (Exception e)
-	    {
-		log.warn("Unable to get refresh date for project [{}]", project.getProjectName(), e);
-	    }
-	}
-	
-    }
-
 
     /**
      * @param protexWrapper

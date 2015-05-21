@@ -25,7 +25,6 @@ public class CCIProject extends ProtexProjectPojo
 {
     private String projectVersion = null;
     private CCIApplication cciApplication = null;
-    private Date lastBOMRefreshDate = null; // TODO eliminate
     
     public CCIProject()
     {
@@ -81,15 +80,4 @@ public class CCIProject extends ProtexProjectPojo
 	public void setCciApplication(CCIApplication cciApplication) {
 		this.cciApplication = cciApplication;
 	}
-
-	public Date getLastBOMRefreshDate()
-    {
-	return lastBOMRefreshDate;
-    }
-
-    public void setLastBOMRefreshDate(Date lastBOMRefreshDate)
-    {
-	this.lastBOMRefreshDate = lastBOMRefreshDate;
-    }
-    
 }
