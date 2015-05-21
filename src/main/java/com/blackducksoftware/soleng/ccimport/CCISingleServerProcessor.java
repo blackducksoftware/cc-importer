@@ -42,14 +42,13 @@ public class CCISingleServerProcessor extends CCIProcessor
     private static Logger log = LoggerFactory
 	    .getLogger(CCISingleServerProcessor.class.getName());
   
-    private ProtexServerWrapper protexWrapper = null;
     private CCIReportGenerator reportGen = null;
     private int numThreads;
     private boolean threadExceptionThrown=false;
     private boolean threadWaitInterrupted=false;
     private String threadExceptionMessages="";
     private ProjectProcessorThreadWorkerFactory threadFactory;
-
+    private ProtexServerWrapper protexServerWrapper;
     /**
      * @param configManager
      * @param protexConfigManager
@@ -57,20 +56,17 @@ public class CCISingleServerProcessor extends CCIProcessor
      */
     public CCISingleServerProcessor(CodeCenterConfigManager configManager,
 	    ProtexConfigManager protexConfigManager, CodeCenterServerWrapper codeCenterServerWrapper,
+	    ProtexServerWrapper protexServerWrapper,
 	    ProjectProcessorThreadWorkerFactory threadFactory) throws Exception
     {
 	super(configManager, codeCenterServerWrapper);
-	
+	this.protexServerWrapper = protexServerWrapper;
 	numThreads = configManager.getNumThreads();
 
 	// There will only be one in the single instance
 	ServerBean protexBean = protexConfigManager.getServerBean();
 
 	log.info("Using Protex URL [{}]", protexBean.getServerName());
-	
-	// Set up the local Protex config.
-	protexWrapper = new ProtexServerWrapper(protexBean,
-		protexConfigManager, true);
 
 	this.threadFactory = threadFactory;
     }
@@ -138,13 +134,13 @@ public class CCISingleServerProcessor extends CCIProcessor
 
     private CCIProjectList getProjects() throws CodeCenterImportException
     {
-	return getProjects(protexWrapper);
+	return getProjects(protexServerWrapper);
     }
 
 	@Override
 	public void runReport() throws CodeCenterImportException 
 	{
-		reportGen = new CCIReportGenerator(codeCenterWrapper, protexWrapper);
+		reportGen = new CCIReportGenerator(codeCenterWrapper, protexServerWrapper);
 		CCIProjectList projectList = getProjects();
 		
 		log.info("Processing {} projects for reporting", projectList);

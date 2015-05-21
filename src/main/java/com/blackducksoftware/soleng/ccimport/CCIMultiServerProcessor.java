@@ -29,9 +29,6 @@ public class CCIMultiServerProcessor extends CCIProcessor
     private static Logger log = LoggerFactory.getLogger(CCIMultiServerProcessor.class.getName());
 
     private ProtexConfigManager protexConfig = null;
-    private ProtexServerWrapper protexServerWrapper;
-    private Object appAdjusterObject;
-    private Method appAdjusterMethod;
     
     /**
      * @param configManager
@@ -40,15 +37,11 @@ public class CCIMultiServerProcessor extends CCIProcessor
      * @throws Exception
      */
     public CCIMultiServerProcessor(CodeCenterConfigManager configManager, ProtexConfigManager protexConfigManager,
-    		CodeCenterServerWrapper codeCenterServerWrapper, ProtexServerWrapper protexServerWrapper,
-    		Object appAdjusterObject, Method appAdjusterMethod)
+    		CodeCenterServerWrapper codeCenterServerWrapper)
 	    throws Exception
     {
 	super(configManager, codeCenterServerWrapper);
-	this.protexServerWrapper = protexServerWrapper;
 	this.protexConfig = protexConfigManager;
-	this.appAdjusterObject = appAdjusterObject;
-	this.appAdjusterMethod = appAdjusterMethod;
 	log.info("Using Protex URL [{}]", protexConfig.getServerBean().getServerName());
     }
 
@@ -64,8 +57,6 @@ public class CCIMultiServerProcessor extends CCIProcessor
 	// First thing we do, is blank out any project lists that the user has specified
 	List<CCIProject> userProjectList = codeCenterConfigManager.getProjectList();
 	List<ServerBean> protexServers = codeCenterConfigManager.getServerListByApplication(APPLICATION.PROTEX);
-	CodeCenterProjectSynchronizer synchronizer = new CodeCenterProjectSynchronizer(
-		codeCenterWrapper, protexServerWrapper, codeCenterConfigManager, appAdjusterObject, appAdjusterMethod);
 	
 	if(userProjectList.size() > 0)
 	{
@@ -105,6 +96,8 @@ public class CCIMultiServerProcessor extends CCIProcessor
 				+ protexServer);
 	    }
 	    
+	    CodeCenterProjectSynchronizer synchronizer = new CodeCenterProjectSynchronizer(
+	    		codeCenterWrapper, wrapper, codeCenterConfigManager, null, null);
 	    List<CCIProject> projectList = getAllProjects(wrapper);
 	    synchronizer.synchronize(projectList);
 	}

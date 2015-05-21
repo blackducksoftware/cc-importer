@@ -152,7 +152,7 @@ public class AppAdjusterIT {
 		// the objects (run multi-threaded) to handle each subset of the project list
 		ProjectProcessorThreadWorkerFactory threadWorkerFactory = 
 				new ProjectProcessorThreadWorkerFactoryImpl(ccWrapper, protexServerWrapper, ccConfigManager, appAdjusterObject, appAdjusterMethod);
-    	CCISingleServerProcessor processor = new CCISingleServerProcessor(ccConfigManager, protexConfigManager, ccWrapper,
+    	CCISingleServerProcessor processor = new CCISingleServerProcessor(ccConfigManager, protexConfigManager, ccWrapper, protexServerWrapper,
     			threadWorkerFactory);
 
 		try {
@@ -289,7 +289,7 @@ public class AppAdjusterIT {
 		ProjectProcessorThreadWorkerFactory threadWorkerFactory = 
 				new ProjectProcessorThreadWorkerFactoryImpl(ccWrapper, protexServerWrapper, ccConfigManager, appAdjusterObject, appAdjusterMethod);
     	CCISingleServerProcessor processor = new CCISingleServerProcessor(ccConfigManager, protexConfigManager, ccWrapper,
-    			threadWorkerFactory);
+    			protexServerWrapper, threadWorkerFactory);
 
 		try {
 			List<CCIProject> projects = ccConfigManager.getProjectList();

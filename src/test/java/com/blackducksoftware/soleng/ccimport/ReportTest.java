@@ -82,7 +82,7 @@ public class ReportTest
 	 	ProjectProcessorThreadWorkerFactory threadWorkerFactory = 
 	 				new ProjectProcessorThreadWorkerFactoryImpl(ccsw, psw, ccConfigManager, null, null);
 		CCIProcessor processor = new CCISingleServerProcessor(ccConfigManager,
-			protexConfigManager, ccsw, threadWorkerFactory);
+			protexConfigManager, ccsw, psw, threadWorkerFactory);
 		processor.runReport();
 	
 		DataTable report = processor.getReportGen().getDataTable();

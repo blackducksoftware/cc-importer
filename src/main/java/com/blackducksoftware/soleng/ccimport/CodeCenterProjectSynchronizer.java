@@ -324,12 +324,11 @@ public class CodeCenterProjectSynchronizer
     }
     
     private void invokeAppAdjuster(CCIConfigurationManager configManager, CCIApplication cciApp, CCIProject project) throws CodeCenterImportException {
-    	if (appAdjusterMethod != null) {
+    	if ((appAdjusterObject != null) && (appAdjusterMethod != null)) {
 	    	try {
 	    		appAdjusterMethod.invoke(appAdjusterObject, cciApp, project);
 	    	} catch (InvocationTargetException e) {
 	    		String msg = "Error during post-import application metadata adjustment: InvocationTargetException: " + e.getTargetException().getMessage(); 
-//	    		log.error(msg, e);
 	    		throw new CodeCenterImportException(msg);
 	    	} catch (IllegalAccessException e) {
 	    		String msg = "Error during post-import application metadata adjustment: IllegalAccessException: " + e.getMessage(); 

@@ -14,7 +14,6 @@ import soleng.framework.standard.codecenter.CodeCenterServerWrapper;
 
 import com.blackducksoftware.soleng.ccimport.exception.CodeCenterImportException;
 import com.blackducksoftware.soleng.ccimporter.config.CCIConfigurationManager;
-import com.blackducksoftware.soleng.ccimporter.config.CCIConstants;
 import com.blackducksoftware.soleng.ccimporter.config.CodeCenterConfigManager;
 import com.blackducksoftware.soleng.ccimporter.config.ProtexConfigManager;
 import com.blackducksoftware.soleng.ccimporter.model.CCIApplication;
@@ -22,6 +21,12 @@ import com.blackducksoftware.soleng.ccimporter.model.CCIProject;
 
 /**
  * Main entry point for the utility.
+ * 
+ * There are two modes: Single (Protex) Server, and Multi (Protex) Server.
+ * 
+ * IF you are running in single server mode:
+ * You can configure in an optional AppAdjuster, which modifies the app after the import/sync is done.
+ * Currently there is one AppAdjuster available, NumericPrefixedAppAdjuster, developed for a specific customer.
  * 
  * @author akamen
  * 
@@ -62,9 +67,7 @@ public class CCIProjectImporterHarness {
 		
 		try {
 			CodeCenterServerWrapper codeCenterServerWrapper = createCodeCenterServerWrapper(ccConfigManager);
-			ProtexServerWrapper protexServerWrapper = createProtexServerWrapper(protexConfigManager);
-			Object appAdjusterObject = getAppAdjusterObject(ccConfigManager);
-			Method appAdjusterMethod = getAppAdjusterMethod(codeCenterServerWrapper, protexServerWrapper, ccConfigManager, appAdjusterObject);
+			
 			/**
 			 * Here we determine whether we do single or multi-protex support.
 			 * By simply checking the server list size we have our answer
@@ -77,14 +80,17 @@ public class CCIProjectImporterHarness {
 			if (servers.size() > 2) {
 				log.info("Multi-Protex mode started.");
 				processor = new CCIMultiServerProcessor(ccConfigManager,
-						protexConfigManager, codeCenterServerWrapper, protexServerWrapper,
-						appAdjusterObject, appAdjusterMethod);
+						protexConfigManager, codeCenterServerWrapper);
 			} else {
 				/**
 				 * In the case of single, we want to pass along the protex
 				 * config manager
 				 */
 				log.info("Single-Protex mode started");
+				
+				ProtexServerWrapper protexServerWrapper = createProtexServerWrapper(protexConfigManager);
+				Object appAdjusterObject = getAppAdjusterObject(ccConfigManager);
+				Method appAdjusterMethod = getAppAdjusterMethod(codeCenterServerWrapper, protexServerWrapper, ccConfigManager, appAdjusterObject);
 
 				// Construct the factory that the processor will use to create
 				// the objects (run multi-threaded) to handle each subset of the project list
@@ -92,7 +98,7 @@ public class CCIProjectImporterHarness {
 						new ProjectProcessorThreadWorkerFactoryImpl(codeCenterServerWrapper, protexServerWrapper, ccConfigManager,
 								appAdjusterObject, appAdjusterMethod);
 				processor = new CCISingleServerProcessor(ccConfigManager,
-						protexConfigManager, codeCenterServerWrapper, threadWorkerFactory);
+						protexConfigManager, codeCenterServerWrapper, protexServerWrapper, threadWorkerFactory);
 			}
 
 			if (ccConfigManager.isRunReport()) {
@@ -142,7 +148,7 @@ public class CCIProjectImporterHarness {
 			log.info("Using Protex URL [{}]", ccBean.getServerName());
 
 			protexWrapper = new ProtexServerWrapper(ccBean,
-					configManager, false);
+					configManager, true);
 
 		} catch (Exception e) {
 			throw new Exception("Unable to establish Protex connection: "

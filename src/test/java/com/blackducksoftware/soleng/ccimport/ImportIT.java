@@ -90,7 +90,7 @@ public class ImportIT {
 	    // the objects (run multi-threaded) to handle each subset of the project list
 	 	ProjectProcessorThreadWorkerFactory threadWorkerFactory = 
 	 				new ProjectProcessorThreadWorkerFactoryImpl(ccsw, psw, ccConfig, null, null);
-		processor = new CCISingleServerProcessor(ccConfig, pConfig, ccsw, threadWorkerFactory);
+		processor = new CCISingleServerProcessor(ccConfig, pConfig, ccsw, psw, threadWorkerFactory);
 		
 		
 		
@@ -119,7 +119,7 @@ public class ImportIT {
 	    // the objects (run multi-threaded) to handle each subset of the project list
 	 	ProjectProcessorThreadWorkerFactory threadWorkerFactory = 
 	 				new ProjectProcessorThreadWorkerFactoryImpl(ccsw, psw, ccConfig, appAdjusterObject, appAdjusterMethod);
-		processor = new CCISingleServerProcessor(ccConfig, pConfig, ccsw, threadWorkerFactory);
+		processor = new CCISingleServerProcessor(ccConfig, pConfig, ccsw, psw, threadWorkerFactory);
 		projectId1 = ProtexTestUtils.createProject(psw, pConfig, APP_NAME1, "src/test/resources/source");
 
 		// The project has just been created; the app does not exist yet
@@ -152,7 +152,7 @@ public class ImportIT {
 	    // the objects (run multi-threaded) to handle each subset of the project list
 	 	threadWorkerFactory = 
 	 				new ProjectProcessorThreadWorkerFactoryImpl(ccsw, psw, ccConfig, appAdjusterObject, appAdjusterMethod);
-		processor = new CCISingleServerProcessor(ccConfig, pConfig, ccsw, threadWorkerFactory);
+		processor = new CCISingleServerProcessor(ccConfig, pConfig, ccsw, psw, threadWorkerFactory);
 				
 		// Change the project BOM
 		ProtexTestUtils.makeSomeIds(pConfig, APP_NAME1, true);
@@ -182,7 +182,7 @@ public class ImportIT {
 	    // the objects (run multi-threaded) to handle each subset of the project list
 	 	threadWorkerFactory = 
 	 				new ProjectProcessorThreadWorkerFactoryImpl(ccsw, psw, ccConfig, null, null);
-		processor = new CCISingleServerProcessor(ccConfig, pConfig, ccsw, threadWorkerFactory);
+		processor = new CCISingleServerProcessor(ccConfig, pConfig, ccsw, psw, threadWorkerFactory);
 		
 		// Delete the app
 		CcTestUtils.deleteAppByName(ccsw, APP_NAME1, APP_VERSION);
@@ -207,7 +207,7 @@ public class ImportIT {
 	    // the objects (run multi-threaded) to handle each subset of the project list
 	 	ProjectProcessorThreadWorkerFactory threadWorkerFactory = 
 	 				new ProjectProcessorThreadWorkerFactoryImpl(ccsw, psw, ccConfig, null, null);
-		processor = new CCISingleServerProcessor(ccConfig, pConfig, ccsw, threadWorkerFactory);
+		processor = new CCISingleServerProcessor(ccConfig, pConfig, ccsw, psw, threadWorkerFactory);
 		
 		projectId2 = ProtexTestUtils.createProject(psw, pConfig, APP_NAME2, "src/test/resources/source");
 		
@@ -237,7 +237,7 @@ public class ImportIT {
 	    // the objects (run multi-threaded) to handle each subset of the project list
 	 	threadWorkerFactory = 
 	 				new ProjectProcessorThreadWorkerFactoryImpl(ccsw, psw, ccConfig, null, null);
-		processor = new CCISingleServerProcessor(ccConfig, pConfig, ccsw, threadWorkerFactory);
+		processor = new CCISingleServerProcessor(ccConfig, pConfig, ccsw, psw, threadWorkerFactory);
 		
 		// Run the sync. This should clear the validation error
 		processor.performSynchronize();
@@ -257,7 +257,7 @@ public class ImportIT {
 	    // the objects (run multi-threaded) to handle each subset of the project list
 	 	ProjectProcessorThreadWorkerFactory threadWorkerFactory = 
 	 				new SuicidalProjectProcessorThreadWorkerFactory();
-		processor = new CCISingleServerProcessor(ccConfig, pConfig, ccsw, threadWorkerFactory);
+		processor = new CCISingleServerProcessor(ccConfig, pConfig, ccsw, psw, threadWorkerFactory);
 		projectId1 = ProtexTestUtils.createProject(psw, pConfig, APP_NAME1, "src/test/resources/source");
 		
 		// Run the sync; should throw mock exception

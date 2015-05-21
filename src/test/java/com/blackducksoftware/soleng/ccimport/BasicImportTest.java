@@ -87,7 +87,7 @@ public class BasicImportTest
 	    // the objects (run multi-threaded) to handle each subset of the project list
 	 	ProjectProcessorThreadWorkerFactory threadWorkerFactory = 
 	 				new ProjectProcessorThreadWorkerFactoryImpl(ccsw, psw, ccConfig, null, null);
-	    processor = new CCISingleServerProcessor(ccConfig, pConfig, ccsw, threadWorkerFactory);
+	    processor = new CCISingleServerProcessor(ccConfig, pConfig, ccsw, psw, threadWorkerFactory);
 	} catch (Exception e)
 	{
 	    Assert.fail(e.getMessage());
@@ -139,7 +139,7 @@ public class BasicImportTest
 	    // the objects (run multi-threaded) to handle each subset of the project list
 	 	ProjectProcessorThreadWorkerFactory threadWorkerFactory = 
 	 				new ProjectProcessorThreadWorkerFactoryImpl(ccsw, psw, ccConfig, null, null);
-	    processor = new CCISingleServerProcessor(ccConfig, pConfig, ccsw, threadWorkerFactory);
+	    processor = new CCISingleServerProcessor(ccConfig, pConfig, ccsw, psw, threadWorkerFactory);
 	} catch (Exception e)
 	{
 	    Assert.fail(e.getMessage());
@@ -180,7 +180,7 @@ public class BasicImportTest
 	    // the objects (run multi-threaded) to handle each subset of the project list
 	 	ProjectProcessorThreadWorkerFactory threadWorkerFactory = 
 	 				new ProjectProcessorThreadWorkerFactoryImpl(ccsw, psw, ccConfig, null, null);
-	    processor = new CCISingleServerProcessor(ccConfig, pConfig, ccsw, threadWorkerFactory);
+	    processor = new CCISingleServerProcessor(ccConfig, pConfig, ccsw, psw, threadWorkerFactory);
 	} catch (Exception e)
 	{
 	    Assert.fail(e.getMessage());
