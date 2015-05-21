@@ -89,7 +89,7 @@ public class ImportIT {
 		// Construct the factory that the processor will use to create
 	    // the objects (run multi-threaded) to handle each subset of the project list
 	 	ProjectProcessorThreadWorkerFactory threadWorkerFactory = 
-	 				new ProjectProcessorThreadWorkerFactoryImpl(ccsw, ccConfig, null, null);
+	 				new ProjectProcessorThreadWorkerFactoryImpl(ccsw, psw, ccConfig, null, null);
 		processor = new CCISingleServerProcessor(ccConfig, pConfig, ccsw, threadWorkerFactory);
 		
 		
@@ -118,7 +118,7 @@ public class ImportIT {
 		// Construct the factory that the processor will use to create
 	    // the objects (run multi-threaded) to handle each subset of the project list
 	 	ProjectProcessorThreadWorkerFactory threadWorkerFactory = 
-	 				new ProjectProcessorThreadWorkerFactoryImpl(ccsw, ccConfig, appAdjusterObject, appAdjusterMethod);
+	 				new ProjectProcessorThreadWorkerFactoryImpl(ccsw, psw, ccConfig, appAdjusterObject, appAdjusterMethod);
 		processor = new CCISingleServerProcessor(ccConfig, pConfig, ccsw, threadWorkerFactory);
 		projectId1 = ProtexTestUtils.createProject(psw, pConfig, APP_NAME1, "src/test/resources/source");
 
@@ -151,7 +151,7 @@ public class ImportIT {
 		// Construct the factory that the processor will use to create
 	    // the objects (run multi-threaded) to handle each subset of the project list
 	 	threadWorkerFactory = 
-	 				new ProjectProcessorThreadWorkerFactoryImpl(ccsw, ccConfig, appAdjusterObject, appAdjusterMethod);
+	 				new ProjectProcessorThreadWorkerFactoryImpl(ccsw, psw, ccConfig, appAdjusterObject, appAdjusterMethod);
 		processor = new CCISingleServerProcessor(ccConfig, pConfig, ccsw, threadWorkerFactory);
 				
 		// Change the project BOM
@@ -181,7 +181,7 @@ public class ImportIT {
 		// Construct the factory that the processor will use to create
 	    // the objects (run multi-threaded) to handle each subset of the project list
 	 	threadWorkerFactory = 
-	 				new ProjectProcessorThreadWorkerFactoryImpl(ccsw, ccConfig, null, null);
+	 				new ProjectProcessorThreadWorkerFactoryImpl(ccsw, psw, ccConfig, null, null);
 		processor = new CCISingleServerProcessor(ccConfig, pConfig, ccsw, threadWorkerFactory);
 		
 		// Delete the app
@@ -206,7 +206,7 @@ public class ImportIT {
 		// Construct the factory that the processor will use to create
 	    // the objects (run multi-threaded) to handle each subset of the project list
 	 	ProjectProcessorThreadWorkerFactory threadWorkerFactory = 
-	 				new ProjectProcessorThreadWorkerFactoryImpl(ccsw, ccConfig, null, null);
+	 				new ProjectProcessorThreadWorkerFactoryImpl(ccsw, psw, ccConfig, null, null);
 		processor = new CCISingleServerProcessor(ccConfig, pConfig, ccsw, threadWorkerFactory);
 		
 		projectId2 = ProtexTestUtils.createProject(psw, pConfig, APP_NAME2, "src/test/resources/source");
@@ -236,7 +236,7 @@ public class ImportIT {
 		// Construct the factory that the processor will use to create
 	    // the objects (run multi-threaded) to handle each subset of the project list
 	 	threadWorkerFactory = 
-	 				new ProjectProcessorThreadWorkerFactoryImpl(ccsw, ccConfig, null, null);
+	 				new ProjectProcessorThreadWorkerFactoryImpl(ccsw, psw, ccConfig, null, null);
 		processor = new CCISingleServerProcessor(ccConfig, pConfig, ccsw, threadWorkerFactory);
 		
 		// Run the sync. This should clear the validation error

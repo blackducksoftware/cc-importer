@@ -77,7 +77,7 @@ public class CCIProjectImporterHarness {
 			if (servers.size() > 2) {
 				log.info("Multi-Protex mode started.");
 				processor = new CCIMultiServerProcessor(ccConfigManager,
-						protexConfigManager, codeCenterServerWrapper,
+						protexConfigManager, codeCenterServerWrapper, protexServerWrapper,
 						appAdjusterObject, appAdjusterMethod);
 			} else {
 				/**
@@ -89,7 +89,7 @@ public class CCIProjectImporterHarness {
 				// Construct the factory that the processor will use to create
 				// the objects (run multi-threaded) to handle each subset of the project list
 				ProjectProcessorThreadWorkerFactory threadWorkerFactory = 
-						new ProjectProcessorThreadWorkerFactoryImpl(codeCenterServerWrapper, ccConfigManager,
+						new ProjectProcessorThreadWorkerFactoryImpl(codeCenterServerWrapper, protexServerWrapper, ccConfigManager,
 								appAdjusterObject, appAdjusterMethod);
 				processor = new CCISingleServerProcessor(ccConfigManager,
 						protexConfigManager, codeCenterServerWrapper, threadWorkerFactory);

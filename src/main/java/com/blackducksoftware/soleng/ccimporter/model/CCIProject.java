@@ -25,7 +25,7 @@ public class CCIProject extends ProtexProjectPojo
 {
     private String projectVersion = null;
     private CCIApplication cciApplication = null;
-    private Date lastBOMRefreshDate = null;
+    private Date lastBOMRefreshDate = null; // TODO eliminate
     
     public CCIProject()
     {

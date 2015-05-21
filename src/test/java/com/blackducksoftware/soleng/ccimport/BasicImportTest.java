@@ -13,6 +13,7 @@ import org.junit.rules.ExpectedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import soleng.framework.connector.protex.ProtexServerWrapper;
 import soleng.framework.standard.codecenter.CodeCenterServerWrapper;
 
 import com.blackducksoftware.sdk.codecenter.application.data.Application;
@@ -59,6 +60,7 @@ public class BasicImportTest
     private static CodeCenterConfigManager ccConfig = null;
     private static CodeCenterServerWrapper ccsw = null;
     private static ProtexConfigManager pConfig = null;
+    private static ProtexServerWrapper psw = null;
 
     private static CCISingleServerProcessor processor = null;
 
@@ -78,11 +80,13 @@ public class BasicImportTest
 	    // Create cc wrapper so that we can peform cleanup tasks
 	    ccsw = new CodeCenterServerWrapper(ccConfig.getServerBean(),
 		    ccConfig);
+	    
+	    psw = new ProtexServerWrapper(pConfig.getServerBean(), pConfig, false);
 
 	    // Construct the factory that the processor will use to create
 	    // the objects (run multi-threaded) to handle each subset of the project list
 	 	ProjectProcessorThreadWorkerFactory threadWorkerFactory = 
-	 				new ProjectProcessorThreadWorkerFactoryImpl(ccsw, ccConfig, null, null);
+	 				new ProjectProcessorThreadWorkerFactoryImpl(ccsw, psw, ccConfig, null, null);
 	    processor = new CCISingleServerProcessor(ccConfig, pConfig, ccsw, threadWorkerFactory);
 	} catch (Exception e)
 	{
@@ -134,7 +138,7 @@ public class BasicImportTest
 	    // Construct the factory that the processor will use to create
 	    // the objects (run multi-threaded) to handle each subset of the project list
 	 	ProjectProcessorThreadWorkerFactory threadWorkerFactory = 
-	 				new ProjectProcessorThreadWorkerFactoryImpl(ccsw, ccConfig, null, null);
+	 				new ProjectProcessorThreadWorkerFactoryImpl(ccsw, psw, ccConfig, null, null);
 	    processor = new CCISingleServerProcessor(ccConfig, pConfig, ccsw, threadWorkerFactory);
 	} catch (Exception e)
 	{
@@ -175,7 +179,7 @@ public class BasicImportTest
 	    // Construct the factory that the processor will use to create
 	    // the objects (run multi-threaded) to handle each subset of the project list
 	 	ProjectProcessorThreadWorkerFactory threadWorkerFactory = 
-	 				new ProjectProcessorThreadWorkerFactoryImpl(ccsw, ccConfig, null, null);
+	 				new ProjectProcessorThreadWorkerFactoryImpl(ccsw, psw, ccConfig, null, null);
 	    processor = new CCISingleServerProcessor(ccConfig, pConfig, ccsw, threadWorkerFactory);
 	} catch (Exception e)
 	{

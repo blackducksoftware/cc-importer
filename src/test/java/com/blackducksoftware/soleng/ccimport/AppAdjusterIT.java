@@ -151,7 +151,7 @@ public class AppAdjusterIT {
 		// Construct the factory that the processor will use to create
 		// the objects (run multi-threaded) to handle each subset of the project list
 		ProjectProcessorThreadWorkerFactory threadWorkerFactory = 
-				new ProjectProcessorThreadWorkerFactoryImpl(ccWrapper, ccConfigManager, appAdjusterObject, appAdjusterMethod);
+				new ProjectProcessorThreadWorkerFactoryImpl(ccWrapper, protexServerWrapper, ccConfigManager, appAdjusterObject, appAdjusterMethod);
     	CCISingleServerProcessor processor = new CCISingleServerProcessor(ccConfigManager, protexConfigManager, ccWrapper,
     			threadWorkerFactory);
 
@@ -287,7 +287,7 @@ public class AppAdjusterIT {
 		// Construct the factory that the processor will use to create
 		// the objects (run multi-threaded) to handle each subset of the project list
 		ProjectProcessorThreadWorkerFactory threadWorkerFactory = 
-				new ProjectProcessorThreadWorkerFactoryImpl(ccWrapper, ccConfigManager, appAdjusterObject, appAdjusterMethod);
+				new ProjectProcessorThreadWorkerFactoryImpl(ccWrapper, protexServerWrapper, ccConfigManager, appAdjusterObject, appAdjusterMethod);
     	CCISingleServerProcessor processor = new CCISingleServerProcessor(ccConfigManager, protexConfigManager, ccWrapper,
     			threadWorkerFactory);
 

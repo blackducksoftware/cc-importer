@@ -36,6 +36,7 @@ import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import soleng.framework.connector.protex.ProtexServerWrapper;
 import soleng.framework.standard.codecenter.CodeCenterServerWrapper;
 
 import com.blackducksoftware.sdk.codecenter.administration.data.ServerNameToken;
@@ -79,6 +80,7 @@ public class CodeCenterProjectSynchronizer
     private Object appAdjusterObject = null;
     private Method appAdjusterMethod = null;
     private CodeCenterServerWrapper ccWrapper = null;
+    private ProtexServerWrapper protexWrapper = null;
     private CCIConfigurationManager configManager = null;
     private CCIReportSummary reportSummary = new CCIReportSummary();
 
@@ -87,10 +89,12 @@ public class CodeCenterProjectSynchronizer
     
     public CodeCenterProjectSynchronizer(
 	    CodeCenterServerWrapper codeCenterWrapper,
+	    ProtexServerWrapper protexWrapper,
 	    CCIConfigurationManager config,
 	    Object appAdjusterObject, Method appAdjusterMethod) throws CodeCenterImportException
     {
 	this.ccWrapper = codeCenterWrapper;
+	this.protexWrapper = protexWrapper;
 	this.configManager = config;
 	this.appAdjusterObject = appAdjusterObject;
 	this.appAdjusterMethod = appAdjusterMethod;
@@ -404,12 +408,23 @@ public class CodeCenterProjectSynchronizer
 		if (this.configManager.isPerformSmartValidate() && !forceValidation)
 		{
 		    // Grab the BOM Refresh date
-		    Date lastRefreshDate = importedProject
-			    .getLastBOMRefreshDate();
+//		    Date lastRefreshDate = importedProject
+//			    .getLastBOMRefreshDate();
+		    
+		    // get BOM refresh date from Protex
+			Date lastRefreshDate=null;
+			try {
+				lastRefreshDate = protexWrapper
+						.getInternalApiWrapper()
+						.getBomApi()
+						.getLastBomRefreshFinishDate(
+								importedProject.getProjectKey());
+			} catch (Exception e) {
+				throw new Exception("Unable to get refresh date for project " + importedProject.getProjectName(), e);
+			}
 
 		    if (lastRefreshDate == null)
-			throw new Exception(
-				"The last BOM refresh date is null, cannot perfom smart validate");
+		    	throw new Exception("The last BOM refresh date is null, cannot perfom smart validate");
 		    
 		    // Grab the validation date
 		    Date lastValidatedTime = app.getLastValidationDate();

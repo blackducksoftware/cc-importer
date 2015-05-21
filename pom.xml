@@ -191,7 +191,7 @@
 					</dependency>
 				</dependencies>
 				<configuration>
-					<argLine>${argLine} -XX:MaxPermSize=128m -Xms64m -Xmx256m</argLine>
+					<argLine>${argLine} -XX:MaxPermSize=200m -Xms64m -Xmx256m</argLine>
 					<includes>
 						<include>**/*Test.class</include>
 					</includes>
@@ -212,7 +212,7 @@
 					</execution>
 				</executions>
 				<configuration>
-					<argLine>-XX:MaxPermSize=128m -Xms64m -Xmx256m</argLine>
+					<argLine>-XX:MaxPermSize=200m -Xms64m -Xmx256m</argLine>
 					<includes>
 						<include>**/*IT.class</include>
 					</includes>

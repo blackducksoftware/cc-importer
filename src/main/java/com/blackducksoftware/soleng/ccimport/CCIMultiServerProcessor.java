@@ -29,6 +29,7 @@ public class CCIMultiServerProcessor extends CCIProcessor
     private static Logger log = LoggerFactory.getLogger(CCIMultiServerProcessor.class.getName());
 
     private ProtexConfigManager protexConfig = null;
+    private ProtexServerWrapper protexServerWrapper;
     private Object appAdjusterObject;
     private Method appAdjusterMethod;
     
@@ -39,12 +40,12 @@ public class CCIMultiServerProcessor extends CCIProcessor
      * @throws Exception
      */
     public CCIMultiServerProcessor(CodeCenterConfigManager configManager, ProtexConfigManager protexConfigManager,
-    		CodeCenterServerWrapper codeCenterServerWrapper,
+    		CodeCenterServerWrapper codeCenterServerWrapper, ProtexServerWrapper protexServerWrapper,
     		Object appAdjusterObject, Method appAdjusterMethod)
 	    throws Exception
     {
 	super(configManager, codeCenterServerWrapper);
-	
+	this.protexServerWrapper = protexServerWrapper;
 	this.protexConfig = protexConfigManager;
 	this.appAdjusterObject = appAdjusterObject;
 	this.appAdjusterMethod = appAdjusterMethod;
@@ -64,7 +65,7 @@ public class CCIMultiServerProcessor extends CCIProcessor
 	List<CCIProject> userProjectList = codeCenterConfigManager.getProjectList();
 	List<ServerBean> protexServers = codeCenterConfigManager.getServerListByApplication(APPLICATION.PROTEX);
 	CodeCenterProjectSynchronizer synchronizer = new CodeCenterProjectSynchronizer(
-		codeCenterWrapper, codeCenterConfigManager, appAdjusterObject, appAdjusterMethod);
+		codeCenterWrapper, protexServerWrapper, codeCenterConfigManager, appAdjusterObject, appAdjusterMethod);
 	
 	if(userProjectList.size() > 0)
 	{

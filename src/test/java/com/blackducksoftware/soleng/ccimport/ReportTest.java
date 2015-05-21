@@ -9,6 +9,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.ExpectedSystemExit;
 
+import soleng.framework.connector.protex.ProtexServerWrapper;
 import soleng.framework.core.config.server.ServerBean;
 
 import com.blackducksoftware.sdk.codecenter.client.util.CodeCenterServerProxyV7_0;
@@ -74,10 +75,12 @@ public class ReportTest
 		CodeCenterServerWrapper ccsw = new CodeCenterServerWrapper(ccConfigManager.getServerBean(),
 				ccConfigManager);
 		
+		ProtexServerWrapper psw = new ProtexServerWrapper(protexConfigManager.getServerBean(), protexConfigManager, false);
+		
 		// Construct the factory that the processor will use to create
 	    // the objects (run multi-threaded) to handle each subset of the project list
 	 	ProjectProcessorThreadWorkerFactory threadWorkerFactory = 
-	 				new ProjectProcessorThreadWorkerFactoryImpl(ccsw, ccConfigManager, null, null);
+	 				new ProjectProcessorThreadWorkerFactoryImpl(ccsw, psw, ccConfigManager, null, null);
 		CCIProcessor processor = new CCISingleServerProcessor(ccConfigManager,
 			protexConfigManager, ccsw, threadWorkerFactory);
 		processor.runReport();

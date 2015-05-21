@@ -134,7 +134,7 @@ public abstract class CCIProcessor
 	if(codeCenterConfigManager.isPerformSmartValidate())
 	{
 	    log.info("Populating BOM refresh dates for all projects");
-	    populateBOMRefreshDate(projectList, protexWrapper);
+	    populateBOMRefreshDate(projectList, protexWrapper); // TODO move this to CodeCenterProjectSynchronizer
 	}
 
 	listObject.setList(projectList);
