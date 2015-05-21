@@ -86,18 +86,8 @@ public class CCIProjectImporterHarness {
 				 * config manager
 				 */
 				log.info("Single-Protex mode started");
-				
-				ProtexServerWrapper protexServerWrapper = createProtexServerWrapper(protexConfigManager);
-				Object appAdjusterObject = getAppAdjusterObject(ccConfigManager);
-				Method appAdjusterMethod = getAppAdjusterMethod(codeCenterServerWrapper, protexServerWrapper, ccConfigManager, appAdjusterObject);
-
-				// Construct the factory that the processor will use to create
-				// the objects (run multi-threaded) to handle each subset of the project list
-				ProjectProcessorThreadWorkerFactory threadWorkerFactory = 
-						new ProjectProcessorThreadWorkerFactoryImpl(codeCenterServerWrapper, protexServerWrapper, ccConfigManager,
-								appAdjusterObject, appAdjusterMethod);
 				processor = new CCISingleServerProcessor(ccConfigManager,
-						protexConfigManager, codeCenterServerWrapper, protexServerWrapper, threadWorkerFactory);
+						protexConfigManager, codeCenterServerWrapper);
 			}
 
 			if (ccConfigManager.isRunReport()) {
@@ -133,27 +123,6 @@ public class CCIProjectImporterHarness {
 					+ e.getMessage());
 		}
 		return codeCenterWrapper;
-	}
-	
-	private static ProtexServerWrapper createProtexServerWrapper(
-			ProtexConfigManager configManager) throws Exception {
-		ProtexServerWrapper protexWrapper;
-		try {
-			// Always just one code center
-			ServerBean ccBean = configManager.getServerBean();
-			if (ccBean == null)
-				throw new Exception("No valid Protex server configurations found");
-
-			log.info("Using Protex URL [{}]", ccBean.getServerName());
-
-			protexWrapper = new ProtexServerWrapper(ccBean,
-					configManager, true);
-
-		} catch (Exception e) {
-			throw new Exception("Unable to establish Protex connection: "
-					+ e.getMessage());
-		}
-		return protexWrapper;
 	}
 	
 	static Object getAppAdjusterObject(CCIConfigurationManager config) throws CodeCenterImportException {

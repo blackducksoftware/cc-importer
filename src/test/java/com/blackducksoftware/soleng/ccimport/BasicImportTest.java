@@ -82,12 +82,7 @@ public class BasicImportTest
 		    ccConfig);
 	    
 	    psw = new ProtexServerWrapper(pConfig.getServerBean(), pConfig, false);
-
-	    // Construct the factory that the processor will use to create
-	    // the objects (run multi-threaded) to handle each subset of the project list
-	 	ProjectProcessorThreadWorkerFactory threadWorkerFactory = 
-	 				new ProjectProcessorThreadWorkerFactoryImpl(ccsw, psw, ccConfig, null, null);
-	    processor = new CCISingleServerProcessor(ccConfig, pConfig, ccsw, psw, threadWorkerFactory);
+	    processor = new CCISingleServerProcessor(ccConfig, pConfig, ccsw);
 	} catch (Exception e)
 	{
 	    Assert.fail(e.getMessage());
@@ -134,12 +129,8 @@ public class BasicImportTest
 	    // Create cc wrapper so that we can peform cleanup tasks
 	    ccsw = new CodeCenterServerWrapper(ccConfig.getServerBean(),
 		    ccConfig);
-	    
-	    // Construct the factory that the processor will use to create
-	    // the objects (run multi-threaded) to handle each subset of the project list
-	 	ProjectProcessorThreadWorkerFactory threadWorkerFactory = 
-	 				new ProjectProcessorThreadWorkerFactoryImpl(ccsw, psw, ccConfig, null, null);
-	    processor = new CCISingleServerProcessor(ccConfig, pConfig, ccsw, psw, threadWorkerFactory);
+
+	    processor = new CCISingleServerProcessor(ccConfig, pConfig, ccsw);
 	} catch (Exception e)
 	{
 	    Assert.fail(e.getMessage());
@@ -176,11 +167,7 @@ public class BasicImportTest
 	    ccsw = new CodeCenterServerWrapper(ccConfig.getServerBean(),
 		    ccConfig);
 	    
-	    // Construct the factory that the processor will use to create
-	    // the objects (run multi-threaded) to handle each subset of the project list
-	 	ProjectProcessorThreadWorkerFactory threadWorkerFactory = 
-	 				new ProjectProcessorThreadWorkerFactoryImpl(ccsw, psw, ccConfig, null, null);
-	    processor = new CCISingleServerProcessor(ccConfig, pConfig, ccsw, psw, threadWorkerFactory);
+	    processor = new CCISingleServerProcessor(ccConfig, pConfig, ccsw);
 	} catch (Exception e)
 	{
 	    Assert.fail(e.getMessage());

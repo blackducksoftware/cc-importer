@@ -86,11 +86,7 @@ public class ImportIT {
 		psw = new ProtexServerWrapper<ProtexProjectPojo>(pConfig.getServerBean(),
 				pConfig, true);
 
-		// Construct the factory that the processor will use to create
-	    // the objects (run multi-threaded) to handle each subset of the project list
-	 	ProjectProcessorThreadWorkerFactory threadWorkerFactory = 
-	 				new ProjectProcessorThreadWorkerFactoryImpl(ccsw, psw, ccConfig, null, null);
-		processor = new CCISingleServerProcessor(ccConfig, pConfig, ccsw, psw, threadWorkerFactory);
+		processor = new CCISingleServerProcessor(ccConfig, pConfig, ccsw);
 		
 		
 		
@@ -112,14 +108,7 @@ public class ImportIT {
 		ccConfig = new CodeCenterConfigManager(props);
 		pConfig = new ProtexConfigManager(props);
 		
-		Object appAdjusterObject = CCIProjectImporterHarness.getAppAdjusterObject(ccConfig);
-		Method appAdjusterMethod = CCIProjectImporterHarness.getAppAdjusterMethod(ccsw, psw, ccConfig, appAdjusterObject);
-		
-		// Construct the factory that the processor will use to create
-	    // the objects (run multi-threaded) to handle each subset of the project list
-	 	ProjectProcessorThreadWorkerFactory threadWorkerFactory = 
-	 				new ProjectProcessorThreadWorkerFactoryImpl(ccsw, psw, ccConfig, appAdjusterObject, appAdjusterMethod);
-		processor = new CCISingleServerProcessor(ccConfig, pConfig, ccsw, psw, threadWorkerFactory);
+		processor = new CCISingleServerProcessor(ccConfig, pConfig, ccsw);
 		projectId1 = ProtexTestUtils.createProject(psw, pConfig, APP_NAME1, "src/test/resources/source");
 
 		// The project has just been created; the app does not exist yet
@@ -145,14 +134,20 @@ public class ImportIT {
 		pConfig = new ProtexConfigManager(props);
 		
 		// Switch to Mock app adjuster
+		Object appAdjusterObject = CCIProjectImporterHarness.getAppAdjusterObject(ccConfig);
+		Method appAdjusterMethod = CCIProjectImporterHarness.getAppAdjusterMethod(ccsw, psw, ccConfig, appAdjusterObject);
 		appAdjusterObject = CCIProjectImporterHarness.getAppAdjusterObject(ccConfig);
 		appAdjusterMethod = CCIProjectImporterHarness.getAppAdjusterMethod(ccsw, psw, ccConfig, appAdjusterObject);
 		
 		// Construct the factory that the processor will use to create
 	    // the objects (run multi-threaded) to handle each subset of the project list
-	 	threadWorkerFactory = 
+		
+		
+		// Construct the factory that the processor will use to create
+	    // the objects (run multi-threaded) to handle each subset of the project list
+	 	ProjectProcessorThreadWorkerFactory threadWorkerFactory = 
 	 				new ProjectProcessorThreadWorkerFactoryImpl(ccsw, psw, ccConfig, appAdjusterObject, appAdjusterMethod);
-		processor = new CCISingleServerProcessor(ccConfig, pConfig, ccsw, psw, threadWorkerFactory);
+		processor = new CCISingleServerProcessor(ccConfig, pConfig, ccsw, threadWorkerFactory);
 				
 		// Change the project BOM
 		ProtexTestUtils.makeSomeIds(pConfig, APP_NAME1, true);
@@ -178,11 +173,7 @@ public class ImportIT {
 		ccConfig = new CodeCenterConfigManager(props);
 		pConfig = new ProtexConfigManager(props);
 		
-		// Construct the factory that the processor will use to create
-	    // the objects (run multi-threaded) to handle each subset of the project list
-	 	threadWorkerFactory = 
-	 				new ProjectProcessorThreadWorkerFactoryImpl(ccsw, psw, ccConfig, null, null);
-		processor = new CCISingleServerProcessor(ccConfig, pConfig, ccsw, psw, threadWorkerFactory);
+		processor = new CCISingleServerProcessor(ccConfig, pConfig, ccsw);
 		
 		// Delete the app
 		CcTestUtils.deleteAppByName(ccsw, APP_NAME1, APP_VERSION);
@@ -202,12 +193,8 @@ public class ImportIT {
 		Properties props = createPropertiesLeaveOldValidationErrors(APP_NAME2);
 		ccConfig = new CodeCenterConfigManager(props);
 		pConfig = new ProtexConfigManager(props);
-		
-		// Construct the factory that the processor will use to create
-	    // the objects (run multi-threaded) to handle each subset of the project list
-	 	ProjectProcessorThreadWorkerFactory threadWorkerFactory = 
-	 				new ProjectProcessorThreadWorkerFactoryImpl(ccsw, psw, ccConfig, null, null);
-		processor = new CCISingleServerProcessor(ccConfig, pConfig, ccsw, psw, threadWorkerFactory);
+
+		processor = new CCISingleServerProcessor(ccConfig, pConfig, ccsw);
 		
 		projectId2 = ProtexTestUtils.createProject(psw, pConfig, APP_NAME2, "src/test/resources/source");
 		
@@ -233,11 +220,7 @@ public class ImportIT {
 		ccConfig = new CodeCenterConfigManager(props);
 		pConfig = new ProtexConfigManager(props);
 		
-		// Construct the factory that the processor will use to create
-	    // the objects (run multi-threaded) to handle each subset of the project list
-	 	threadWorkerFactory = 
-	 				new ProjectProcessorThreadWorkerFactoryImpl(ccsw, psw, ccConfig, null, null);
-		processor = new CCISingleServerProcessor(ccConfig, pConfig, ccsw, psw, threadWorkerFactory);
+		processor = new CCISingleServerProcessor(ccConfig, pConfig, ccsw);
 		
 		// Run the sync. This should clear the validation error
 		processor.performSynchronize();
@@ -257,7 +240,7 @@ public class ImportIT {
 	    // the objects (run multi-threaded) to handle each subset of the project list
 	 	ProjectProcessorThreadWorkerFactory threadWorkerFactory = 
 	 				new SuicidalProjectProcessorThreadWorkerFactory();
-		processor = new CCISingleServerProcessor(ccConfig, pConfig, ccsw, psw, threadWorkerFactory);
+		processor = new CCISingleServerProcessor(ccConfig, pConfig, ccsw, threadWorkerFactory);
 		projectId1 = ProtexTestUtils.createProject(psw, pConfig, APP_NAME1, "src/test/resources/source");
 		
 		// Run the sync; should throw mock exception

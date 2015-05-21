@@ -8,6 +8,7 @@ All rights reserved. **/
  */
 package com.blackducksoftware.soleng.ccimport;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -50,26 +51,55 @@ public class CCISingleServerProcessor extends CCIProcessor
     private ProjectProcessorThreadWorkerFactory threadFactory;
     private ProtexServerWrapper protexServerWrapper;
     /**
-     * @param configManager
+     * @param ccConfigManager
      * @param protexConfigManager
      * @throws Exception
      */
-    public CCISingleServerProcessor(CodeCenterConfigManager configManager,
-	    ProtexConfigManager protexConfigManager, CodeCenterServerWrapper codeCenterServerWrapper,
-	    ProtexServerWrapper protexServerWrapper,
-	    ProjectProcessorThreadWorkerFactory threadFactory) throws Exception
-    {
-	super(configManager, codeCenterServerWrapper);
-	this.protexServerWrapper = protexServerWrapper;
-	numThreads = configManager.getNumThreads();
+	public CCISingleServerProcessor(CodeCenterConfigManager ccConfigManager,
+			ProtexConfigManager protexConfigManager,
+			CodeCenterServerWrapper codeCenterServerWrapper) throws Exception {
+		
+		super(ccConfigManager, codeCenterServerWrapper);
+		protexServerWrapper = createProtexServerWrapper(protexConfigManager);
+		Object appAdjusterObject = CCIProjectImporterHarness
+				.getAppAdjusterObject(ccConfigManager);
+		Method appAdjusterMethod = CCIProjectImporterHarness
+				.getAppAdjusterMethod(codeCenterServerWrapper,
+						protexServerWrapper, ccConfigManager, appAdjusterObject);
 
-	// There will only be one in the single instance
-	ServerBean protexBean = protexConfigManager.getServerBean();
+		// Construct the factory that the processor will use to create
+		// the objects (run multi-threaded) to handle each subset of the project
+		// list
+		threadFactory = new ProjectProcessorThreadWorkerFactoryImpl(
+				codeCenterServerWrapper, protexServerWrapper, ccConfigManager,
+				appAdjusterObject, appAdjusterMethod);
 
-	log.info("Using Protex URL [{}]", protexBean.getServerName());
+		init(ccConfigManager, protexConfigManager, protexServerWrapper);
+	}
 
-	this.threadFactory = threadFactory;
-    }
+	public CCISingleServerProcessor(CodeCenterConfigManager ccConfigManager,
+			ProtexConfigManager protexConfigManager,
+			CodeCenterServerWrapper codeCenterServerWrapper,
+			ProjectProcessorThreadWorkerFactory threadFactory) throws Exception {
+		
+		super(ccConfigManager, codeCenterServerWrapper);
+		protexServerWrapper = createProtexServerWrapper(protexConfigManager);
+		this.threadFactory = threadFactory;
+
+		init(ccConfigManager, protexConfigManager, protexServerWrapper);
+	}
+
+	private void init(CodeCenterConfigManager ccConfigManager,
+			ProtexConfigManager protexConfigManager,
+			ProtexServerWrapper protexServerWrapper) {
+		this.protexServerWrapper = protexServerWrapper;
+		numThreads = ccConfigManager.getNumThreads();
+
+		// There will only be one in the single instance
+		ServerBean protexBean = protexConfigManager.getServerBean();
+
+		log.info("Using Protex URL [{}]", protexBean.getServerName());
+	}
 
 	@Override
 	public void performSynchronize() throws CodeCenterImportException {
@@ -165,5 +195,24 @@ public class CCISingleServerProcessor extends CCIProcessor
 			}
 		}
 	}
-	
+	private static ProtexServerWrapper createProtexServerWrapper(
+			ProtexConfigManager configManager) throws Exception {
+		ProtexServerWrapper protexWrapper;
+		try {
+			// Always just one code center
+			ServerBean ccBean = configManager.getServerBean();
+			if (ccBean == null)
+				throw new Exception("No valid Protex server configurations found");
+
+			log.info("Using Protex URL [{}]", ccBean.getServerName());
+
+			protexWrapper = new ProtexServerWrapper(ccBean,
+					configManager, true);
+
+		} catch (Exception e) {
+			throw new Exception("Unable to establish Protex connection: "
+					+ e.getMessage());
+		}
+		return protexWrapper;
+	}
 }

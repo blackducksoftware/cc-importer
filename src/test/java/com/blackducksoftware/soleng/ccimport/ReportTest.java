@@ -75,14 +75,8 @@ public class ReportTest
 		CodeCenterServerWrapper ccsw = new CodeCenterServerWrapper(ccConfigManager.getServerBean(),
 				ccConfigManager);
 		
-		ProtexServerWrapper psw = new ProtexServerWrapper(protexConfigManager.getServerBean(), protexConfigManager, false);
-		
-		// Construct the factory that the processor will use to create
-	    // the objects (run multi-threaded) to handle each subset of the project list
-	 	ProjectProcessorThreadWorkerFactory threadWorkerFactory = 
-	 				new ProjectProcessorThreadWorkerFactoryImpl(ccsw, psw, ccConfigManager, null, null);
 		CCIProcessor processor = new CCISingleServerProcessor(ccConfigManager,
-			protexConfigManager, ccsw, psw, threadWorkerFactory);
+			protexConfigManager, ccsw);
 		processor.runReport();
 	
 		DataTable report = processor.getReportGen().getDataTable();

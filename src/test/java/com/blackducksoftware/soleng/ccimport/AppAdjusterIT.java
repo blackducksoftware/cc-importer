@@ -145,15 +145,7 @@ public class AppAdjusterIT {
 		String[] args = {"-config", "config.properties", "-new-app-list-filename", NEW_APPS_LIST_FILENAME};
 		ccConfigManager.setCmdLineArgs(args);
 		
-		Object appAdjusterObject = CCIProjectImporterHarness.getAppAdjusterObject(ccConfigManager);
-		Method appAdjusterMethod = CCIProjectImporterHarness.getAppAdjusterMethod(ccWrapper, protexServerWrapper, ccConfigManager, appAdjusterObject);
-		
-		// Construct the factory that the processor will use to create
-		// the objects (run multi-threaded) to handle each subset of the project list
-		ProjectProcessorThreadWorkerFactory threadWorkerFactory = 
-				new ProjectProcessorThreadWorkerFactoryImpl(ccWrapper, protexServerWrapper, ccConfigManager, appAdjusterObject, appAdjusterMethod);
-    	CCISingleServerProcessor processor = new CCISingleServerProcessor(ccConfigManager, protexConfigManager, ccWrapper, protexServerWrapper,
-    			threadWorkerFactory);
+    	CCISingleServerProcessor processor = new CCISingleServerProcessor(ccConfigManager, protexConfigManager, ccWrapper);
 
 		try {
 			List<CCIProject> projects = ccConfigManager.getProjectList();
@@ -281,15 +273,7 @@ public class AppAdjusterIT {
 		String[] args = {"-config", "config.properties", "-new-app-list-filename", NEW_APPS_LIST_FILENAME_MANY_THREADS};
 		ccConfigManager.setCmdLineArgs(args);
 		
-		Object appAdjusterObject = CCIProjectImporterHarness.getAppAdjusterObject(ccConfigManager);
-		Method appAdjusterMethod = CCIProjectImporterHarness.getAppAdjusterMethod(ccWrapper, protexWrapper, ccConfigManager, appAdjusterObject);
-		
-		// Construct the factory that the processor will use to create
-		// the objects (run multi-threaded) to handle each subset of the project list
-		ProjectProcessorThreadWorkerFactory threadWorkerFactory = 
-				new ProjectProcessorThreadWorkerFactoryImpl(ccWrapper, protexServerWrapper, ccConfigManager, appAdjusterObject, appAdjusterMethod);
-    	CCISingleServerProcessor processor = new CCISingleServerProcessor(ccConfigManager, protexConfigManager, ccWrapper,
-    			protexServerWrapper, threadWorkerFactory);
+    	CCISingleServerProcessor processor = new CCISingleServerProcessor(ccConfigManager, protexConfigManager, ccWrapper);
 
 		try {
 			List<CCIProject> projects = ccConfigManager.getProjectList();
