@@ -24,7 +24,6 @@ import com.blackducksoftware.soleng.ccimporter.model.CCIProject;
  * 
  * There are two modes: Single (Protex) Server, and Multi (Protex) Server.
  * 
- * IF you are running in single server mode:
  * You can configure in an optional AppAdjuster, which modifies the app after the import/sync is done.
  * Currently there is one AppAdjuster available, NumericPrefixedAppAdjuster, developed for a specific customer.
  * 

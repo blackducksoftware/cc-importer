@@ -95,9 +95,10 @@ public class CCIMultiServerProcessor extends CCIProcessor
 			"Unable to establish connection against: "
 				+ protexServer);
 	    }
-	    
+	    Object appAdjusterObject = CCIProjectImporterHarness.getAppAdjusterObject(codeCenterConfigManager);
+		Method appAdjusterMethod = CCIProjectImporterHarness.getAppAdjusterMethod(super.codeCenterWrapper, wrapper, codeCenterConfigManager, appAdjusterObject);
 	    CodeCenterProjectSynchronizer synchronizer = new CodeCenterProjectSynchronizer(
-	    		codeCenterWrapper, wrapper, codeCenterConfigManager, null, null);
+	    		codeCenterWrapper, wrapper, codeCenterConfigManager, appAdjusterObject, appAdjusterMethod);
 	    List<CCIProject> projectList = getAllProjects(wrapper);
 	    synchronizer.synchronize(projectList);
 	}
