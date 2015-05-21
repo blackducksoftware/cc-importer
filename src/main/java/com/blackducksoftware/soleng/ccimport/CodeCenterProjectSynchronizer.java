@@ -45,6 +45,7 @@ import com.blackducksoftware.sdk.codecenter.application.data.ApplicationCreate;
 import com.blackducksoftware.sdk.codecenter.application.data.ApplicationIdToken;
 import com.blackducksoftware.sdk.codecenter.application.data.ApplicationNameVersionToken;
 import com.blackducksoftware.sdk.codecenter.application.data.ProjectNameToken;
+import com.blackducksoftware.sdk.codecenter.application.data.ProjectIdToken;
 import com.blackducksoftware.sdk.codecenter.application.data.ProtexRequest;
 import com.blackducksoftware.sdk.codecenter.application.data.ValidationStatusEnum;
 import com.blackducksoftware.sdk.codecenter.approval.data.WorkflowNameToken;
@@ -343,29 +344,31 @@ public class CodeCenterProjectSynchronizer
      * 
      * @param project
      * @return
+     * @throws CodeCenterImportException 
      */
-    private String lookUpCorrespondingApplication(CCIProject project)
+    private String lookUpCorrespondingApplication(CCIProject project) throws CodeCenterImportException
     {
-	String correspondingApplicationID = null;
-	if (configManager.isIgnoreAssociations())
-	{
-	    log.info("**Ignore association mode.***");
-	    // If the user has elected to ignore associations, then we will look
-	    // up
-	    // the DB to see if a project ID is associated with anything.
-	    // If it is, then we use the app of that association.
-	    if (projectAssociationMap == null)
-	    {
-		CodeCenterAssociationLookup cal = new CodeCenterAssociationLookup(
-			configManager, ccWrapper);
-		projectAssociationMap = cal.getAssociationMap();
-	    }
+    	String correspondingApplicationID = null;
+    	
+    	ProjectIdToken projectIdToken = new ProjectIdToken();
+    	projectIdToken.setId(project.getProjectKey());
+    	ServerNameToken serverNameToken = new ServerNameToken();
+    	serverNameToken.setName(configManager.getProtexServerName());
+    	projectIdToken.setServerId(serverNameToken);
+    	Application correspondingApplication;
+    	try {
+    		correspondingApplication = ccWrapper.getInternalApiWrapper().getApplicationApi().getAssociatedApplication(projectIdToken);
+    	} catch (SdkFault e) {
+    		String msg = "Unable to get application associated with project " + project.getProjectName() +
+    				": " + e.getMessage();
+    		log.info(msg);
+    		return null;
+    	}
+    	log.info("Found association for project " + project.getProjectName() + ": " + correspondingApplication.getName() + " / " + 
+    			correspondingApplication.getVersion());
+    	correspondingApplicationID = correspondingApplication.getId().getId();
 
-	    correspondingApplicationID = projectAssociationMap.get(project
-		    .getProjectKey());
-	}
-
-	return correspondingApplicationID;
+    	return correspondingApplicationID;
     }
 
     /**
