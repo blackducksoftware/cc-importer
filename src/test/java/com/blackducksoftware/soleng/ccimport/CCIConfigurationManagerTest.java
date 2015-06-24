@@ -37,7 +37,7 @@ public class CCIConfigurationManagerTest {
 	@Test
 	public void test() {
 		Properties props = new Properties();
-		props.setProperty("protex.server.name", "http://se-menger.blackducksoftware.com");
+		props.setProperty("protex.server.name", "https://se-menger.blackducksoftware.com");
 		props.setProperty("protex.user.name", "ccImportUser@blackducksoftware.com");
 		props.setProperty("protex.password", "blackduck");
 		props.setProperty("cc.server.name", "http://int-cc-dev/");
@@ -45,7 +45,7 @@ public class CCIConfigurationManagerTest {
 		props.setProperty("cc.password", "blackduck");
 		props.setProperty("protex.password.isplaintext", "true");
 		props.setProperty("cc.password.isplaintext", "true");
-		props.setProperty("cc.protex.name", "Menger");
+		props.setProperty("cc.protex.name", "MengerHttps");
 		props.setProperty("cc.default.app.version", APP_VERSION);
 		props.setProperty("cc.workflow", "Serial");
 		props.setProperty("cc.owner", APP_OWNER);
@@ -70,7 +70,7 @@ public class CCIConfigurationManagerTest {
 	@Test
 	public void testAddDeleteSubmit() {
 		Properties props = new Properties();
-		props.setProperty("protex.server.name", "http://se-menger.blackducksoftware.com");
+		props.setProperty("protex.server.name", "https://se-menger.blackducksoftware.com");
 		props.setProperty("protex.user.name", "ccImportUser@blackducksoftware.com");
 		props.setProperty("protex.password", "blackduck");
 		props.setProperty("cc.server.name", "http://int-cc-dev/");
@@ -78,7 +78,7 @@ public class CCIConfigurationManagerTest {
 		props.setProperty("cc.password", "blackduck");
 		props.setProperty("protex.password.isplaintext", "true");
 		props.setProperty("cc.password.isplaintext", "true");
-		props.setProperty("cc.protex.name", "Menger");
+		props.setProperty("cc.protex.name", "MengerHttps");
 		props.setProperty("cc.default.app.version", APP_VERSION);
 		props.setProperty("cc.workflow", "Serial");
 		props.setProperty("cc.owner", APP_OWNER);
@@ -121,7 +121,7 @@ public class CCIConfigurationManagerTest {
 	@Test
 	public void testSpaceAfterComma() {
 		Properties props = new Properties();
-		props.setProperty("protex.server.name", "http://se-menger.blackducksoftware.com");
+		props.setProperty("protex.server.name", "https://se-menger.blackducksoftware.com");
 		props.setProperty("protex.user.name", "ccImportUser@blackducksoftware.com");
 		props.setProperty("protex.password", "blackduck");
 		props.setProperty("cc.server.name", "http://int-cc-dev/");
@@ -129,7 +129,7 @@ public class CCIConfigurationManagerTest {
 		props.setProperty("cc.password", "blackduck");
 		props.setProperty("protex.password.isplaintext", "true");
 		props.setProperty("cc.password.isplaintext", "true");
-		props.setProperty("cc.protex.name", "Menger");
+		props.setProperty("cc.protex.name", "MengerHttps");
 		props.setProperty("cc.default.app.version", APP_VERSION);
 		props.setProperty("cc.workflow", "Serial");
 		props.setProperty("cc.owner", APP_OWNER);

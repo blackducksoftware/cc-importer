@@ -183,7 +183,7 @@ public class AppAdjusterIT {
 	
 	private static Properties createBasicProperties() {
 		Properties props = new Properties();
-		props.setProperty("protex.server.name", "http://se-menger.blackducksoftware.com");
+		props.setProperty("protex.server.name", "https://se-menger.blackducksoftware.com");
 		props.setProperty("protex.user.name", "ccImportUser@blackducksoftware.com");
 		props.setProperty("protex.password", CC_IMPORT_USER_PASSWORD);
 
@@ -194,7 +194,7 @@ public class AppAdjusterIT {
 		props.setProperty("protex.password.isplaintext", "true");
 		props.setProperty("cc.password.isplaintext", "true");
 		
-		props.setProperty("cc.protex.name", "Menger");
+		props.setProperty("cc.protex.name", "MengerHttps");
 		props.setProperty("cc.default.app.version", APPLICATION_VERSION);
 		props.setProperty("cc.workflow", WORKFLOW);
 		props.setProperty("cc.owner", APP_OWNER);

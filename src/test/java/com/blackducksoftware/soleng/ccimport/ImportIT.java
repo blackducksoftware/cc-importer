@@ -295,7 +295,7 @@ public class ImportIT {
 	
 	private static Properties createBasicProperties(String appName) {
 		Properties props = new Properties();
-		props.setProperty("protex.server.name", "http://se-menger.blackducksoftware.com");
+		props.setProperty("protex.server.name", "https://se-menger.blackducksoftware.com");
 		props.setProperty("protex.user.name", "ccImportUser@blackducksoftware.com");
 		props.setProperty("protex.password", "blackduck");
 
@@ -308,7 +308,7 @@ public class ImportIT {
 		props.setProperty("cc.password", "blackduck");
 		props.setProperty("protex.password.isplaintext", "true");
 		props.setProperty("cc.password.isplaintext", "true");
-		props.setProperty("cc.protex.name", "Menger");
+		props.setProperty("cc.protex.name", "MengerHttps");
 		props.setProperty("cc.default.app.version", APP_VERSION);
 		props.setProperty("cc.workflow", WORKFLOW);
 		props.setProperty("cc.owner", APP_OWNER);
