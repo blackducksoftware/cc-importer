@@ -546,7 +546,7 @@ public class CodeCenterProjectSynchronizer
 		    token.setComponentId(protexRequest.getComponentId());
 
 		    request.setApplicationComponentToken(token);
-
+		    request.setLicenseId(protexRequest.getLicenseInfo().getId());
 		    newRequests
 			    .add(ccWrapper.getInternalApiWrapper().getRequestApi()
 				    .createRequest(request));

@@ -277,6 +277,7 @@ public class AppAdjusterIT {
 
 		try {
 			List<CCIProject> projects = ccConfigManager.getProjectList();
+			System.out.println("Project list size: " + projects.size());
 			File outputFile = new File(NEW_APPS_LIST_FILENAME_MANY_THREADS);
 			outputFile.delete();
 
