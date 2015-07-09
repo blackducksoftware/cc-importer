@@ -45,19 +45,15 @@ public class CCIConfigurationManager extends ConfigurationManager {
 	private Boolean performAdd = true;
 	private Boolean performSmartValidate = false;
 	private String version = "undefined";
-	private Boolean ignoreAssociations = false;
 	private boolean attemptToFixInvalidAssociation = false;
 	private String appAdjusterClassname = null;
 	private boolean reValidateAfterBomChange = false;
 	private boolean appAdjusterOnlyIfBomEdits = false;
 	private Pattern protexProjectNameFilterPattern = null;
 	private int numThreads = 1;
-	
 
-	// TODO: Temporary workarounds for DB access
 	private String hostName = null;
 	private String timeZone = null;
-	private String dbString = null;
 
 	private Boolean runReport = false;
 
@@ -117,16 +113,12 @@ public class CCIConfigurationManager extends ConfigurationManager {
 		performDelete = getOptionalProperty(CCIConstants.DELETE_REQUESTS,
 				false, Boolean.class);
 
-		ignoreAssociations = getOptionalProperty(
-				CCIConstants.IGNORE_ASSOCIATIONS, false, Boolean.class);
-
 		runReport = getOptionalProperty(CCIConstants.RUN_REPORT_PROPERTY,
 				false, Boolean.class);
 
 		// TODO: Temporary workaround for the DB access
 		this.hostName = getOptionalProperty(CCIConstants.VALIDATE_SMART_HOST_NAME_PROPERTY);
 		this.timeZone = getOptionalProperty(CCIConstants.VALIDATE_SMART_TIMEZONE_PROPERTY);
-		this.dbString = getOptionalProperty(CCIConstants.VALIDATE_SMART_DB_PROPERTY);
 		
 		String attemptToFixInvalidAssociationString = getOptionalProperty(CCIConstants.ATTEMPT_TO_FIX_INVALID_ASSOCIATION_PROPERTY);
 		if ("true".equalsIgnoreCase(attemptToFixInvalidAssociationString)) {
@@ -459,22 +451,6 @@ public class CCIConfigurationManager extends ConfigurationManager {
 
 	public void setTimeZone(String timeZone) {
 		this.timeZone = timeZone;
-	}
-
-	public String getDbString() {
-		return dbString;
-	}
-
-	public void setDbString(String dbString) {
-		this.dbString = dbString;
-	}
-
-	public Boolean isIgnoreAssociations() {
-		return ignoreAssociations;
-	}
-
-	public void setIgnoreAssociations(Boolean ignoreAssociations) {
-		this.ignoreAssociations = ignoreAssociations;
 	}
 
 	public String getAppAdjusterClassname() {

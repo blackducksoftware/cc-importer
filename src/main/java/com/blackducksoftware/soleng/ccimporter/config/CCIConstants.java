@@ -57,9 +57,6 @@ public class CCIConstants {
 	
 	public static final String NUM_THREADS_PROPERTY = "num.threads";
 	
-	// This switch ignores the existing associations
-	public static final String IGNORE_ASSOCIATIONS = "cc.ignore.associations";
-	
 	// Validate Step
 	public static final String VALIDATE_APPLICATION_PROPERTY = "validate.application";
 	public static final String RE_VALIDATE_AFTER_CHANGING_BOM_PROPERTY = "revalidate.after.changing.bom";
@@ -72,7 +69,6 @@ public class CCIConstants {
 	// TODO: Temporary workaround, remove after API is established
 	public static final String VALIDATE_SMART_HOST_NAME_PROPERTY = "validate.smart.host.name";
 	public static final String VALIDATE_SMART_TIMEZONE_PROPERTY = "validate.smart.timezone";
-	public static final String VALIDATE_SMART_DB_PROPERTY = "validate.smart.db.string";
 	
 	// Part of validate, should the requests be added?
 	protected static final String SUBMIT_PROPERTY = "cc.submit.request";

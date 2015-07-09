@@ -33,24 +33,6 @@ import com.blackducksoftware.sdk.protex.user.User;
 public class ProtexTestUtils {
 	private static final int CHUNK_SIZE = 7;
 	
-//	public static ConfigurationManager initConfig(String protexUrl, String username, String password) {
-//		Properties props = new Properties();
-//		props.setProperty("protex.server.name", protexUrl);
-//		props.setProperty("protex.user.name", username);
-//		props.setProperty("protex.password", password);
-//		props.setProperty("cc.database.server.name", CcTestUtils.DB_SERVER);
-//		props.setProperty("cc.database.port", CcTestUtils.DB_PORT);
-//		props.setProperty("cc.database.user.name", CcTestUtils.DB_USER);
-//		props.setProperty("cc.database.password", CcTestUtils.DB_PASSWORD);
-//		ConfigurationManager config = new ProtexConfigMgr(props);
-//		return config;
-//	}
-	
-//	public static ProtexConfigMgr initConfig(String configFilename) {
-//		ProtexConfigMgr config = new ProtexConfigMgr(configFilename);
-//		return config;
-//	}
-	
 	public static void confirmByProjectIdAccessLimitedTo(ProtexServerWrapper protexServerWrapper, String projectId, String username) throws Exception {
 		// Get the current list of users that have access to the project
 		List<User> projectUsers = protexServerWrapper.getInternalApiWrapper().getProjectApi().getProjectUsers(projectId);

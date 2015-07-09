@@ -339,7 +339,7 @@ public class CodeCenterProjectSynchronizer
     }
 
     /**
-     * Perform a DB lookup, and determines based on Protex project ID 
+     * Determines based on Protex project ID 
      * the ID of the associated CC Application.
      * 
      * @param project

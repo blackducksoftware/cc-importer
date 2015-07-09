@@ -42,10 +42,6 @@ public class CcTestUtils {
 	public static final String CC_URL = "http://int-cc-dev.blackducksoftware.com";
 	public static final String CC_PASSWORD = "blackduck";
 	public static final String CC_USER = "unitTester@blackducksoftware.com";
-	public static final String DB_SERVER = "int-cc-dev.blackducksoftware.com";
-	public static final String DB_PASSWORD = "mallard";
-	public static final String DB_USER = "blackduck";
-	public static final String DB_PORT = "55433";
 	public static final String CLONED_APP_WORKFLOW = "Parallel";
 	
 	public static void deleteAppByName(CodeCenterServerWrapper ccServerWrapper,
@@ -72,10 +68,6 @@ public class CcTestUtils {
 		props.setProperty("cc.password", password);
 		props.setProperty("cc.app.version", "Unspecified");
 		props.setProperty("cc.cloned.app.workflow", CLONED_APP_WORKFLOW);
-		props.setProperty("cc.database.server.name", DB_SERVER);
-		props.setProperty("cc.database.port", DB_PORT);
-		props.setProperty("cc.database.user.name", DB_USER);
-		props.setProperty("cc.database.password", DB_PASSWORD);
 		CodeCenterConfigManager config = new CodeCenterConfigManager(props);
 		return config;
 	}
