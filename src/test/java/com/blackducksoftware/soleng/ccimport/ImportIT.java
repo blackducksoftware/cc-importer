@@ -40,11 +40,6 @@ import com.blackducksoftware.soleng.ccimporter.model.CCIProject;
  * 
  */
 public class ImportIT {
-	private static final String CUSTOM_ATTR = "Sample Textfield";
-//	private static final String CUSTOM_ATTR = "Product Name";
-
-		private static final String WORKFLOW = "Serial";
-//	private static final String WORKFLOW = "Application Build Workflow";
 	
 	private static final String APP_VERSION = "Unspecified";
 	private static final String APP_SEALID1 = "123456";
@@ -53,11 +48,8 @@ public class ImportIT {
 	private static final String APP_SEALID2 = "123457";
 	private static final String APP_NAME2 = APP_SEALID2 + "-test2-PROD-CURRENT";
 	
-	private static final String APP_OWNER = "unitTester@blackducksoftware.com";
-//	private static final String APP_OWNER = "sbillings@blackducksoftware.com";
-	
 	private static final String APP_DESCRIPTION = "Application created by the Code Center Importer version: undefined";
-	private static final String ROLE = "Application Administrator";
+
 	
 	private static Logger log = LoggerFactory.getLogger(ImportIT.class
 			.getName());
@@ -124,7 +116,7 @@ public class ImportIT {
 		// app adjuster ran and worked
 		// Also verify that the validate status is PASSED
 		Map<String, String> expectedAttrValues = new HashMap<String, String>();
-		expectedAttrValues.put(CUSTOM_ATTR, APP_SEALID1);
+		expectedAttrValues.put(TestServerConfig.getCcCustomAttributeTextfield(), APP_SEALID1);
 		CcTestUtils.checkApplication(ccsw, APP_NAME1, APP_VERSION, APP_DESCRIPTION, false, expectedAttrValues, true);
 
 		// Switch to the Mock app adjuster so we can easily tell if it
@@ -254,7 +246,7 @@ public class ImportIT {
 		props.setProperty("app.adjuster.classname", "com.blackducksoftware.soleng.ccimport.appadjuster.custom.NumericPrefixedAppAdjuster");
 //		props.setProperty("app.adjuster.classname", "com.blackducksoftware.soleng.ccimport.appadjuster.custom.MockAppAdjuster");
 		
-		props.setProperty("numprefixed.app.attribute.numericprefix", CUSTOM_ATTR);
+		props.setProperty("numprefixed.app.attribute.numericprefix", TestServerConfig.getCcCustomAttributeTextfield());
 		props.setProperty("numprefixed.app.attribute.analyzeddate", "null");
 		props.setProperty("numprefixed.app.attribute.workstream", "null");
 		props.setProperty("numprefixed.app.attribute.projectstatus", "null");
@@ -295,23 +287,18 @@ public class ImportIT {
 	
 	private static Properties createBasicProperties(String appName) {
 		Properties props = new Properties();
-		props.setProperty("protex.server.name", "https://se-menger.blackducksoftware.com");
-		props.setProperty("protex.user.name", "ccImportUser@blackducksoftware.com");
-		props.setProperty("protex.password", "blackduck");
-
-		props.setProperty("cc.server.name", "http://int-cc-dev/");
-//		props.setProperty("cc.server.name", "http://salescc/");
-		
-		props.setProperty("cc.user.name", "ccImportUser");
-//		props.setProperty("cc.user.name", "sbillings@blackducksoftware.com");
-		
-		props.setProperty("cc.password", "blackduck");
-		props.setProperty("protex.password.isplaintext", "true");
-		props.setProperty("cc.password.isplaintext", "true");
-		props.setProperty("cc.protex.name", "MengerHttps");
+		props.setProperty("protex.server.name", TestServerConfig.getProtexServerName());
+		props.setProperty("protex.user.name", TestServerConfig.getProtexUsername());
+		props.setProperty("protex.password", TestServerConfig.getProtexPassword());
+		props.setProperty("cc.server.name", TestServerConfig.getCcServerName());
+		props.setProperty("cc.user.name", TestServerConfig.getCcUsername());
+		props.setProperty("cc.password", TestServerConfig.getCcPassword());
+		props.setProperty("protex.password.isencrypted", "false");
+		props.setProperty("cc.password.isencrypted", "false");
+		props.setProperty("cc.protex.name", TestServerConfig.getProtexServerNameInCc());
 		props.setProperty("cc.default.app.version", APP_VERSION);
-		props.setProperty("cc.workflow", WORKFLOW);
-		props.setProperty("cc.owner", APP_OWNER);
+		props.setProperty("cc.workflow", TestServerConfig.getCcWorkflow());
+		props.setProperty("cc.owner", TestServerConfig.getProtexUsername2());
 		props.setProperty("protex.project.list", appName);
 		props.setProperty("validate.application", "true");
 		props.setProperty("validate.application.smart", "true");

@@ -31,6 +31,7 @@ import com.blackducksoftware.sdk.codecenter.attribute.data.AttributeIdToken;
 import com.blackducksoftware.sdk.codecenter.client.util.CodeCenterServerProxyV7_0;
 import com.blackducksoftware.sdk.codecenter.common.data.AttributeValue;
 import com.blackducksoftware.soleng.ccimport.ProtexTestUtils;
+import com.blackducksoftware.soleng.ccimport.TestServerConfig;
 import com.blackducksoftware.soleng.ccimport.TestUtils;
 import com.blackducksoftware.soleng.ccimport.appadjuster.custom.NumericPrefixedAppAdjuster;
 import com.blackducksoftware.soleng.ccimporter.config.CodeCenterConfigManager;
@@ -40,11 +41,6 @@ import com.blackducksoftware.soleng.ccimporter.model.CCIProject;
 
 public class NumericPrefixedAppAdjusterIT {
 	private static final long TIME_VALUE_OF_JAN1_2000 = 946702800000L;
-	private static final String CUSTOM_ATTR_NAME = "NonRequiredTextField";
-	
-	private static final String CC_URL = "http://int-cc-dev.blackducksoftware.com/";
-	public static final String SUPERUSER_USERNAME = "super";
-	public static final String SUPERUSER_PASSWORD = "super";
 	
 	private static final String NUMPREFIX1_ATTR_VALUE = "123";
 	private static final String APP_NAME_STRING = "some application";
@@ -120,7 +116,7 @@ public class NumericPrefixedAppAdjusterIT {
 		
     	TestUtils.createUser(cc, USER1_USERNAME, USER_PASSWORD);
     	ApplicationIdToken appIdToken = TestUtils.createApplication(cc, APPLICATION1_NAME, APPLICATION_VERSION, USER1_USERNAME, USER_ROLE1,
-    			TestUtils.REQUIRED_ATTRNAME, "test");
+    			TestServerConfig.getCcCustomAttributeTextfield(), "test");
     	Application app = TestUtils.getApplication(cc, appIdToken);
     	CCIApplication cciApp = new CCIApplication(app, false);
 		
@@ -144,7 +140,7 @@ public class NumericPrefixedAppAdjusterIT {
 			System.out.println("attr name: " + curAttrName + 
 				"; value: " + curAttrValue);
 			
-			if (CUSTOM_ATTR_NAME.equals(curAttrName)) {
+			if (TestServerConfig.getCcCustomAttributeTextfield().equals(curAttrName)) {
 				foundNumPrefixAttr = true;
 				assertEquals(NUMPREFIX1_ATTR_VALUE, curAttrValue);
 			}
@@ -168,7 +164,7 @@ public class NumericPrefixedAppAdjusterIT {
 		
     	TestUtils.createUser(cc, USER1a_USERNAME, USER_PASSWORD);
     	ApplicationIdToken appIdToken = TestUtils.createApplication(cc, APPLICATION1a_NAME, APPLICATION_VERSION, USER1a_USERNAME, USER_ROLE1,
-    			TestUtils.REQUIRED_ATTRNAME, "test");
+    			TestServerConfig.getCcCustomAttributeTextfield2(), "test");
     	Application app = TestUtils.getApplication(cc, appIdToken);
     	CCIApplication cciApp = new CCIApplication(app, false);
 		
@@ -182,6 +178,7 @@ public class NumericPrefixedAppAdjusterIT {
 		appAdjuster.adjustApp(cciApp, project);
 		
 		boolean foundNumPrefixAttr = false;
+		boolean numPrefixSet = false;
 		Application app2 = cc.getApplicationApi().getApplication(appIdToken); 
 		List<AttributeValue> attrValues = app2.getAttributeValues();
 		for (AttributeValue attrValue : attrValues) {
@@ -191,12 +188,14 @@ public class NumericPrefixedAppAdjusterIT {
 			System.out.println("attr name: " + curAttrName + 
 				"; value: " + curAttrValue);
 			
-			if (CUSTOM_ATTR_NAME.equals(curAttrName)) {
+			if (TestServerConfig.getCcCustomAttributeTextfield().equals(curAttrName)) {
 				foundNumPrefixAttr = true;
-				assertEquals(NUMPREFIX1_ATTR_VALUE, curAttrValue);
+				if (NUMPREFIX1_ATTR_VALUE.equals(curAttrValue)) {
+					numPrefixSet = true;
+				}
 			}
 		}
-		assertFalse(foundNumPrefixAttr);
+		assertTrue(!foundNumPrefixAttr || !numPrefixSet); // assert that numeric prefix was not set on not-new app
     }
     
     @Test
@@ -216,7 +215,7 @@ public class NumericPrefixedAppAdjusterIT {
     	
     	TestUtils.createUser(cc, USER2_USERNAME, USER_PASSWORD);
     	ApplicationIdToken appIdToken = TestUtils.createApplication(cc, APPLICATION2_NAME, APPLICATION_VERSION, USER2_USERNAME, USER_ROLE1,
-    			TestUtils.REQUIRED_ATTRNAME, "test");
+    			TestServerConfig.getCcCustomAttributeTextfield(), "test");
     	Application app = TestUtils.getApplication(cc, appIdToken);
     	CCIApplication cciApp = new CCIApplication(app, false);
     	
@@ -242,7 +241,7 @@ public class NumericPrefixedAppAdjusterIT {
 			System.out.println("attr name: " + curAttrName + 
 				"; value: " + curAttrValue);
 			
-			if (CUSTOM_ATTR_NAME.equals(curAttrName)) {
+			if (TestServerConfig.getCcCustomAttributeTextfield().equals(curAttrName)) {
 				foundNumPrefixAttr = true;
 				assertEquals(df.format(testDateValue), curAttrValue);
 			}
@@ -267,7 +266,7 @@ public class NumericPrefixedAppAdjusterIT {
 		
     	TestUtils.createUser(cc, USER2a_USERNAME, USER_PASSWORD);
     	ApplicationIdToken appIdToken = TestUtils.createApplication(cc, APPLICATION2a_NAME, APPLICATION_VERSION, USER2a_USERNAME, USER_ROLE1,
-    			TestUtils.REQUIRED_ATTRNAME, "test");
+    			TestServerConfig.getCcCustomAttributeTextfield(), "test");
     	Application app = TestUtils.getApplication(cc, appIdToken);
     	CCIApplication cciApp = new CCIApplication(app, false);
     	
@@ -293,7 +292,7 @@ public class NumericPrefixedAppAdjusterIT {
 			System.out.println("attr name: " + curAttrName + 
 				"; value: " + curAttrValue);
 			
-			if (CUSTOM_ATTR_NAME.equals(curAttrName)) {
+			if (TestServerConfig.getCcCustomAttributeTextfield().equals(curAttrName)) {
 				foundNumPrefixAttr = true;
 				assertEquals(df.format(testDateValue), curAttrValue);
 			}
@@ -318,7 +317,7 @@ public class NumericPrefixedAppAdjusterIT {
 		
     	TestUtils.createUser(cc, USER3_USERNAME, USER_PASSWORD);
     	ApplicationIdToken appIdToken = TestUtils.createApplication(cc, APPLICATION3_NAME, APPLICATION_VERSION, USER3_USERNAME, USER_ROLE1,
-    			TestUtils.REQUIRED_ATTRNAME, "test");
+    			TestServerConfig.getCcCustomAttributeTextfield(), "test");
     	Application app = TestUtils.getApplication(cc, appIdToken);
     	CCIApplication cciApp = new CCIApplication(app, false);
     	
@@ -344,7 +343,7 @@ public class NumericPrefixedAppAdjusterIT {
 			System.out.println("attr name: " + curAttrName + 
 				"; value: " + curAttrValue);
 			
-			if (CUSTOM_ATTR_NAME.equals(curAttrName)) {
+			if (TestServerConfig.getCcCustomAttributeTextfield().equals(curAttrName)) {
 				foundProjectStatus = true;
 				assertEquals(EXPECTED_PROJECT_STATUS_VALUE, curAttrValue);
 			}

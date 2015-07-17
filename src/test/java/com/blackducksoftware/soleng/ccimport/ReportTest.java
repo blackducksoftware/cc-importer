@@ -24,14 +24,10 @@ import soleng.framework.standard.datatable.writer.DataSetWriterStdOut;
 
 public class ReportTest
 {
-	private static final String CC_URL = "http://int-cc-dev.blackducksoftware.com/";
-	public static final String SUPERUSER_USERNAME = "super";
-	public static final String SUPERUSER_PASSWORD = "super";
 	private static String APPLICATION0_NAME = "ccImporterReportTestApp1";
 	private static String APPLICATION_VERSION = "v123";
 	private static String USER1_USERNAME = "JUnit_ccimporter_report_user1";
 	private static String USER1_PASSWORD = "password";
-	private static final String USER_ROLE1 = "Application Developer";
 	private static CodeCenterServerProxyV7_0 cc;
 	
     @Rule
@@ -44,7 +40,8 @@ public class ReportTest
     @BeforeClass
 	public static void setUpBeforeClass() throws Exception {
 		cc = new CodeCenterServerProxyV7_0(
-				CC_URL, SUPERUSER_USERNAME, SUPERUSER_PASSWORD, TestUtils.CONNECTION_TIMEOUT);
+				TestServerConfig.getCcServerName(), TestServerConfig.getCcUsername(), 
+				TestServerConfig.getCcPassword(), TestUtils.CONNECTION_TIMEOUT);
 	}
 
 	@AfterClass
@@ -64,8 +61,9 @@ public class ReportTest
     public void testReport() throws Exception
     {
     	TestUtils.createUser(cc, USER1_USERNAME, USER1_PASSWORD);
-    	TestUtils.createApplication(cc, APPLICATION0_NAME, APPLICATION_VERSION, USER1_USERNAME, USER_ROLE1,
-    			TestUtils.REQUIRED_ATTRNAME, "test");
+    	TestUtils.createApplication(cc, APPLICATION0_NAME, APPLICATION_VERSION, USER1_USERNAME, 
+    			TestServerConfig.getCcUserRole2(),
+    			TestServerConfig.getCcCustomAttributeTextfield(), "test");
     	
 		String configPath = "src/test/resources/report.properties";
 	

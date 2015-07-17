@@ -28,6 +28,7 @@ import com.blackducksoftware.sdk.codecenter.attribute.data.AttributeIdToken;
 import com.blackducksoftware.sdk.codecenter.client.util.CodeCenterServerProxyV7_0;
 import com.blackducksoftware.sdk.codecenter.common.data.AttributeValue;
 import com.blackducksoftware.soleng.ccimport.ProtexTestUtils;
+import com.blackducksoftware.soleng.ccimport.TestServerConfig;
 import com.blackducksoftware.soleng.ccimport.TestUtils;
 import com.blackducksoftware.soleng.ccimport.appadjuster.custom.NumericPrefixedAppAdjuster;
 import com.blackducksoftware.soleng.ccimporter.config.CodeCenterConfigManager;
@@ -38,12 +39,6 @@ import com.blackducksoftware.soleng.ccimporter.model.CCIProject;
 public class NumericPrefixAppAdjusterAppEditUrlIT {
 	private static final String APPEDIT_URL = "http://localhost:8080/AppEdit/editappdetails";
 	private static final String CONFIG_FILE = "src/test/resources/numprefixed_appediturl.properties";
-	private static final long TIME_VALUE_OF_JAN1_2000 = 946702800000L;
-	private static final String CUSTOM_ATTR_NAME = "Application Editor";
-	
-	private static final String CC_URL = "http://int-cc-dev.blackducksoftware.com/";
-	public static final String SUPERUSER_USERNAME = "super";
-	public static final String SUPERUSER_PASSWORD = "super";
 	
 	private static final String NUMPREFIX1_ATTR_VALUE = "200";
 	private static final String APP_NAME_STRING = "appediturl test app";
@@ -52,9 +47,6 @@ public class NumericPrefixAppAdjusterAppEditUrlIT {
 	private static String application1ProjectId=null;
 	
 	private static String APPLICATION_VERSION = "v123";
-	private static String OWNER = "unitTester@blackducksoftware.com";
-	private static String USER_PASSWORD = "password";
-	private static final String USER_ROLE1 = "Application Developer";
 
     @BeforeClass
 	public static void setUpBeforeClass() throws Exception {
@@ -69,9 +61,9 @@ public class NumericPrefixAppAdjusterAppEditUrlIT {
         ProtexConfigManager protexConfigManager = protexConfigManager = new ProtexConfigManager(configPath);
 		
     	ServerBean bean = new ServerBean();
-		bean.setServerName(CC_URL);
-		bean.setUserName(SUPERUSER_USERNAME);
-		bean.setPassword(SUPERUSER_PASSWORD);
+		bean.setServerName(TestServerConfig.getCcServerName());
+		bean.setUserName(TestServerConfig.getCcSuperUsername());
+		bean.setPassword(TestServerConfig.getCcSuperPassword());
 		
 		CodeCenterServerWrapper ccWrapper = new CodeCenterServerWrapper(bean, ccConfigManager);
 		CodeCenterServerProxyV7_0 cc = ccWrapper.getInternalApiWrapper().getProxy();
@@ -97,8 +89,9 @@ public class NumericPrefixAppAdjusterAppEditUrlIT {
 		ProtexServerWrapper protexWrapper = new ProtexServerWrapper(protexConfigManager.getServerBean(), protexConfigManager, false);
 		application1ProjectId = ProtexTestUtils.createProject(protexWrapper, protexConfigManager, APPLICATION1_NAME, "src/test/resources/source");
 
-    	ApplicationIdToken appIdToken = TestUtils.createApplication(cc, APPLICATION1_NAME, APPLICATION_VERSION, OWNER, USER_ROLE1,
-    			TestUtils.REQUIRED_ATTRNAME, "test");
+    	ApplicationIdToken appIdToken = TestUtils.createApplication(cc, APPLICATION1_NAME, APPLICATION_VERSION, 
+    			TestServerConfig.getProtexUsername2(), TestServerConfig.getCcUserRole2(),
+    			TestServerConfig.getCcCustomAttributeTextfield(), "test");
     	Application app = TestUtils.getApplication(cc, appIdToken);
     	CCIApplication cciApp = new CCIApplication(app, false);
 		
@@ -122,7 +115,7 @@ public class NumericPrefixAppAdjusterAppEditUrlIT {
 			System.out.println("attr name: " + curAttrName + 
 				"; value: " + curAttrValue);
 			
-			if (CUSTOM_ATTR_NAME.equals(curAttrName)) {
+			if (TestServerConfig.getCcCustomAttributeTextfield().equals(curAttrName)) {
 				foundAppEditUrlAttr = true;
 				assertEquals(APPEDIT_URL + "?appId=" + app.getId().getId(), curAttrValue);
 			}

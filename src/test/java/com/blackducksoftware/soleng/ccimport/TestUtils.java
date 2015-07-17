@@ -37,7 +37,6 @@ import com.blackducksoftware.sdk.codecenter.user.data.UserNameToken;
 
 public class TestUtils {
 	public static final Long CONNECTION_TIMEOUT = 120 * 1000L;
-	public static final String REQUIRED_ATTRNAME = "Sample Textfield";
 
 	public static ApplicationIdToken createApplication(CodeCenterServerProxyV7_0 cc, String appName,
 			String appVersion, 

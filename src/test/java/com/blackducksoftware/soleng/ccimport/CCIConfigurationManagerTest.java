@@ -37,18 +37,18 @@ public class CCIConfigurationManagerTest {
 	@Test
 	public void test() {
 		Properties props = new Properties();
-		props.setProperty("protex.server.name", "https://se-menger.blackducksoftware.com");
-		props.setProperty("protex.user.name", "ccImportUser@blackducksoftware.com");
-		props.setProperty("protex.password", "blackduck");
-		props.setProperty("cc.server.name", "http://int-cc-dev/");
-		props.setProperty("cc.user.name", "ccImportUser");
-		props.setProperty("cc.password", "blackduck");
-		props.setProperty("protex.password.isplaintext", "true");
-		props.setProperty("cc.password.isplaintext", "true");
-		props.setProperty("cc.protex.name", "MengerHttps");
+		props.setProperty("protex.server.name", TestServerConfig.getProtexServerName());
+		props.setProperty("protex.user.name", TestServerConfig.getProtexUsername());
+		props.setProperty("protex.password", TestServerConfig.getProtexPassword());
+		props.setProperty("cc.server.name", TestServerConfig.getCcServerName());
+		props.setProperty("cc.user.name", TestServerConfig.getCcUsername());
+		props.setProperty("cc.password", TestServerConfig.getCcPassword());
+		props.setProperty("protex.password.isencrypted", "false");
+		props.setProperty("cc.password.isencrypted", "false");
+		props.setProperty("cc.protex.name", TestServerConfig.getProtexServerNameInCc());
 		props.setProperty("cc.default.app.version", APP_VERSION);
-		props.setProperty("cc.workflow", "Serial");
-		props.setProperty("cc.owner", APP_OWNER);
+		props.setProperty("cc.workflow", TestServerConfig.getCcWorkflow());
+		props.setProperty("cc.owner", TestServerConfig.getCcUsername2());
 		props.setProperty("protex.project.list", APP_NAME1);
 		props.setProperty("validate.application", "true");
 		props.setProperty("cc.submit.request", "true");
@@ -70,18 +70,18 @@ public class CCIConfigurationManagerTest {
 	@Test
 	public void testAddDeleteSubmit() {
 		Properties props = new Properties();
-		props.setProperty("protex.server.name", "https://se-menger.blackducksoftware.com");
-		props.setProperty("protex.user.name", "ccImportUser@blackducksoftware.com");
-		props.setProperty("protex.password", "blackduck");
-		props.setProperty("cc.server.name", "http://int-cc-dev/");
-		props.setProperty("cc.user.name", "ccImportUser");
-		props.setProperty("cc.password", "blackduck");
-		props.setProperty("protex.password.isplaintext", "true");
-		props.setProperty("cc.password.isplaintext", "true");
-		props.setProperty("cc.protex.name", "MengerHttps");
+		props.setProperty("protex.server.name", TestServerConfig.getProtexServerName());
+		props.setProperty("protex.user.name", TestServerConfig.getProtexUsername());
+		props.setProperty("protex.password", TestServerConfig.getProtexPassword());
+		props.setProperty("cc.server.name", TestServerConfig.getCcServerName());
+		props.setProperty("cc.user.name", TestServerConfig.getCcUsername());
+		props.setProperty("cc.password", TestServerConfig.getCcPassword());
+		props.setProperty("protex.password.isencrypted", "false");
+		props.setProperty("cc.password.isencrypted", "false");
+		props.setProperty("cc.protex.name", TestServerConfig.getProtexServerNameInCc());
 		props.setProperty("cc.default.app.version", APP_VERSION);
-		props.setProperty("cc.workflow", "Serial");
-		props.setProperty("cc.owner", APP_OWNER);
+		props.setProperty("cc.workflow", TestServerConfig.getCcWorkflow());
+		props.setProperty("cc.owner", TestServerConfig.getCcUsername2());
 		props.setProperty("protex.project.list", APP_NAME1);
 		props.setProperty("validate.application", "true");
 		
@@ -121,18 +121,18 @@ public class CCIConfigurationManagerTest {
 	@Test
 	public void testSpaceAfterComma() {
 		Properties props = new Properties();
-		props.setProperty("protex.server.name", "https://se-menger.blackducksoftware.com");
-		props.setProperty("protex.user.name", "ccImportUser@blackducksoftware.com");
-		props.setProperty("protex.password", "blackduck");
-		props.setProperty("cc.server.name", "http://int-cc-dev/");
-		props.setProperty("cc.user.name", "ccImportUser");
-		props.setProperty("cc.password", "blackduck");
-		props.setProperty("protex.password.isplaintext", "true");
-		props.setProperty("cc.password.isplaintext", "true");
-		props.setProperty("cc.protex.name", "MengerHttps");
+		props.setProperty("protex.server.name", TestServerConfig.getProtexServerName());
+		props.setProperty("protex.user.name", TestServerConfig.getProtexUsername());
+		props.setProperty("protex.password", TestServerConfig.getProtexPassword());
+		props.setProperty("cc.server.name", TestServerConfig.getCcServerName());
+		props.setProperty("cc.user.name", TestServerConfig.getCcUsername());
+		props.setProperty("cc.password", TestServerConfig.getCcPassword());
+		props.setProperty("protex.password.isencrypted", "false");
+		props.setProperty("cc.password.isencrypted", "false");
+		props.setProperty("cc.protex.name", TestServerConfig.getProtexServerNameInCc());
 		props.setProperty("cc.default.app.version", APP_VERSION);
-		props.setProperty("cc.workflow", "Serial");
-		props.setProperty("cc.owner", APP_OWNER);
+		props.setProperty("cc.workflow", TestServerConfig.getCcWorkflow());
+		props.setProperty("cc.owner", TestServerConfig.getCcUsername2());
 		props.setProperty("protex.project.list", APP_NAME1 + ", " + APP_NAME2);
 		props.setProperty("validate.application", "true");
 		props.setProperty("cc.submit.request", "true");

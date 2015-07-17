@@ -37,10 +37,10 @@ import com.blackducksoftware.soleng.ccimporter.model.CCIProject;
  * @author akamen
  * 
  */
-public class BasicImportTest
+public class BasicImportIT
 {
 
-    private static Logger log = LoggerFactory.getLogger(BasicImportTest.class
+    private static Logger log = LoggerFactory.getLogger(BasicImportIT.class
 	    .getName());
 
     public static String testPropsForBasicImport = "importer_test.properties";

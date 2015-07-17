@@ -20,6 +20,7 @@ public class TestServerConfig {
 	private static String ccUserRole2 = null;
 	private static String ccWorkflow = null;
 	private static String ccCustomAttributeTextfield = null;
+	private static String ccCustomAttributeTextfield2 = null;
 	
 //	private static String ccVulnerabilityStatusInProgress = null;
 //	private static String ccVulnerabilityStatusRemediated = null;
@@ -64,10 +65,12 @@ public class TestServerConfig {
 	}
 	
 	public static String getCcUsername2() {
+		ensureTestServerConfigInitialized();
 		return ccUsername2;
 	}
 
 	public static String getCcPassword2() {
+		ensureTestServerConfigInitialized();
 		return ccPassword2;
 	}
 
@@ -116,6 +119,11 @@ public class TestServerConfig {
 //		return ccComponentVulnerability2;
 //	}
 
+	public static String getCcCustomAttributeTextfield2() {
+		ensureTestServerConfigInitialized();
+		return ccCustomAttributeTextfield2;
+	}
+
 	private static void ensureTestServerConfigInitialized() {
 		if (ccServerName == null) {
 			loadTestServerConfig();
@@ -149,6 +157,7 @@ public class TestServerConfig {
 	
 	
 	public static String getProtexServerNameInCc() {
+		ensureTestServerConfigInitialized();
 		return protexServerNameInCc;
 	}
 
@@ -170,6 +179,7 @@ public class TestServerConfig {
 		ccUserRole2 = props.getProperty("cc.user.role.2");
 		ccWorkflow = props.getProperty("cc.workflow");
 		ccCustomAttributeTextfield = props.getProperty("cc.custom.attribute.textfield");
+		ccCustomAttributeTextfield2 = props.getProperty("cc.custom.attribute.textfield.2");
 		
 //		ccVulnerabilityStatusInProgress = props.getProperty("cc.vulnerability.status.inprogress");
 //		ccVulnerabilityStatusRemediated = props.getProperty("cc.vulnerability.status.remediated");
@@ -184,8 +194,8 @@ public class TestServerConfig {
 		protexUsername = props.getProperty("protex.user.name");
 		protexPassword = props.getProperty("protex.password");
 		
-		protexUsername2 = props.getProperty("protex.user.name2");
-		protexPassword2 = props.getProperty("protex.password2");
+		protexUsername2 = props.getProperty("protex.user.name.2");
+		protexPassword2 = props.getProperty("protex.password.2");
 		
 		protexServerNameInCc = props.getProperty("protex.server.name.in.cc");
 	}
