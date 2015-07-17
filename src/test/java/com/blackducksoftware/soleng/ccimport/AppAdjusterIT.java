@@ -48,8 +48,6 @@ import com.blackducksoftware.soleng.ccimporter.model.CCIProject;
  */
 public class AppAdjusterIT {
 	
-	private static final String CC_IMPORT_USER_PASSWORD = "blackduck";
-	private static final String CC_IMPORT_USERNAME = "ccImportUser";
 	// parameters for multi-threaded new app list file generation test
 	private static final int NUM_THREADS = 20; // 20 is a pretty good test; 3/29/2015: successfully tested 100 
 	private static final int APP_COUNT = NUM_THREADS*2;
@@ -57,10 +55,6 @@ public class AppAdjusterIT {
 	private static final String NEW_APPS_LIST_FILENAME = "unit_test_new_apps.txt";
 	private static final String NEW_APPS_LIST_FILENAME_MANY_THREADS = "unit_test_new_apps_many_threads.txt";
 	private static final String DATE_FORMAT = "MM-dd-yyyy";
-	private static final String CUSTOM_ATTR_NAME = "Sample Textfield";
-	private static final String CC_URL = "http://int-cc-dev.blackducksoftware.com/";
-	public static final String SUPERUSER_USERNAME = "super";
-	public static final String SUPERUSER_PASSWORD = "super";
 	
 	private static final String NUMPREFIX1_ATTR_VALUE = "123456";
 	private static final String APP_NAME_STRING_BASE = "test application";
@@ -70,9 +64,6 @@ public class AppAdjusterIT {
 	private static String APPLICATION1_NAME = NUMPREFIX1_ATTR_VALUE + "-" + APP_NAME_STRING1 + "-" + WORK_STREAM + "-CURRENT";
 	private static String APPLICATION2_NAME = NUMPREFIX1_ATTR_VALUE + "-" + APP_NAME_STRING2 + "-" + WORK_STREAM + "-CURRENT";
 	
-	private static final String CUSTOM_ATTR = "Sample Textfield";
-	private static final String WORKFLOW = "Serial";
-	private static final String APP_OWNER = "unitTester@blackducksoftware.com";
 	private static String APPLICATION_VERSION = "TestVersion";
 	private static Logger log = LoggerFactory.getLogger(AppAdjusterIT.class.getName());
 
@@ -98,9 +89,9 @@ public class AppAdjusterIT {
         ProtexConfigManager protexConfigManager = new ProtexConfigManager(CONFIG_FILE);
 		
     	ServerBean bean = new ServerBean();
-		bean.setServerName(CC_URL);
-		bean.setUserName(SUPERUSER_USERNAME);
-		bean.setPassword(SUPERUSER_PASSWORD);
+		bean.setServerName(TestServerConfig.getCcServerName());
+		bean.setUserName(TestServerConfig.getCcSuperUsername());
+		bean.setPassword(TestServerConfig.getCcSuperPassword());
 		
 		CodeCenterServerWrapper ccWrapper = new CodeCenterServerWrapper(bean, ccConfigManager);
 		CodeCenterServerProxyV7_0 cc = ccWrapper.getInternalApiWrapper().getProxy();
@@ -124,9 +115,9 @@ public class AppAdjusterIT {
         ProtexConfigManager protexConfigManager = new ProtexConfigManager(CONFIG_FILE);
 		
     	ServerBean bean = new ServerBean();
-		bean.setServerName(CC_URL);
-		bean.setUserName(CC_IMPORT_USERNAME);
-		bean.setPassword(CC_IMPORT_USER_PASSWORD);
+		bean.setServerName(TestServerConfig.getCcServerName());
+		bean.setUserName(TestServerConfig.getCcUsername());
+		bean.setPassword(TestServerConfig.getCcPassword());
 		
 		CodeCenterServerWrapper ccWrapper = new CodeCenterServerWrapper(bean, ccConfigManager);
 		CodeCenterServerProxyV7_0 cc = ccWrapper.getInternalApiWrapper().getProxy();
@@ -183,21 +174,21 @@ public class AppAdjusterIT {
 	
 	private static Properties createBasicProperties() {
 		Properties props = new Properties();
-		props.setProperty("protex.server.name", "https://se-menger.blackducksoftware.com");
-		props.setProperty("protex.user.name", "ccImportUser@blackducksoftware.com");
-		props.setProperty("protex.password", CC_IMPORT_USER_PASSWORD);
+		props.setProperty("protex.server.name", TestServerConfig.getProtexServerName());
+		props.setProperty("protex.user.name", TestServerConfig.getProtexUsername());
+		props.setProperty("protex.password", TestServerConfig.getProtexPassword());
 
-		props.setProperty("cc.server.name", "http://int-cc-dev/");
-		props.setProperty("cc.user.name", CC_IMPORT_USERNAME);
-		props.setProperty("cc.password", CC_IMPORT_USER_PASSWORD);
+		props.setProperty("cc.server.name", TestServerConfig.getCcServerName());
+		props.setProperty("cc.user.name", TestServerConfig.getCcUsername());
+		props.setProperty("cc.password", TestServerConfig.getCcPassword());
 		
-		props.setProperty("protex.password.isplaintext", "true");
-		props.setProperty("cc.password.isplaintext", "true");
+		props.setProperty("protex.password.isencrypted", "false");
+		props.setProperty("cc.password.isencrypted", "false");
 		
-		props.setProperty("cc.protex.name", "MengerHttps");
+		props.setProperty("cc.protex.name", TestServerConfig.getProtexServerNameInCc());
 		props.setProperty("cc.default.app.version", APPLICATION_VERSION);
-		props.setProperty("cc.workflow", WORKFLOW);
-		props.setProperty("cc.owner", APP_OWNER);
+		props.setProperty("cc.workflow", TestServerConfig.getCcWorkflow());
+		props.setProperty("cc.owner", TestServerConfig.getCcUsername2());
 		
 		props.setProperty("validate.application", "false");
 		props.setProperty("validate.application.smart", "false");
@@ -211,7 +202,7 @@ public class AppAdjusterIT {
 		Properties props = createBasicProperties();
 		props.setProperty("app.adjuster.classname", "com.blackducksoftware.soleng.ccimport.appadjuster.custom.NumericPrefixedAppAdjuster");
 		props.setProperty("num.threads", Integer.toString(numThreads));
-		props.setProperty("numprefixed.app.attribute.numericprefix", CUSTOM_ATTR);
+		props.setProperty("numprefixed.app.attribute.numericprefix", TestServerConfig.getCcCustomAttributeTextfield());
 		props.setProperty("numprefixed.app.attribute.analyzeddate", "null");
 		props.setProperty("numprefixed.app.attribute.workstream", "null");
 		props.setProperty("numprefixed.app.attribute.projectstatus", "null");
@@ -372,7 +363,7 @@ public class AppAdjusterIT {
 			System.out.println("attr name: " + curAttrName + 
 				"; value: " + curAttrValue);
 			
-			if (CUSTOM_ATTR_NAME.equals(curAttrName)) {
+			if (TestServerConfig.getCcCustomAttributeTextfield().equals(curAttrName)) {
 				foundCustomAttr = true;
 				assertEquals(expectedAnalyzedDate, curAttrValue);
 			}
