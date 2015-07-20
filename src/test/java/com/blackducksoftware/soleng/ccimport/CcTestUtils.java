@@ -38,11 +38,6 @@ import com.blackducksoftware.sdk.codecenter.user.data.UserNameToken;
 import com.blackducksoftware.soleng.ccimporter.config.CodeCenterConfigManager;
 
 public class CcTestUtils {
-	public static final String CC_ROLE = "Application Administrator";
-	public static final String CC_URL = "http://int-cc-dev.blackducksoftware.com";
-	public static final String CC_PASSWORD = "blackduck";
-	public static final String CC_USER = "unitTester@blackducksoftware.com";
-	public static final String CLONED_APP_WORKFLOW = "Parallel";
 	
 	public static void deleteAppByName(CodeCenterServerWrapper ccServerWrapper,
 			String appName, String appVersion) {
@@ -67,7 +62,7 @@ public class CcTestUtils {
 		props.setProperty("cc.user.name", username);
 		props.setProperty("cc.password", password);
 		props.setProperty("cc.app.version", "Unspecified");
-		props.setProperty("cc.cloned.app.workflow", CLONED_APP_WORKFLOW);
+		props.setProperty("cc.cloned.app.workflow", TestServerConfig.getCcWorkflow());
 		CodeCenterConfigManager config = new CodeCenterConfigManager(props);
 		return config;
 	}
@@ -96,7 +91,7 @@ public class CcTestUtils {
 		appCreate.setVersion(appVersion);
 		appCreate.setOwnerId(userToken);
 		appCreate.setOwnerRoleId(roleToken);
-		appCreate.setWorkflowId(getWorkflowToken(CLONED_APP_WORKFLOW));
+		appCreate.setWorkflowId(getWorkflowToken(TestServerConfig.getCcWorkflow()));
 
 		if ((attributes != null) && (attributes.size() > 0)) {
 			List<AttributeValue> attributesValues = new ArrayList<AttributeValue>();

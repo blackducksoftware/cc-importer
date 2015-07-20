@@ -39,6 +39,9 @@ public class TestServerConfig {
 	
 	private static String protexServerNameInCc = null;
 	
+	private static String protexExistingProjectName = null;
+	private static String protexExistingProjectName2 = null	;
+	
 	public static String getCcServerName() {
 		ensureTestServerConfigInitialized();
 		return ccServerName;
@@ -161,6 +164,16 @@ public class TestServerConfig {
 		return protexServerNameInCc;
 	}
 
+	public static String getProtexExistingProjectName() {
+		ensureTestServerConfigInitialized();
+		return protexExistingProjectName;
+	}
+
+	public static String getProtexExistingProjectName2() {
+		ensureTestServerConfigInitialized();
+		return protexExistingProjectName2;
+	}
+
 	private static void loadTestServerConfig() {
 		ConfigurationFile configFile = new ConfigurationFile("src/test/resources/_configureme/test_server_config.properties");
 		EProperties props = new EProperties();
@@ -198,5 +211,8 @@ public class TestServerConfig {
 		protexPassword2 = props.getProperty("protex.password.2");
 		
 		protexServerNameInCc = props.getProperty("protex.server.name.in.cc");
+		
+		protexExistingProjectName = props.getProperty("protex.existing.project.name.1");
+		protexExistingProjectName2 = props.getProperty("protex.existing.project.name.2");
 	}
 }

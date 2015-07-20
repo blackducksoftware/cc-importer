@@ -75,24 +75,6 @@ public class TestUtils {
 			 throws SdkFault {
 		
 		System.out.println("Setting app custom attr text field");
-//		AttributeGroupPageFilter attrGroupPageFilter = new AttributeGroupPageFilter();
-//		List<AttributeGroup> attrGroups =
-//				cc.getAttributeApi().searchAttributeGroups("HasTextField", 
-//						AttributeGroupTypeEnum.APPLICATION, attrGroupPageFilter);
-//		System.out.println("*** Found " + attrGroups.size() + " matching attribute groups");
-//		AttributePageFilter attrPageFilter = new AttributePageFilter();
-//		attrPageFilter.setFirstRowIndex(0);
-//		attrPageFilter.setLastRowIndex(Integer.MAX_VALUE);
-//		List<AbstractAttribute> attrs = cc.getAttributeApi().searchAttributes("NonRequiredTextField", attrPageFilter);
-//		for (AbstractAttribute attr : attrs) {
-//			System.out.println("attr: " + attr.getName());
-//			if (attr.getName().equals(attrName)) {
-//				System.out.println("*** Found attr");
-////				AttributeValue attrValue = new AttributeValue();
-////				attrValue.
-////				app.getAttributeValues().add(attrValue);
-//			}
-//		}
 		
 		List<AttributeValue> attributesValues = new ArrayList<AttributeValue>();
         AttributeValue attrValueObject = new AttributeValue();

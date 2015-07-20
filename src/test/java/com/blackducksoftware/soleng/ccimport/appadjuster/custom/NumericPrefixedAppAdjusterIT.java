@@ -62,7 +62,6 @@ public class NumericPrefixedAppAdjusterIT {
 	private static String USER2a_USERNAME = "JUnit_ccimporter_report_user3_2a";
 	private static String USER3_USERNAME = "JUnit_ccimporter_report_user3_3";
 	private static String USER_PASSWORD = "password";
-	private static final String USER_ROLE1 = "Application Developer";
 
 	private static List<String> projectIdsToDelete = new ArrayList<String>();
 	
@@ -115,7 +114,7 @@ public class NumericPrefixedAppAdjusterIT {
 		projectIdsToDelete.add(projectId);
 		
     	TestUtils.createUser(cc, USER1_USERNAME, USER_PASSWORD);
-    	ApplicationIdToken appIdToken = TestUtils.createApplication(cc, APPLICATION1_NAME, APPLICATION_VERSION, USER1_USERNAME, USER_ROLE1,
+    	ApplicationIdToken appIdToken = TestUtils.createApplication(cc, APPLICATION1_NAME, APPLICATION_VERSION, USER1_USERNAME, TestServerConfig.getCcUserRole2(),
     			TestServerConfig.getCcCustomAttributeTextfield(), "test");
     	Application app = TestUtils.getApplication(cc, appIdToken);
     	CCIApplication cciApp = new CCIApplication(app, false);
@@ -163,7 +162,7 @@ public class NumericPrefixedAppAdjusterIT {
 		projectIdsToDelete.add(projectId);
 		
     	TestUtils.createUser(cc, USER1a_USERNAME, USER_PASSWORD);
-    	ApplicationIdToken appIdToken = TestUtils.createApplication(cc, APPLICATION1a_NAME, APPLICATION_VERSION, USER1a_USERNAME, USER_ROLE1,
+    	ApplicationIdToken appIdToken = TestUtils.createApplication(cc, APPLICATION1a_NAME, APPLICATION_VERSION, USER1a_USERNAME, TestServerConfig.getCcUserRole2(),
     			TestServerConfig.getCcCustomAttributeTextfield2(), "test");
     	Application app = TestUtils.getApplication(cc, appIdToken);
     	CCIApplication cciApp = new CCIApplication(app, false);
@@ -214,7 +213,7 @@ public class NumericPrefixedAppAdjusterIT {
     	projectIdsToDelete.add(projectId);
     	
     	TestUtils.createUser(cc, USER2_USERNAME, USER_PASSWORD);
-    	ApplicationIdToken appIdToken = TestUtils.createApplication(cc, APPLICATION2_NAME, APPLICATION_VERSION, USER2_USERNAME, USER_ROLE1,
+    	ApplicationIdToken appIdToken = TestUtils.createApplication(cc, APPLICATION2_NAME, APPLICATION_VERSION, USER2_USERNAME, TestServerConfig.getCcUserRole2(),
     			TestServerConfig.getCcCustomAttributeTextfield(), "test");
     	Application app = TestUtils.getApplication(cc, appIdToken);
     	CCIApplication cciApp = new CCIApplication(app, false);
@@ -265,7 +264,7 @@ public class NumericPrefixedAppAdjusterIT {
 		projectIdsToDelete.add(projectId);
 		
     	TestUtils.createUser(cc, USER2a_USERNAME, USER_PASSWORD);
-    	ApplicationIdToken appIdToken = TestUtils.createApplication(cc, APPLICATION2a_NAME, APPLICATION_VERSION, USER2a_USERNAME, USER_ROLE1,
+    	ApplicationIdToken appIdToken = TestUtils.createApplication(cc, APPLICATION2a_NAME, APPLICATION_VERSION, USER2a_USERNAME, TestServerConfig.getCcUserRole2(),
     			TestServerConfig.getCcCustomAttributeTextfield(), "test");
     	Application app = TestUtils.getApplication(cc, appIdToken);
     	CCIApplication cciApp = new CCIApplication(app, false);
@@ -316,7 +315,7 @@ public class NumericPrefixedAppAdjusterIT {
 		projectIdsToDelete.add(projectId);
 		
     	TestUtils.createUser(cc, USER3_USERNAME, USER_PASSWORD);
-    	ApplicationIdToken appIdToken = TestUtils.createApplication(cc, APPLICATION3_NAME, APPLICATION_VERSION, USER3_USERNAME, USER_ROLE1,
+    	ApplicationIdToken appIdToken = TestUtils.createApplication(cc, APPLICATION3_NAME, APPLICATION_VERSION, USER3_USERNAME, TestServerConfig.getCcUserRole2(),
     			TestServerConfig.getCcCustomAttributeTextfield(), "test");
     	Application app = TestUtils.getApplication(cc, appIdToken);
     	CCIApplication cciApp = new CCIApplication(app, false);

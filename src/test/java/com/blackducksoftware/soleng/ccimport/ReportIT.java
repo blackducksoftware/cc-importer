@@ -22,7 +22,7 @@ import soleng.framework.standard.datatable.Record;
 import soleng.framework.standard.datatable.writer.DataSetWriter;
 import soleng.framework.standard.datatable.writer.DataSetWriterStdOut;
 
-public class ReportTest
+public class ReportIT
 {
 	private static String APPLICATION0_NAME = "ccImporterReportTestApp1";
 	private static String APPLICATION_VERSION = "v123";
