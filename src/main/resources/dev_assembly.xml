@@ -3,7 +3,7 @@
 	<formats>
 		<format>zip</format> 
 	</formats> 
-	<id>development_env</id>
+	<id>development_kit</id>
 	<fileSets> 
 		  <fileSet>
 	       <directory>${project.basedir}</directory>
