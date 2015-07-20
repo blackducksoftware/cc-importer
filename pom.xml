@@ -127,6 +127,7 @@
 				<version>2.4</version>
 				<executions>
 					<execution>
+						<!-- assemble executable package -->
 						<id>assembly</id>
 						<phase>package</phase>
 						<goals>
@@ -135,6 +136,22 @@
 						<configuration>
 							<descriptors>
 								<descriptor>src/main/resources/cci_assembly.xml</descriptor>
+							</descriptors>
+							<descriptorRef>build-zip</descriptorRef>
+							<appendAssemblyId>true</appendAssemblyId>
+						</configuration>
+					</execution>
+					
+					<execution>
+						<!-- assemble development package -->
+						<id>dev</id>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+						<configuration>
+							<descriptors>
+								<descriptor>src/main/resources/dev_assembly.xml</descriptor>
 							</descriptors>
 							<descriptorRef>build-zip</descriptorRef>
 							<appendAssemblyId>true</appendAssemblyId>

@@ -1,0 +1,17 @@
+<assembly>  
+	<includeBaseDirectory>false</includeBaseDirectory> 
+	<formats>
+		<format>zip</format> 
+	</formats> 
+	<id>development_env</id>
+	<fileSets> 
+		  <fileSet>
+	       <directory>${project.basedir}</directory>
+	       	<outputDirectory>/</outputDirectory>
+	       	<includes>
+				<include>/src/**</include>
+				<include>/pom.xml</include>
+			</includes>
+	    </fileSet> 	
+	</fileSets> 
+</assembly> 
