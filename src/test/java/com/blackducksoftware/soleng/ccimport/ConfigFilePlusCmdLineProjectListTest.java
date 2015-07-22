@@ -24,8 +24,8 @@ public class ConfigFilePlusCmdLineProjectListTest {
 		ccConfigManager.setProjectList(projectListString);
 		protexConfigManager.setProjectList(projectListString);
 		
-		assertEquals(TestServerConfig.getCcUsername(), ccConfigManager.getOwner());
-		assertEquals(TestServerConfig.getProtexUsername(), protexConfigManager.getServerBean().getUserName());
+		assertEquals("testowner", ccConfigManager.getOwner());
+		assertEquals("testprotexusername", protexConfigManager.getServerBean().getUserName());
 		List<CCIProject> projects = protexConfigManager.getProjectList();
 		boolean foundP1 = false;
 		boolean foundP2 = false;
