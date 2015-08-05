@@ -44,7 +44,7 @@
 		<dependency>
 			<groupId>com.blackducksoftware.soleng</groupId>
 			<artifactId>cf-7x-connector</artifactId>
-			<version>1.2.4</version>
+			<version>1.2.6-SNAPSHOT</version>
 		</dependency>
 
 	</dependencies>
