@@ -34,7 +34,7 @@
     </appender>
  
  
-    <category name="com.blackducksoftware.soleng.ccimport.report">
+    <category name="com.blackducksoftware.tools.ccimport.report">
         <priority value="DEBUG" />
     </category>
          

@@ -1,0 +1,67 @@
+package com.blackducksoftware.tools.ccimport.report;
+
+import java.util.List;
+import java.util.TreeSet;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.blackducksoftware.sdk.protex.common.ComponentType;
+import com.blackducksoftware.sdk.protex.project.bom.BomComponent;
+import com.blackducksoftware.sdk.protex.common.ComponentInfo;
+import com.blackducksoftware.tools.commonframework.connector.protex.ProtexServerWrapper;
+import com.blackducksoftware.tools.commonframework.standard.codecenter.pojo.ComponentPojo;
+import com.blackducksoftware.tools.commonframework.standard.codecenter.pojo.ComponentPojoImpl;
+import com.blackducksoftware.tools.commonframework.standard.common.ProjectPojo;
+
+public class ProtexComponentCollector extends ComponentCollector {
+	private static Logger log = LoggerFactory
+		    .getLogger(ProtexComponentCollector.class.getName());
+	private String protexProjectId;
+
+	public ProtexComponentCollector(ProtexServerWrapper protexWrapper, String protexProjectId) throws Exception {
+		this.protexProjectId = protexProjectId;
+		loadProjectComponents(protexWrapper, protexProjectId);
+	}
+	
+	/**
+	 * Gets protex elements
+	 * @return
+	 * @throws Exception
+	 */
+	private void loadProjectComponents(ProtexServerWrapper protexWrapper, String protexProjectId) throws Exception
+	{
+		
+		ProjectPojo protexProject = protexWrapper.getProjectByID(protexProjectId);
+		if (protexProject == null)
+			throw new Exception("Unable to find project with ID: " + protexProjectId);
+
+		String projectIdFromProtex = protexProject.getProjectKey();
+		
+		List<BomComponent> bomComps = protexWrapper.getInternalApiWrapper().getBomApi().getBomComponents(protexProjectId);
+		compPojoList = new TreeSet<ComponentPojo>();
+		for(BomComponent bomcomponent : bomComps)
+		{
+
+			ComponentInfo componentInfo = protexWrapper.getInternalApiWrapper().getProjectApi().getComponentByKey(protexProjectId, 
+					bomcomponent.getComponentKey());
+		
+			log.debug("Comp " + componentInfo.getComponentName() + ": Comp Type: " + componentInfo.getComponentType());
+			log.debug("Comp " + componentInfo.getComponentName() + ": BomComp Type: " + bomcomponent.getType());
+			log.debug("Comp " + componentInfo.getComponentName() + ": BomComp VersionName: " + bomcomponent.getVersionName());
+			
+//			log.debug("\tBomComp approval state: " + bomcomponent.getApprovalInfo().getApproved().name());
+//			log.debug("\tBomComp file count identified: " + bomcomponent.getFileCountIdentified());
+//			log.debug("\tBomComp file count rapidId identified: " + bomcomponent.getFileCountRapidIdIdentifications());	
+			
+			if (componentInfo.getComponentType() == ComponentType.PROJECT) {
+				continue;
+			}
+			ComponentPojo compPojo = new ComponentPojoImpl(bomcomponent.getComponentKey().getComponentId(),
+					componentInfo.getComponentName(),
+					bomcomponent.getBomVersionName(),
+					bomcomponent.getComponentKey().getComponentId());
+			compPojoList.add(compPojo);
+		}
+	}
+}
