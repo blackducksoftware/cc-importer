@@ -1,3 +1,20 @@
+/*******************************************************************************
+ * Copyright (C) 2015 Black Duck Software, Inc.
+ * http://www.blackducksoftware.com/
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License version 2 only
+ * as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License version 2
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *******************************************************************************/
 package com.blackducksoftware.tools.ccimport;
 
 import java.lang.reflect.Method;
@@ -8,34 +25,44 @@ import com.blackducksoftware.tools.ccimporter.config.CodeCenterConfigManager;
 import com.blackducksoftware.tools.ccimporter.model.CCIProject;
 import com.blackducksoftware.tools.commonframework.connector.protex.ProtexServerWrapper;
 import com.blackducksoftware.tools.commonframework.standard.codecenter.CodeCenterServerWrapper;
+import com.blackducksoftware.tools.commonframework.standard.protex.ProtexProjectPojo;
 
-public class ProjectProcessorThreadWorkerFactoryImpl implements ProjectProcessorThreadWorkerFactory {
-	private CodeCenterServerWrapper codeCenterWrapper;
-	private ProtexServerWrapper protexServerWrapper;
-	private CodeCenterConfigManager codeCenterConfigManager;
-	private Object appAdjusterObject;
-	private Method appAdjusterMethod;
-	
-	public ProjectProcessorThreadWorkerFactoryImpl(CodeCenterServerWrapper codeCenterWrapper, ProtexServerWrapper protexServerWrapper,
-			CodeCenterConfigManager codeCenterConfigManager,
-			Object appAdjusterObject, Method appAdjusterMethod) {
-		this.codeCenterConfigManager = codeCenterConfigManager;
-		this.protexServerWrapper = protexServerWrapper;
-		this.codeCenterWrapper = codeCenterWrapper;
-		this.appAdjusterObject = appAdjusterObject;
-		this.appAdjusterMethod = appAdjusterMethod;
-	}
+public class ProjectProcessorThreadWorkerFactoryImpl implements
+	ProjectProcessorThreadWorkerFactory {
+    private CodeCenterServerWrapper codeCenterWrapper;
+    private ProtexServerWrapper<ProtexProjectPojo> protexServerWrapper;
+    private CodeCenterConfigManager codeCenterConfigManager;
+    private Object appAdjusterObject;
+    private Method appAdjusterMethod;
 
-	/* (non-Javadoc)
-	 * @see com.blackducksoftware.tools.ccimport.ProjectProcessorThreadWorkerFactory#createProjectProcessorThreadWorker(java.util.List, java.util.List)
-	 */
-	@Override
-	public Runnable createProjectProcessorThreadWorker(List<CCIProject> partialProjectList,
-			List<CCIReportSummary> synchronizedThreadsReportSummaryList) {
-		Runnable threadWorker = new ProjectProcessorThreadWorker(
-				codeCenterWrapper, protexServerWrapper, codeCenterConfigManager,
-				partialProjectList, synchronizedThreadsReportSummaryList,
-				appAdjusterObject, appAdjusterMethod);
-		return threadWorker;
-	}
+    public ProjectProcessorThreadWorkerFactoryImpl(
+	    CodeCenterServerWrapper codeCenterWrapper,
+	    ProtexServerWrapper<ProtexProjectPojo> protexServerWrapper,
+	    CodeCenterConfigManager codeCenterConfigManager,
+	    Object appAdjusterObject, Method appAdjusterMethod) {
+	this.codeCenterConfigManager = codeCenterConfigManager;
+	this.protexServerWrapper = protexServerWrapper;
+	this.codeCenterWrapper = codeCenterWrapper;
+	this.appAdjusterObject = appAdjusterObject;
+	this.appAdjusterMethod = appAdjusterMethod;
+    }
+
+    /*
+     * (non-Javadoc)
+     *
+     * @see
+     * com.blackducksoftware.tools.ccimport.ProjectProcessorThreadWorkerFactory
+     * #createProjectProcessorThreadWorker(java.util.List, java.util.List)
+     */
+    @Override
+    public Runnable createProjectProcessorThreadWorker(
+	    List<CCIProject> partialProjectList,
+	    List<CCIReportSummary> synchronizedThreadsReportSummaryList) {
+	Runnable threadWorker = new ProjectProcessorThreadWorker(
+		codeCenterWrapper, protexServerWrapper,
+		codeCenterConfigManager, partialProjectList,
+		synchronizedThreadsReportSummaryList, appAdjusterObject,
+		appAdjusterMethod);
+	return threadWorker;
+    }
 }

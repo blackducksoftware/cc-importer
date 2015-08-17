@@ -17,13 +17,12 @@ import com.blackducksoftware.tools.commonframework.core.config.server.ServerBean
  * @author akamen
  * 
  */
-public class CodeCenterProjectHarnessTest
-{
+public class CodeCenterProjectHarnessTest {
     // OUR TEST DATA
     private static String PROTEX_SERVER = "protex/server";
     private static String PROTEX_USER = "akamen";
     private static String PROTEX_PASS = "blackDu@ckkk";
-    
+
     private static String CC_SERVER = "codeceNter/server";
     private static String CC_USER = "akamen@cc.com";
     private static String CC_PASS = "cc_blackDu@ckkk";
@@ -32,8 +31,8 @@ public class CodeCenterProjectHarnessTest
     public final ExpectedSystemExit exit = ExpectedSystemExit.none();
 
     private CCIProjectImporterHarness harness = new CCIProjectImporterHarness();
-    private  String[] args = null;
-    
+    private String[] args = null;
+
     // Local config files
     CodeCenterConfigManager ccConfigManager = null;
     ProtexConfigManager protexConfigManager = null;
@@ -42,18 +41,16 @@ public class CodeCenterProjectHarnessTest
      * Expecting a system exit due to insufficient arguments
      */
     @Test
-    public void testBasicNoArguments()
-    {
+    public void testBasicNoArguments() {
 	exit.expectSystemExitWithStatus(-1);
-	args = new String[]{};
+	args = new String[] {};
 	harness.main(args);
     }
 
     @Test
-    public void testBasicArgumentsComplete()
-    {
+    public void testBasicArgumentsComplete() {
 	String NEWLINE = "\n";
-	
+
 	StringBuilder sb = new StringBuilder();
 	sb.append("--p-server" + NEWLINE + PROTEX_SERVER);
 	sb.append("\n");
@@ -82,22 +79,22 @@ public class CodeCenterProjectHarnessTest
 	sb.append("--validate" + NEWLINE + "false");
 
 	String[] args = sb.toString().split("\n");
-	
+
 	ccConfigManager = new CodeCenterConfigManager(args);
 	protexConfigManager = new ProtexConfigManager(args);
-	
+
 	ServerBean ccBean = ccConfigManager.getServerBean();
 	// Test config
 	Assert.assertEquals(CC_SERVER, ccBean.getServerName());
 	Assert.assertEquals(CC_USER, ccBean.getUserName());
 	Assert.assertEquals(CC_PASS, ccBean.getPassword());
-	
+
 	ServerBean protexBean = protexConfigManager.getServerBean();
-	
+
 	Assert.assertEquals(PROTEX_SERVER, protexBean.getServerName());
 	Assert.assertEquals(PROTEX_USER, protexBean.getUserName());
 	Assert.assertEquals(PROTEX_PASS, protexBean.getPassword());
-	
+
 	// Test the remainder
 	Assert.assertEquals("My Workflow", ccConfigManager.getWorkflow());
     }

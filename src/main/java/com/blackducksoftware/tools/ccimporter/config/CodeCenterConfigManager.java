@@ -1,19 +1,20 @@
-/**
- * Copyright (C)2014 Black Duck Software Inc.
+/*******************************************************************************
+ * Copyright (C) 2015 Black Duck Software, Inc.
  * http://www.blackducksoftware.com/
- * All rights reserved.
- * 
- * This software is the confidential and proprietary information of
- * Black Duck Software ("Confidential Information"). You shall not
- * disclose such Confidential Information and shall use it only in
- * accordance with the terms set forth in the Black Duck App Exchange
- * Terms of Use located at:
- * http://www.blackducksoftware.com/legal/appexchange
- * IF YOU DO NOT AGREE TO THE THESE TERMS OR ANY SPECIAL TERMS, 
- * DO NOT ACCESS OR USE THIS SITE OR THE SOFTWARE.
- * 
- * @author Niles Madison, namdison@blackducksoftware.com
- */
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License version 2 only
+ * as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License version 2
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *******************************************************************************/
 package com.blackducksoftware.tools.ccimporter.config;
 
 import java.util.Properties;
@@ -23,30 +24,25 @@ import org.slf4j.LoggerFactory;
 
 /**
  * CC Configuration Manager class for CCI.
- * 
+ *
  * @author akamen
- * 
+ *
  */
-public class CodeCenterConfigManager extends CCIConfigurationManager
-{
-    private final static Logger log = LoggerFactory
-	    .getLogger(CodeCenterConfigManager.class.getName());
+public class CodeCenterConfigManager extends CCIConfigurationManager {
+    private Logger log = LoggerFactory.getLogger(this.getClass().getName());
 
-    public CodeCenterConfigManager(String[] args)
-    {
+    public CodeCenterConfigManager(String[] args) {
 	super();
 	initCommandLine(args, APPLICATION.CODECENTER);
     }
 
-    public CodeCenterConfigManager(String fileLocation)
-    {
+    public CodeCenterConfigManager(String fileLocation) {
 	super(fileLocation, APPLICATION.CODECENTER);
 	log.info("Importing user configuration from file...");
 	initConfigFile();
     }
-    
-    public CodeCenterConfigManager(Properties props)
-    {
+
+    public CodeCenterConfigManager(Properties props) {
 	super(props, APPLICATION.CODECENTER);
 	log.info("Importing user configuration from file...");
 	initConfigFile();

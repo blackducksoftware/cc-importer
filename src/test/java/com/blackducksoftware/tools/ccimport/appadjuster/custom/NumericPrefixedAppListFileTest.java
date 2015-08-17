@@ -18,33 +18,34 @@ import org.junit.Test;
 import com.blackducksoftware.tools.ccimport.appadjuster.custom.NumericPrefixedAppListFile;
 
 public class NumericPrefixedAppListFileTest {
-	private static final String expectedListContents = "test app 1\ntest app 2\n";
-	private static File outputFile;
-	
-	@BeforeClass
-	public static void setUpBeforeClass() throws Exception {
-		outputFile = File.createTempFile("JUnit_AppListFile_", ".txt");
-	}
+    private static final String expectedListContents = "test app 1\ntest app 2\n";
+    private static File outputFile;
 
-	@AfterClass
-	public static void tearDownAfterClass() throws Exception {
-		outputFile.delete();
-	}
+    @BeforeClass
+    public static void setUpBeforeClass() throws Exception {
+	outputFile = File.createTempFile("JUnit_AppListFile_", ".txt");
+    }
 
-	@Test
-	public void test() throws Exception {
-		
-		NumericPrefixedAppListFile appList = new NumericPrefixedAppListFile();
-		appList.addApp("test app 1");
-		appList.addApp("test app 2");
-		assertEquals(expectedListContents, appList.toString());
-		appList.save(outputFile.getAbsolutePath());
-		
-		BufferedReader br = new BufferedReader(new FileReader(outputFile.getAbsoluteFile()));
-		String line = br.readLine();
-		assertEquals("test app 1", line);
-		line = br.readLine();
-		assertEquals("test app 2", line);
-	}
+    @AfterClass
+    public static void tearDownAfterClass() throws Exception {
+	outputFile.delete();
+    }
+
+    @Test
+    public void test() throws Exception {
+
+	NumericPrefixedAppListFile appList = new NumericPrefixedAppListFile();
+	appList.addApp("test app 1");
+	appList.addApp("test app 2");
+	assertEquals(expectedListContents, appList.toString());
+	appList.save(outputFile.getAbsolutePath());
+
+	BufferedReader br = new BufferedReader(new FileReader(
+		outputFile.getAbsoluteFile()));
+	String line = br.readLine();
+	assertEquals("test app 1", line);
+	line = br.readLine();
+	assertEquals("test app 2", line);
+    }
 
 }
