@@ -46,7 +46,13 @@ import com.blackducksoftware.tools.commonframework.standard.codecenter.CodeCente
 import com.blackducksoftware.tools.commonframework.standard.protex.ProtexProjectPojo;
 
 /**
- * A custom appAdjuster for ccimporter.
+ * A custom appAdjuster for ccimporter for application names with a numeric
+ * prefix. Application name formats: <numericPrefix>-<workstream>-<state>
+ * <numericPrefix>-<appdescription>-<workstream>-<state>
+ *
+ * For each application: If it was just created, append it to the "new apps"
+ * file Update the application's attribute values: numeric prefix workstream
+ * state AppEdit URL Last analyzed date
  *
  * @author sbillings
  *
@@ -99,8 +105,9 @@ public class NumericPrefixedAppAdjuster implements AppAdjuster {
 
     // These patterns are used to determine whether or not the app name includes
     // the app description.
-    // That is: <sealid>-<workstream>-CURRENT vs.
-    // <sealid>-<appdescription>-<workstream>-CURRENT
+    // For example:
+    // <numericPrefix>-<workstream>-<state> vs.
+    // <numericPrefix>-<appdescription>-<workstream>-<state>
     // They also ensure we only work on app names that conform to one of those
     // formats
     private Pattern withoutDescriptionFormatPattern = null;

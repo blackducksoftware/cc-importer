@@ -49,7 +49,7 @@ public class ProjectProcessorThreadWorkerFactoryImpl implements
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see
      * com.blackducksoftware.tools.ccimport.ProjectProcessorThreadWorkerFactory
      * #createProjectProcessorThreadWorker(java.util.List, java.util.List)
