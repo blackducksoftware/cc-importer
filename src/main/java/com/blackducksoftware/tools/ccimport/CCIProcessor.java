@@ -46,10 +46,11 @@ import com.blackducksoftware.tools.commonframework.standard.protex.ProtexProject
  *
  */
 public abstract class CCIProcessor {
-    private Logger log = LoggerFactory.getLogger(this.getClass().getName());
+    private final Logger log = LoggerFactory.getLogger(this.getClass()
+	    .getName());
 
-    protected CodeCenterConfigManager codeCenterConfigManager = null;
-    protected CodeCenterServerWrapper codeCenterWrapper = null;
+    protected final CodeCenterConfigManager codeCenterConfigManager;
+    protected final CodeCenterServerWrapper codeCenterWrapper;
 
     protected List<CCIReportSummary> reportSummaryList = new ArrayList<CCIReportSummary>();
 

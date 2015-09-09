@@ -25,6 +25,7 @@ import java.util.TimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.blackducksoftware.tools.ccimport.appadjuster.AppAdjuster;
 import com.blackducksoftware.tools.ccimport.exception.CodeCenterImportException;
 import com.blackducksoftware.tools.ccimporter.config.CCIConfigurationManager;
 import com.blackducksoftware.tools.ccimporter.config.CodeCenterConfigManager;
@@ -49,12 +50,12 @@ import com.blackducksoftware.tools.commonframework.standard.protex.ProtexProject
  *
  */
 public class CCIProjectImporterHarness {
-    private static Logger log = LoggerFactory
+    private static final Logger log = LoggerFactory
 	    .getLogger(CCIProjectImporterHarness.class.getName());
 
-    private static CodeCenterConfigManager ccConfigManager = null;
+    private static CodeCenterConfigManager ccConfigManager;
     // Used in the case of single-server mode.
-    private static ProtexConfigManager protexConfigManager = null;
+    private static ProtexConfigManager protexConfigManager;
 
     public static void main(String args[]) {
 	if (args.length == 0) {
@@ -156,9 +157,10 @@ public class CCIProjectImporterHarness {
 	    return null; // No custom app adjuster has been configured
 	}
 	// Get the user-configured custom app adjuster class
-	Class sourceClass = null;
+	Class<AppAdjuster> sourceClass = null;
 	try {
-	    sourceClass = Class.forName(appAdjusterClassname);
+	    sourceClass = (Class<AppAdjuster>) Class
+		    .forName(appAdjusterClassname);
 	} catch (ClassNotFoundException e) {
 	    String msg = "Unable to convert name to class for custom app adjuster: Class not found: "
 		    + appAdjusterClassname;
@@ -200,9 +202,10 @@ public class CCIProjectImporterHarness {
 	    return null; // No custom app adjuster has been configured
 	}
 	// Get the user-configured custom app adjuster class
-	Class sourceClass = null;
+	Class<AppAdjuster> sourceClass = null;
 	try {
-	    sourceClass = Class.forName(appAdjusterClassname);
+	    sourceClass = (Class<AppAdjuster>) Class
+		    .forName(appAdjusterClassname);
 	} catch (ClassNotFoundException e) {
 	    String msg = "Unable to convert name to class for custom app adjuster: Class not found: "
 		    + appAdjusterClassname;
@@ -211,7 +214,7 @@ public class CCIProjectImporterHarness {
 
 	// Get the init method on the custom app adjuster class
 	Method initMethod = null;
-	Class[] initMethodArgTypes = { CodeCenterServerWrapper.class,
+	Class<?>[] initMethodArgTypes = { CodeCenterServerWrapper.class,
 		ProtexServerWrapper.class, CCIConfigurationManager.class,
 		TimeZone.class };
 	try {
@@ -224,7 +227,7 @@ public class CCIProjectImporterHarness {
 	}
 
 	// Get the adjustApp method on the custom app adjuster class
-	Class[] adjustAppMethodArgTypes = { CCIApplication.class,
+	Class<?>[] adjustAppMethodArgTypes = { CCIApplication.class,
 		CCIProject.class };
 	Method appAdjusterMethod = null;
 	try {

@@ -32,15 +32,16 @@ import com.blackducksoftware.tools.commonframework.standard.codecenter.CodeCente
 import com.blackducksoftware.tools.commonframework.standard.protex.ProtexProjectPojo;
 
 public class ProjectProcessorThreadWorker implements Runnable {
-    private Logger log = LoggerFactory.getLogger(this.getClass().getName());
+    private final Logger log = LoggerFactory.getLogger(this.getClass()
+	    .getName());
 
-    private CodeCenterServerWrapper codeCenterServerWrapper;
-    private ProtexServerWrapper<ProtexProjectPojo> protexServerWrapper;
-    private List<CCIProject> partialProjectList;
-    private List<CCIReportSummary> reportSummaryList;
-    private CodeCenterConfigManager codeCenterConfigManager;
-    private Object appAdjusterObject;
-    private Method appAdjusterMethod;
+    private final CodeCenterServerWrapper codeCenterServerWrapper;
+    private final ProtexServerWrapper<ProtexProjectPojo> protexServerWrapper;
+    private final List<CCIProject> partialProjectList;
+    private final List<CCIReportSummary> reportSummaryList;
+    private final CodeCenterConfigManager codeCenterConfigManager;
+    private final Object appAdjusterObject;
+    private final Method appAdjusterMethod;
 
     public ProjectProcessorThreadWorker(
 	    CodeCenterServerWrapper codeCenterWrapper,

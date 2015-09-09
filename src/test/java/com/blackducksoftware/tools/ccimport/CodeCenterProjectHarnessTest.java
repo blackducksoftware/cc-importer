@@ -23,16 +23,15 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.ExpectedSystemExit;
 
-import com.blackducksoftware.tools.ccimport.CCIProjectImporterHarness;
 import com.blackducksoftware.tools.ccimporter.config.CodeCenterConfigManager;
 import com.blackducksoftware.tools.ccimporter.config.ProtexConfigManager;
 import com.blackducksoftware.tools.commonframework.core.config.server.ServerBean;
 
 /**
  * Tests all the CLI options.
- * 
+ *
  * @author akamen
- * 
+ *
  */
 public class CodeCenterProjectHarnessTest {
     // OUR TEST DATA
@@ -47,8 +46,7 @@ public class CodeCenterProjectHarnessTest {
     @Rule
     public final ExpectedSystemExit exit = ExpectedSystemExit.none();
 
-    private CCIProjectImporterHarness harness = new CCIProjectImporterHarness();
-    private String[] args = null;
+    private String[] args;
 
     // Local config files
     CodeCenterConfigManager ccConfigManager = null;
@@ -61,7 +59,7 @@ public class CodeCenterProjectHarnessTest {
     public void testBasicNoArguments() {
 	exit.expectSystemExitWithStatus(-1);
 	args = new String[] {};
-	harness.main(args);
+	CCIProjectImporterHarness.main(args);
     }
 
     @Test

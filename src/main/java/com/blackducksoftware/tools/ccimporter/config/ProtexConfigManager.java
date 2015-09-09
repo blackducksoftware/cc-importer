@@ -34,7 +34,8 @@ import org.slf4j.LoggerFactory;
  *
  */
 public class ProtexConfigManager extends CCIConfigurationManager {
-    private Logger log = LoggerFactory.getLogger(this.getClass().getName());
+    private final Logger log = LoggerFactory.getLogger(this.getClass()
+	    .getName());
 
     public ProtexConfigManager(String[] args) {
 	super();

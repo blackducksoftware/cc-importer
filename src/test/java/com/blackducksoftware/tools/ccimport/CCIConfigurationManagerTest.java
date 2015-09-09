@@ -18,7 +18,9 @@
 
 package com.blackducksoftware.tools.ccimport;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 import java.util.Properties;
@@ -28,7 +30,6 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.blackducksoftware.tools.ccimport.exception.CodeCenterImportException;
 import com.blackducksoftware.tools.ccimporter.config.CodeCenterConfigManager;
 import com.blackducksoftware.tools.ccimporter.config.ProtexConfigManager;
 import com.blackducksoftware.tools.ccimporter.model.CCIProject;
@@ -37,7 +38,6 @@ public class CCIConfigurationManagerTest {
     private static final String APP_VERSION = "Unspecified";
     private static final String APP_NAME1 = "ccimport IT app";
     private static final String APP_NAME2 = "another app";
-    private static final String APP_OWNER = "unitTester@blackducksoftware.com";
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {

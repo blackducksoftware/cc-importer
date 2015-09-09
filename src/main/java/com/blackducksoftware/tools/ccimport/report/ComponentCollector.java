@@ -26,8 +26,9 @@ import org.slf4j.LoggerFactory;
 import com.blackducksoftware.tools.commonframework.standard.codecenter.pojo.ComponentPojo;
 
 public abstract class ComponentCollector {
-    private Logger log = LoggerFactory.getLogger(this.getClass().getName());
-    protected SortedSet<ComponentPojo> compPojoList = null;
+    private final Logger log = LoggerFactory.getLogger(this.getClass()
+	    .getName());
+    protected SortedSet<ComponentPojo> compPojoList;
 
     public String getDiffString(Object o) {
 	String diffString = null; // Null means they ComponentCollections are

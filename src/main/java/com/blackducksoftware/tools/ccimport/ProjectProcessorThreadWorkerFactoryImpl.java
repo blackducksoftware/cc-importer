@@ -29,11 +29,11 @@ import com.blackducksoftware.tools.commonframework.standard.protex.ProtexProject
 
 public class ProjectProcessorThreadWorkerFactoryImpl implements
 	ProjectProcessorThreadWorkerFactory {
-    private CodeCenterServerWrapper codeCenterWrapper;
-    private ProtexServerWrapper<ProtexProjectPojo> protexServerWrapper;
-    private CodeCenterConfigManager codeCenterConfigManager;
-    private Object appAdjusterObject;
-    private Method appAdjusterMethod;
+    private final CodeCenterServerWrapper codeCenterWrapper;
+    private final ProtexServerWrapper<ProtexProjectPojo> protexServerWrapper;
+    private final CodeCenterConfigManager codeCenterConfigManager;
+    private final Object appAdjusterObject;
+    private final Method appAdjusterMethod;
 
     public ProjectProcessorThreadWorkerFactoryImpl(
 	    CodeCenterServerWrapper codeCenterWrapper,

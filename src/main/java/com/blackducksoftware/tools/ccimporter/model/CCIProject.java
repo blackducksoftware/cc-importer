@@ -33,8 +33,8 @@ import com.blackducksoftware.tools.commonframework.standard.protex.ProtexProject
  *
  */
 public class CCIProject extends ProtexProjectPojo {
-    private String projectVersion = null;
-    private CCIApplication cciApplication = null;
+    private String projectVersion;
+    private CCIApplication cciApplication;
 
     public CCIProject() {
 	super();

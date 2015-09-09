@@ -38,9 +38,10 @@ import com.blackducksoftware.tools.commonframework.standard.protex.ProtexProject
 
 public class CCIMultiServerProcessor extends CCIProcessor {
 
-    private Logger log = LoggerFactory.getLogger(this.getClass().getName());
+    private final Logger log = LoggerFactory.getLogger(this.getClass()
+	    .getName());
 
-    private ProtexConfigManager protexConfig = null;
+    private final ProtexConfigManager protexConfig;
 
     /**
      * @param configManager

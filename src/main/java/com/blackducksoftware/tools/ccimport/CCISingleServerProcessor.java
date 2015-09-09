@@ -50,16 +50,17 @@ import com.blackducksoftware.tools.commonframework.standard.protex.ProtexProject
  */
 public class CCISingleServerProcessor extends CCIProcessor {
 
-    private static Logger log = LoggerFactory
+    private static final Logger log = LoggerFactory
 	    .getLogger(CCISingleServerProcessor.class.getName());
 
-    private CCIReportGenerator reportGen = null;
-    private int numThreads;
+    private final ProtexServerWrapper<ProtexProjectPojo> protexServerWrapper;
+    private final int numThreads;
+    private final ProjectProcessorThreadWorkerFactory threadFactory;
+
+    private CCIReportGenerator reportGen;
     private boolean threadExceptionThrown = false;
     private boolean threadWaitInterrupted = false;
     private String threadExceptionMessages = "";
-    private ProjectProcessorThreadWorkerFactory threadFactory;
-    private ProtexServerWrapper<ProtexProjectPojo> protexServerWrapper;
 
     /**
      * @param ccConfigManager
@@ -85,7 +86,12 @@ public class CCISingleServerProcessor extends CCIProcessor {
 		codeCenterServerWrapper, protexServerWrapper, ccConfigManager,
 		appAdjusterObject, appAdjusterMethod);
 
-	init(ccConfigManager, protexConfigManager, protexServerWrapper);
+	numThreads = ccConfigManager.getNumThreads();
+
+	// There will only be one in the single instance
+	ServerBean protexBean = protexConfigManager.getServerBean();
+
+	log.info("Using Protex URL [{}]", protexBean.getServerName());
     }
 
     public CCISingleServerProcessor(CodeCenterConfigManager ccConfigManager,
@@ -97,13 +103,6 @@ public class CCISingleServerProcessor extends CCIProcessor {
 	protexServerWrapper = createProtexServerWrapper(protexConfigManager);
 	this.threadFactory = threadFactory;
 
-	init(ccConfigManager, protexConfigManager, protexServerWrapper);
-    }
-
-    private void init(CodeCenterConfigManager ccConfigManager,
-	    ProtexConfigManager protexConfigManager,
-	    ProtexServerWrapper<ProtexProjectPojo> protexServerWrapper) {
-	this.protexServerWrapper = protexServerWrapper;
 	numThreads = ccConfigManager.getNumThreads();
 
 	// There will only be one in the single instance

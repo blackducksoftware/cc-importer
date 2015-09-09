@@ -29,7 +29,8 @@ import org.slf4j.LoggerFactory;
  *
  */
 public class CodeCenterConfigManager extends CCIConfigurationManager {
-    private Logger log = LoggerFactory.getLogger(this.getClass().getName());
+    private final Logger log = LoggerFactory.getLogger(this.getClass()
+	    .getName());
 
     public CodeCenterConfigManager(String[] args) {
 	super();

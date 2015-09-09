@@ -18,18 +18,15 @@
 
 package com.blackducksoftware.tools.ccimport.appadjuster.custom;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 import java.util.Date;
 import java.util.Properties;
 import java.util.TimeZone;
 
-import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Test;
 
-import com.blackducksoftware.tools.ccimport.appadjuster.custom.NumericPrefixedAppAdjuster;
-import com.blackducksoftware.tools.ccimport.appadjuster.custom.NumericPrefixedAppMetadata;
 import com.blackducksoftware.tools.ccimporter.config.CCIConfigurationManager;
 import com.blackducksoftware.tools.commonframework.core.config.ConfigConstants.APPLICATION;
 

@@ -20,13 +20,12 @@ package com.blackducksoftware.tools.ccimporter.model;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.blackducksoftware.tools.ccimporter.model.CCIProject;
-
 public class CCIProjectList {
     private boolean userSpecifiedSubset = false;
     private List<CCIProject> list;
-    private List<CCIProject> invalidList; // list of user specified but invalid
-					  // projects
+    private final List<CCIProject> invalidList; // list of user specified but
+						// invalid
+						// projects
 
     public CCIProjectList() {
 	list = new ArrayList<CCIProject>(1000);

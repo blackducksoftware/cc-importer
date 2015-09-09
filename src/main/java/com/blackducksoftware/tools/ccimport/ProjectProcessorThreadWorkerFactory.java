@@ -24,7 +24,7 @@ import com.blackducksoftware.tools.ccimporter.model.CCIProject;
 
 public interface ProjectProcessorThreadWorkerFactory {
 
-    public Runnable createProjectProcessorThreadWorker(
+    Runnable createProjectProcessorThreadWorker(
 	    List<CCIProject> partialProjectList,
 	    List<CCIReportSummary> synchronizedThreadsReportSummaryList);
 

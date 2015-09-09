@@ -64,14 +64,15 @@ import com.blackducksoftware.tools.commonframework.standard.protex.ProtexProject
  *
  */
 public class CodeCenterProjectSynchronizer {
-    private Logger log = LoggerFactory.getLogger(this.getClass().getName());
+    private final Logger log = LoggerFactory.getLogger(this.getClass()
+	    .getName());
 
-    private Object appAdjusterObject = null;
-    private Method appAdjusterMethod = null;
-    private CodeCenterServerWrapper ccWrapper = null;
-    private ProtexServerWrapper<ProtexProjectPojo> protexWrapper = null;
-    private CCIConfigurationManager configManager = null;
-    private CCIReportSummary reportSummary = new CCIReportSummary();
+    private final Object appAdjusterObject;
+    private final Method appAdjusterMethod;
+    private final CodeCenterServerWrapper ccWrapper;
+    private final ProtexServerWrapper<ProtexProjectPojo> protexWrapper;
+    private final CCIConfigurationManager configManager;
+    private final CCIReportSummary reportSummary = new CCIReportSummary();
 
     public CodeCenterProjectSynchronizer(
 	    CodeCenterServerWrapper codeCenterWrapper,

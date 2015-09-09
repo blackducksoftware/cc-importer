@@ -33,7 +33,8 @@ import com.blackducksoftware.tools.commonframework.standard.common.ProjectPojo;
 import com.blackducksoftware.tools.commonframework.standard.protex.ProtexProjectPojo;
 
 public class ProtexComponentCollector extends ComponentCollector {
-    private Logger log = LoggerFactory.getLogger(this.getClass().getName());
+    private final Logger log = LoggerFactory.getLogger(this.getClass()
+	    .getName());
 
     public ProtexComponentCollector(
 	    ProtexServerWrapper<ProtexProjectPojo> protexWrapper,

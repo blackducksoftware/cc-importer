@@ -26,7 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class NumericPrefixedAppListFile {
-    List<String> appNames = new ArrayList<String>();
+    private final List<String> appNames = new ArrayList<String>();
 
     public void addApp(String appName) {
 	appNames.add(appName);

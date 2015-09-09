@@ -44,7 +44,7 @@ import com.blackducksoftware.tools.commonframework.core.config.server.ServerBean
 public class CCIConfigurationManager extends ConfigurationManager {
     private Logger log = LoggerFactory.getLogger(this.getClass().getName());
 
-    private String[] cmdLineArgs = null;
+    private String[] cmdLineArgs;
     private String protexServerName = "";
     private String appVersion = "";
     private String workflow = "";
@@ -56,14 +56,14 @@ public class CCIConfigurationManager extends ConfigurationManager {
     private Boolean performSmartValidate = false;
     private String version = "undefined";
     private boolean attemptToFixInvalidAssociation = false;
-    private String appAdjusterClassname = null;
+    private String appAdjusterClassname;
     private boolean reValidateAfterBomChange = false;
     private boolean appAdjusterOnlyIfBomEdits = false;
-    private Pattern protexProjectNameFilterPattern = null;
+    private Pattern protexProjectNameFilterPattern;
     private int numThreads = 1;
 
-    private String hostName = null;
-    private String timeZone = null;
+    private String hostName;
+    private String timeZone;
 
     private Boolean runReport = false;
 

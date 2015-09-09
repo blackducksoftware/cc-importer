@@ -18,7 +18,7 @@
 
 package com.blackducksoftware.tools.ccimport.appadjuster.custom;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -27,8 +27,6 @@ import java.io.FileReader;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-
-import com.blackducksoftware.tools.ccimport.appadjuster.custom.NumericPrefixedAppListFile;
 
 public class NumericPrefixedAppListFileTest {
     private static final String expectedListContents = "test app 1\ntest app 2\n";
@@ -55,10 +53,14 @@ public class NumericPrefixedAppListFileTest {
 
 	BufferedReader br = new BufferedReader(new FileReader(
 		outputFile.getAbsoluteFile()));
-	String line = br.readLine();
-	assertEquals("test app 1", line);
-	line = br.readLine();
-	assertEquals("test app 2", line);
+	try {
+	    String line = br.readLine();
+	    assertEquals("test app 1", line);
+	    line = br.readLine();
+	    assertEquals("test app 2", line);
+	} finally {
+	    br.close();
+	}
     }
 
 }

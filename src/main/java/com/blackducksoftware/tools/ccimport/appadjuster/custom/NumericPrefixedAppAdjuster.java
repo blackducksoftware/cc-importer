@@ -60,7 +60,8 @@ import com.blackducksoftware.tools.commonframework.standard.protex.ProtexProject
 public class NumericPrefixedAppAdjuster implements AppAdjuster {
     private static final String NEW_APP_LIST_FILENAME_CMDLINE_ARG = "--new-app-list-filename";
 
-    private Logger log = LoggerFactory.getLogger(this.getClass().getName());
+    private final Logger log = LoggerFactory.getLogger(this.getClass()
+	    .getName());
 
     private static final String NUMERIC_PREFIX_PATTERN_STRING_PROPERTY = "numprefixed.appname.pattern.numericprefix";
     private static final String SEPARATOR_PATTERN_STRING_PROPERTY = "numprefixed.appname.pattern.separator";
@@ -110,26 +111,26 @@ public class NumericPrefixedAppAdjuster implements AppAdjuster {
     // <numericPrefix>-<appdescription>-<workstream>-<state>
     // They also ensure we only work on app names that conform to one of those
     // formats
-    private Pattern withoutDescriptionFormatPattern = null;
-    private Pattern withDescriptionFormatPattern = null;
+    private Pattern withoutDescriptionFormatPattern;
+    private Pattern withDescriptionFormatPattern;
 
     // These patterns are used to extract individual parts of the app name
-    private Pattern numericPrefixPattern = null;
-    private Pattern separatorPattern = null;
-    private Pattern workStreamPattern = null;
-    private Pattern projectStatePattern = null;
+    private Pattern numericPrefixPattern;
+    private Pattern separatorPattern;
+    private Pattern workStreamPattern;
+    private Pattern projectStatePattern;
 
     // Used to find end of app description part of app name
-    private Pattern followsDescriptionPattern = null;
+    private Pattern followsDescriptionPattern;
 
-    private String numericPrefixAttrName = null;
-    private String analyzedDateAttrName = null;
-    private String workStreamAttrName = null;
-    private String projectStateAttrName = null;
-    private String projectStateValue = null;
+    private String numericPrefixAttrName;
+    private String analyzedDateAttrName;
+    private String workStreamAttrName;
+    private String projectStateAttrName;
+    private String projectStateValue;
 
-    private String appEditUrlAttrName = null;
-    private String appEditUrlValue = null;
+    private String appEditUrlAttrName;
+    private String appEditUrlValue;
 
     private String dateFormatString;
 
@@ -138,10 +139,10 @@ public class NumericPrefixedAppAdjuster implements AppAdjuster {
 
     private TimeZone tz;
 
-    private String analyzedDateNeverString = null;
+    private String analyzedDateNeverString;
 
-    private String newAppListFilename = null;
-    private NumericPrefixedAppListFile newAppList = null;
+    private String newAppListFilename;
+    private NumericPrefixedAppListFile newAppList;
 
     private boolean updateAppEditUrlOnOldApps = false;
 

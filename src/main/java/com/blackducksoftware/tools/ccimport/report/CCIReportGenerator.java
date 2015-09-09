@@ -52,12 +52,13 @@ import com.blackducksoftware.tools.commonframework.standard.protex.ProtexProject
  */
 public class CCIReportGenerator {
 
-    private Logger log = LoggerFactory.getLogger(this.getClass().getName());
+    private final Logger log = LoggerFactory.getLogger(this.getClass()
+	    .getName());
 
     private final static int EXCEL_CELL_MAX_CHARS = 32767;
 
-    private CodeCenterServerWrapper codeCenterWrapper = null;
-    private ProtexServerWrapper<ProtexProjectPojo> protexWrapper = null;
+    private final CodeCenterServerWrapper codeCenterWrapper;
+    private final ProtexServerWrapper<ProtexProjectPojo> protexWrapper;
     private DataTable dataTable;
     private RecordDef recordDef;
 
