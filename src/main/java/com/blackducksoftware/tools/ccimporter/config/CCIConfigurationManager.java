@@ -42,7 +42,8 @@ import com.blackducksoftware.tools.commonframework.core.config.server.ServerBean
  *
  */
 public class CCIConfigurationManager extends ConfigurationManager {
-    private Logger log = LoggerFactory.getLogger(this.getClass().getName());
+    private final Logger log = LoggerFactory.getLogger(this.getClass()
+	    .getName());
 
     private String[] cmdLineArgs;
     private String protexServerName = "";
