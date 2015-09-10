@@ -29,7 +29,6 @@ public class CCIProjectList {
 
     public CCIProjectList() {
 	list = new ArrayList<CCIProject>(1000);
-	;
 	invalidList = new ArrayList<CCIProject>(10);
     }
 
