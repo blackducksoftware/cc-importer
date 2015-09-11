@@ -34,7 +34,6 @@ import com.blackducksoftware.sdk.codecenter.application.data.ApplicationCreate;
 import com.blackducksoftware.sdk.codecenter.application.data.ApplicationIdToken;
 import com.blackducksoftware.sdk.codecenter.application.data.ApplicationNameVersionToken;
 import com.blackducksoftware.sdk.codecenter.application.data.ProjectIdToken;
-import com.blackducksoftware.sdk.codecenter.application.data.ProjectNameToken;
 import com.blackducksoftware.sdk.codecenter.application.data.ProtexRequest;
 import com.blackducksoftware.sdk.codecenter.application.data.ValidationStatusEnum;
 import com.blackducksoftware.sdk.codecenter.approval.data.WorkflowNameToken;
@@ -759,10 +758,11 @@ public class CodeCenterProjectSynchronizer {
 	if (performAssociation) {
 	    try {
 		log.info("Attempting Protex project association for: "
-			+ projectName + " version: " + appVersion);
+			+ projectName + " version: " + appVersion
+			+ "; Protex Project ID: " + cciProject.getProjectKey());
 
-		ProjectNameToken projectToken = new ProjectNameToken();
-		projectToken.setName(projectName);
+		ProjectIdToken projectToken = new ProjectIdToken();
+		projectToken.setId(cciProject.getProjectKey());
 
 		ServerNameToken protexServerToken = new ServerNameToken();
 		protexServerToken.setName(ccProtexAliasName);
