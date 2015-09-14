@@ -212,11 +212,15 @@
 
 	<repositories>
 		<repository>
-			<id>soleng</id>
-			<name>BlackDuck SolEng Repo</name>
-			<url>http://artifactory.blackducksoftware.com:8081/artifactory/soleng/</url>
+			<id>jcenter</id>
+			<name>JCenter</name>
+			<url>http://jcenter.bintray.com</url>
 		</repository>
-
+		<repository>
+			<id>bds-bintray</id>
+			<name>BDS Bintray</name>
+			<url>http://dl.bintray.com/bds/tools</url>
+		</repository>
 	</repositories>
 
 </project>
