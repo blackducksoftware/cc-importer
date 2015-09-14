@@ -1,6 +1,0 @@
-analyseLocally=false
-eclipse.preferences.version=1
-extraProperties=sonar.jdbc.password\=sonar\r\nsonar.jdbc.username\=sonar\r\nsonar.jdbc.url\=jdbc\:h2\:tcp\://localhost\:9092/sonar\r\nsonar.host.url\=http\://localhost\:9000
-projectKey=com.blackducksoftware.soleng\:cc-importer
-serverUrl=http\://localhost\:9000
-version=2
