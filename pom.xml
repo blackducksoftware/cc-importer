@@ -222,5 +222,20 @@
 			<url>http://dl.bintray.com/bds/tools</url>
 		</repository>
 	</repositories>
+	
+	<!-- Push artifact to internal BLack Duck repo for integration testing -->
+	<distributionManagement>
+		<repository>
+			<id>artifactory.blackducksoftware.com</id>
+			<name>artifactory.blackducksoftware.com-releases</name>
+			<url>http://artifactory.blackducksoftware.com:8081/artifactory/soleng</url>
+		</repository>
+		<snapshotRepository>
+			<id>artifactory.blackducksoftware.com</id>
+			<name>artifactory.blackducksoftware.com-snapshots</name>
+			<url>http://artifactory.blackducksoftware.com:8081/artifactory/soleng</url>
+		</snapshotRepository>
+
+	</distributionManagement>
 
 </project>
