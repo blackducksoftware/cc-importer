@@ -31,6 +31,13 @@ import com.blackducksoftware.tools.commonframework.connector.protex.ProtexServer
 import com.blackducksoftware.tools.commonframework.standard.codecenter.CodeCenterServerWrapper;
 import com.blackducksoftware.tools.commonframework.standard.protex.ProtexProjectPojo;
 
+/**
+ * The entry point for each synchronizer thread. The actual work is delegated to
+ * CodeCenterProjectSynchronizer.
+ *
+ * @author sbillings
+ *
+ */
 public class ProjectProcessorThreadWorker implements Runnable {
     private final Logger log = LoggerFactory.getLogger(this.getClass()
 	    .getName());

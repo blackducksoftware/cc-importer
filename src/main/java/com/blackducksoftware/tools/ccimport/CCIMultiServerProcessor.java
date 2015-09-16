@@ -36,6 +36,12 @@ import com.blackducksoftware.tools.commonframework.core.config.server.ServerBean
 import com.blackducksoftware.tools.commonframework.standard.codecenter.CodeCenterServerWrapper;
 import com.blackducksoftware.tools.commonframework.standard.protex.ProtexProjectPojo;
 
+/**
+ * Synchronizes multiple Protex servers with one Code Center server.
+ *
+ * @author sbillings
+ *
+ */
 public class CCIMultiServerProcessor extends CCIProcessor {
 
     private final Logger log = LoggerFactory.getLogger(this.getClass()

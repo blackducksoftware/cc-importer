@@ -25,6 +25,12 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Creates a file containing a given list of application names.
+ *
+ * @author sbillings
+ *
+ */
 public class NumericPrefixedAppListFile {
     private final List<String> appNames = new ArrayList<String>();
 

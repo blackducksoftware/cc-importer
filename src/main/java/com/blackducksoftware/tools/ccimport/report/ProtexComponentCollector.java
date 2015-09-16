@@ -32,6 +32,12 @@ import com.blackducksoftware.tools.commonframework.standard.codecenter.pojo.Comp
 import com.blackducksoftware.tools.commonframework.standard.common.ProjectPojo;
 import com.blackducksoftware.tools.commonframework.standard.protex.ProtexProjectPojo;
 
+/**
+ * A list of components for a project.
+ *
+ * @author sbillings
+ *
+ */
 public class ProtexComponentCollector extends ComponentCollector {
     private final Logger log = LoggerFactory.getLogger(this.getClass()
 	    .getName());

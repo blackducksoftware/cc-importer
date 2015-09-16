@@ -37,6 +37,8 @@ import com.blackducksoftware.tools.commonframework.core.config.ConfigurationMana
 import com.blackducksoftware.tools.commonframework.core.config.server.ServerBean;
 
 /**
+ * cc-importer configuration manager.
+ *
  * @author Ari Kamen
  * @date Jun 27, 2014
  *

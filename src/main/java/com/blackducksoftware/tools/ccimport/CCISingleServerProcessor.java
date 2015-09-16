@@ -43,6 +43,8 @@ import com.blackducksoftware.tools.commonframework.standard.codecenter.CodeCente
 import com.blackducksoftware.tools.commonframework.standard.protex.ProtexProjectPojo;
 
 /**
+ * Synchronizes a single Protex server with a Code Center server.
+ * Multi-threaded.
  *
  * @author Ari Kamen
  * @date Jun 27, 2014

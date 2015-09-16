@@ -25,6 +25,12 @@ import org.slf4j.LoggerFactory;
 
 import com.blackducksoftware.tools.commonframework.standard.codecenter.pojo.ComponentPojo;
 
+/**
+ * A list of components for a project or application.
+ *
+ * @author sbillings
+ *
+ */
 public abstract class ComponentCollector {
     private final Logger log = LoggerFactory.getLogger(this.getClass()
 	    .getName());

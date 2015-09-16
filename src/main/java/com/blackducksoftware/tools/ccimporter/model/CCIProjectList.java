@@ -20,6 +20,12 @@ package com.blackducksoftware.tools.ccimporter.model;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Project list which distinguishes between valid and invalid projects.
+ *
+ * @author sbillings
+ *
+ */
 public class CCIProjectList {
     private boolean userSpecifiedSubset = false;
     private List<CCIProject> list;

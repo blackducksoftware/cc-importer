@@ -17,6 +17,12 @@
  *******************************************************************************/
 package com.blackducksoftware.tools.ccimport.exception;
 
+/**
+ * Exception type thrown by cc-importer classes.
+ *
+ * @author sbillings
+ *
+ */
 public class CodeCenterImportException extends Exception {
 
     private static final long serialVersionUID = 1L;

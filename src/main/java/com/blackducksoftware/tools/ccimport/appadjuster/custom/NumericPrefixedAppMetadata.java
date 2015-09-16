@@ -18,6 +18,12 @@
 
 package com.blackducksoftware.tools.ccimport.appadjuster.custom;
 
+/**
+ * A bean that holds details about an application name.
+ *
+ * @author sbillings
+ *
+ */
 public class NumericPrefixedAppMetadata {
     private String numericPrefix;
     private String appNameString = "";

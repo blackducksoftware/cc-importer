@@ -17,6 +17,12 @@
  *******************************************************************************/
 package com.blackducksoftware.tools.ccimporter.config;
 
+/**
+ * Shared constants.
+ *
+ * @author sbillings
+ *
+ */
 public class CCIConstants {
 
     public static final String DESCRIPTION = "Application created by the Code Center Importer version: ";

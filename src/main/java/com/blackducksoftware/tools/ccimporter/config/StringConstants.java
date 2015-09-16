@@ -17,6 +17,12 @@
  *******************************************************************************/
 package com.blackducksoftware.tools.ccimporter.config;
 
+/**
+ * Command line option strings.
+ *
+ * @author sbillings
+ *
+ */
 public class StringConstants {
     /**
      * --p-server

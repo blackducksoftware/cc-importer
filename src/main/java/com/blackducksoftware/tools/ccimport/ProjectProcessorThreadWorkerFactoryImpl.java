@@ -27,6 +27,13 @@ import com.blackducksoftware.tools.commonframework.connector.protex.ProtexServer
 import com.blackducksoftware.tools.commonframework.standard.codecenter.CodeCenterServerWrapper;
 import com.blackducksoftware.tools.commonframework.standard.protex.ProtexProjectPojo;
 
+/**
+ * A factory that creates ProjectProcessorThreadWorker objects. One
+ * ProjectProcessorThreadWorker object will be needed per thread.
+ *
+ * @author sbillings
+ *
+ */
 public class ProjectProcessorThreadWorkerFactoryImpl implements
 	ProjectProcessorThreadWorkerFactory {
     private final CodeCenterServerWrapper codeCenterWrapper;
@@ -49,7 +56,7 @@ public class ProjectProcessorThreadWorkerFactoryImpl implements
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * com.blackducksoftware.tools.ccimport.ProjectProcessorThreadWorkerFactory
      * #createProjectProcessorThreadWorker(java.util.List, java.util.List)

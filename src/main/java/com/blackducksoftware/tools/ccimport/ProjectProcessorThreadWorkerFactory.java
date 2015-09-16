@@ -22,6 +22,13 @@ import java.util.List;
 import com.blackducksoftware.tools.ccimport.report.CCIReportSummary;
 import com.blackducksoftware.tools.ccimporter.model.CCIProject;
 
+/**
+ * A factory that creates ProjectProcessorThreadWorker objects. One
+ * ProjectProcessorThreadWorker object will be needed per thread.
+ *
+ * @author sbillings
+ *
+ */
 public interface ProjectProcessorThreadWorkerFactory {
 
     Runnable createProjectProcessorThreadWorker(

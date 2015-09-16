@@ -19,6 +19,12 @@ package com.blackducksoftware.tools.ccimport.report;
 
 import com.blackducksoftware.tools.commonframework.standard.codecenter.dao.ApplicationDao;
 
+/**
+ * A list of components for an application.
+ *
+ * @author sbillings
+ *
+ */
 public class CodeCenterComponentCollector extends ComponentCollector {
 
     public CodeCenterComponentCollector(ApplicationDao dao) throws Exception {

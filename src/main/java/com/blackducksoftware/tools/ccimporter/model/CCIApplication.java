@@ -20,6 +20,12 @@ package com.blackducksoftware.tools.ccimporter.model;
 
 import com.blackducksoftware.sdk.codecenter.application.data.Application;
 
+/**
+ * Application POJO.
+ *
+ * @author sbillings
+ *
+ */
 public class CCIApplication {
     private final Application app;
     private boolean justCreated; // true if this app was created during this run
