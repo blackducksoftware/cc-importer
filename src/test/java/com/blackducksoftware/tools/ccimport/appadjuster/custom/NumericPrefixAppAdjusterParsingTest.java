@@ -18,7 +18,7 @@
 
 package com.blackducksoftware.tools.ccimport.appadjuster.custom;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.util.Properties;
 import java.util.TimeZone;
@@ -27,10 +27,8 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.blackducksoftware.tools.ccimport.appadjuster.custom.NumericPrefixedAppAdjuster;
-import com.blackducksoftware.tools.ccimport.appadjuster.custom.NumericPrefixedAppMetadata;
 import com.blackducksoftware.tools.ccimporter.config.CCIConfigurationManager;
-import com.blackducksoftware.tools.commonframework.core.config.ConfigConstants.APPLICATION;
+import com.blackducksoftware.tools.ccimporter.config.CodeCenterConfigManager;
 
 public class NumericPrefixAppAdjusterParsingTest {
 
@@ -50,6 +48,10 @@ public class NumericPrefixAppAdjusterParsingTest {
 	props.setProperty("cc.user.name", "notused");
 	props.setProperty("cc.server.name", "notused");
 	props.setProperty("cc.password", "notused");
+	props.setProperty("cc.protex.name", "notused");
+	props.setProperty("cc.owner", "notused");
+	props.setProperty("cc.default.app.version", "notused");
+	props.setProperty("cc.workflow", "notused");
 	props.setProperty("numprefixed.appname.pattern.separator", "-");
 	props.setProperty("numprefixed.appname.pattern.numericprefix",
 		"[0-9][0-9][0-9]+");
@@ -69,8 +71,7 @@ public class NumericPrefixAppAdjusterParsingTest {
 	props.setProperty("numprefixed.appname.pattern.follows.description",
 		"-(PROD|RC1|RC2|RC3|RC4|RC5)-CURRENT");
 
-	CCIConfigurationManager config = new CCIConfigurationManager(props,
-		APPLICATION.CODECENTER);
+	CCIConfigurationManager config = new CodeCenterConfigManager(props);
 	NumericPrefixedAppAdjuster adjuster = new NumericPrefixedAppAdjuster();
 	TimeZone tz = TimeZone.getDefault();
 	adjuster.init(null, null, config, tz);

@@ -36,11 +36,28 @@ import com.blackducksoftware.tools.commonframework.standard.protex.ProtexProject
  *
  */
 public interface AppAdjuster {
+    /**
+     * Initialize the object.
+     *
+     * @param ccWrapper
+     * @param protexWrapper
+     * @param config
+     * @param tz
+     * @throws CodeCenterImportException
+     */
     void init(CodeCenterServerWrapper ccWrapper,
 	    ProtexServerWrapper<ProtexProjectPojo> protexWrapper,
 	    CCIConfigurationManager config, TimeZone tz)
 	    throws CodeCenterImportException;
 
+    /**
+     * Make changes to the given application. The corresponding Protex project
+     * is also provided in case it is the source of some of the metadata.
+     *
+     * @param app
+     * @param project
+     * @throws CodeCenterImportException
+     */
     void adjustApp(CCIApplication app, CCIProject project)
 	    throws CodeCenterImportException;
 }

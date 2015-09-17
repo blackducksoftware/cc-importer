@@ -36,14 +36,31 @@ public class CCIApplication {
 	this.justCreated = justCreated;
     }
 
+    /**
+     * Returns the underlying Code Center SDK Application object.
+     * 
+     * @return
+     */
     public Application getApp() {
 	return app;
     }
 
+    /**
+     * Gets a boolean indicating whether or not the application was created
+     * during this run of cc-importer.
+     * 
+     * @return
+     */
     public boolean isJustCreated() {
 	return justCreated;
     }
 
+    /**
+     * Sets a boolean indicating whether or not the application was created
+     * during this run of cc-importer.
+     * 
+     * @param justCreated
+     */
     public void setJustCreated(boolean justCreated) {
 	this.justCreated = justCreated;
     }

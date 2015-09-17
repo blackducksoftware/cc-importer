@@ -43,7 +43,7 @@ import com.blackducksoftware.tools.commonframework.core.config.server.ServerBean
  * @date Jun 27, 2014
  *
  */
-public class CCIConfigurationManager extends ConfigurationManager {
+public abstract class CCIConfigurationManager extends ConfigurationManager {
     private final Logger log = LoggerFactory.getLogger(this.getClass()
 	    .getName());
 

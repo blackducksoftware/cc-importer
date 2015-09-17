@@ -28,7 +28,7 @@ import java.util.TimeZone;
 import org.junit.Test;
 
 import com.blackducksoftware.tools.ccimporter.config.CCIConfigurationManager;
-import com.blackducksoftware.tools.commonframework.core.config.ConfigConstants.APPLICATION;
+import com.blackducksoftware.tools.ccimporter.config.CodeCenterConfigManager;
 
 public class NumericPrefixedAppAdjusterTest {
     private static final long TIME_VALUE_OF_JAN1_2000 = 946702800000L;
@@ -41,14 +41,17 @@ public class NumericPrefixedAppAdjusterTest {
 	props.setProperty("cc.user.name", "notused");
 	props.setProperty("cc.server.name", "notused");
 	props.setProperty("cc.password", "notused");
+	props.setProperty("cc.protex.name", "notused");
+	props.setProperty("cc.owner", "notused");
+	props.setProperty("cc.default.app.version", "notused");
+	props.setProperty("cc.workflow", "notused");
 	props.setProperty("numprefixed.app.attribute.numericprefix", "notused");
 	props.setProperty("numprefixed.app.attribute.workstream", "notused");
 	props.setProperty("numprefixed.app.attribute.analyzeddate", "notused");
 	props.setProperty("numprefixed.analyzed.date.format", "yyyy-mm-dd");
 	props.setProperty("numprefixed.app.attribute.projectstatus", "null");
 	props.setProperty("numprefixed.app.value.projectstatus", "CURRENT");
-	CCIConfigurationManager config = new CCIConfigurationManager(props,
-		APPLICATION.CODECENTER);
+	CCIConfigurationManager config = new CodeCenterConfigManager(props);
 	NumericPrefixedAppAdjuster adjuster = new NumericPrefixedAppAdjuster();
 	TimeZone tz = TimeZone.getDefault();
 	adjuster.init(null, null, config, tz);
@@ -82,6 +85,10 @@ public class NumericPrefixedAppAdjusterTest {
 	props.setProperty("cc.user.name", "notused");
 	props.setProperty("cc.server.name", "notused");
 	props.setProperty("cc.password", "notused");
+	props.setProperty("cc.protex.name", "notused");
+	props.setProperty("cc.owner", "notused");
+	props.setProperty("cc.default.app.version", "notused");
+	props.setProperty("cc.workflow", "notused");
 	props.setProperty("numprefixed.appname.pattern.separator", "_");
 	props.setProperty("numprefixed.appname.pattern.numericprefix",
 		"[a-z][a-z][a-z]+");
@@ -101,8 +108,7 @@ public class NumericPrefixedAppAdjusterTest {
 	props.setProperty("numprefixed.appname.pattern.follows.description",
 		"_(PPPP|RCA|RCB|RCC|RCD|RCE)_CURRENT");
 
-	CCIConfigurationManager config = new CCIConfigurationManager(props,
-		APPLICATION.CODECENTER);
+	CCIConfigurationManager config = new CodeCenterConfigManager(props);
 	NumericPrefixedAppAdjuster adjuster = new NumericPrefixedAppAdjuster();
 	TimeZone tz = TimeZone.getDefault();
 	adjuster.init(null, null, config, tz);
@@ -136,6 +142,10 @@ public class NumericPrefixedAppAdjusterTest {
 	props.setProperty("cc.user.name", "notused");
 	props.setProperty("cc.server.name", "notused");
 	props.setProperty("cc.password", "notused");
+	props.setProperty("cc.protex.name", "notused");
+	props.setProperty("cc.owner", "notused");
+	props.setProperty("cc.default.app.version", "notused");
+	props.setProperty("cc.workflow", "notused");
 	props.setProperty("numprefixed.appname.pattern.separator", "_");
 	props.setProperty("numprefixed.appname.pattern.numericprefix",
 		"[a-z][a-z][a-z]+");
@@ -148,8 +158,7 @@ public class NumericPrefixedAppAdjusterTest {
 	props.setProperty("numprefixed.app.attribute.projectstatus", "null");
 	props.setProperty("numprefixed.app.value.projectstatus", "CURRENT");
 
-	CCIConfigurationManager config = new CCIConfigurationManager(props,
-		APPLICATION.CODECENTER);
+	CCIConfigurationManager config = new CodeCenterConfigManager(props);
 	NumericPrefixedAppAdjuster adjuster = new NumericPrefixedAppAdjuster();
 	TimeZone tz = TimeZone.getDefault();
 	adjuster.init(null, null, config, tz);
@@ -166,14 +175,17 @@ public class NumericPrefixedAppAdjusterTest {
 	props.setProperty("cc.user.name", "notused");
 	props.setProperty("cc.server.name", "notused");
 	props.setProperty("cc.password", "notused");
+	props.setProperty("cc.protex.name", "notused");
+	props.setProperty("cc.owner", "notused");
+	props.setProperty("cc.default.app.version", "notused");
+	props.setProperty("cc.workflow", "notused");
 	props.setProperty("numprefixed.app.attribute.numericprefix", "notused");
 	props.setProperty("numprefixed.app.attribute.workstream", "notused");
 	props.setProperty("numprefixed.app.attribute.analyzeddate", "notused");
 	props.setProperty("numprefixed.analyzed.date.format", "yyyy-mm-dd");
 	props.setProperty("numprefixed.app.attribute.projectstatus", "null");
 	props.setProperty("numprefixed.app.value.projectstatus", "CURRENT");
-	CCIConfigurationManager config = new CCIConfigurationManager(props,
-		APPLICATION.CODECENTER);
+	CCIConfigurationManager config = new CodeCenterConfigManager(props);
 	NumericPrefixedAppAdjuster adjuster = new NumericPrefixedAppAdjuster();
 	TimeZone tz = TimeZone.getDefault();
 	adjuster.init(null, null, config, tz);
