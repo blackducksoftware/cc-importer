@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Project list which distinguishes between valid and invalid projects.
+ * A project list, with an associated list of invalid projects.
  *
  * @author sbillings
  *
@@ -33,24 +33,48 @@ public class CCIProjectList {
 						// invalid
 						// projects
 
+    /**
+     * Construct an empty list.
+     */
     public CCIProjectList() {
 	list = new ArrayList<CCIProject>(1000);
 	invalidList = new ArrayList<CCIProject>(10);
     }
 
+    /**
+     * Construct a list from the given list of valid projects.
+     *
+     * @param list
+     */
     public CCIProjectList(List<CCIProject> list) {
 	this.list = list;
 	invalidList = new ArrayList<CCIProject>(10);
     }
 
+    /**
+     * Set the list of valid projects.
+     *
+     * @param list
+     */
     public void setList(List<CCIProject> list) {
 	this.list = list;
     }
 
+    /**
+     * Add a project to the list.
+     *
+     * @param project
+     */
     public void addProject(CCIProject project) {
 	list.add(project);
     }
 
+    /**
+     * Add the given project to the invalid project list.
+     *
+     * @param projectName
+     * @param projectVersion
+     */
     public void addInvalidProject(String projectName, String projectVersion) {
 	CCIProject project = new CCIProject();
 	project.setProjectName(projectName);
@@ -58,22 +82,48 @@ public class CCIProjectList {
 	invalidList.add(project);
     }
 
+    /**
+     * Is this list a user-specified subset of projects (vs all projects).
+     *
+     * @return
+     */
     public boolean isUserSpecifiedSubset() {
 	return userSpecifiedSubset;
     }
 
+    /**
+     * Set the boolean that indicates whether this list is a user-specified
+     * subset of projects (vs all projects).
+     * 
+     * @param userSpecifiedSubset
+     */
     public void setUserSpecifiedSubset(boolean userSpecifiedSubset) {
 	this.userSpecifiedSubset = userSpecifiedSubset;
     }
 
+    /**
+     * Get the list of projects.
+     *
+     * @return
+     */
     public List<CCIProject> getList() {
 	return list;
     }
 
+    /**
+     * Get the associated list of invalid projects.
+     *
+     * @return
+     */
     public List<CCIProject> getInvalidList() {
 	return invalidList;
     }
 
+    /**
+     * Get the list size.
+     *
+     * @return
+     */
     public int size() {
 	return list.size();
     }

@@ -113,6 +113,9 @@ public class CCISingleServerProcessor extends CCIProcessor {
 	log.info("Using Protex URL [{}]", protexBean.getServerName());
     }
 
+    /**
+     * Synchronize Code Center with Protex.
+     */
     @Override
     public void performSynchronize() throws CodeCenterImportException {
 
@@ -176,6 +179,11 @@ public class CCISingleServerProcessor extends CCIProcessor {
 	reportSummaryList = threadsReportSummaryList;
     }
 
+    /**
+     * Get exception messages generated during performSynchronize() method.
+     *
+     * @return
+     */
     public String getThreadExceptionMessages() {
 	return threadExceptionMessages;
     }
@@ -184,6 +192,11 @@ public class CCISingleServerProcessor extends CCIProcessor {
 	return getProjects(protexServerWrapper);
     }
 
+    /**
+     * Generate report which can be used to verify whether or not Code Center
+     * and Protex are in sync.
+     *
+     */
     @Override
     public void runReport() throws CodeCenterImportException {
 	reportGen = new CCIReportGenerator(codeCenterWrapper,
@@ -194,7 +207,9 @@ public class CCISingleServerProcessor extends CCIProcessor {
 	reportGen.generateReport(projectList);
     }
 
-    // Used by unit tests
+    /**
+     * Get the report generator object.
+     */
     @Override
     public CCIReportGenerator getReportGen() {
 	return reportGen;

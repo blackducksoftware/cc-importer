@@ -34,10 +34,21 @@ import java.util.List;
 public class NumericPrefixedAppListFile {
     private final List<String> appNames = new ArrayList<String>();
 
+    /**
+     * Add an app name to the list.
+     *
+     * @param appName
+     */
     public void addApp(String appName) {
 	appNames.add(appName);
     }
 
+    /**
+     * Save the list to a file.
+     *
+     * @param filename
+     * @throws IOException
+     */
     public void save(String filename) throws IOException {
 	File file = new File(filename);
 

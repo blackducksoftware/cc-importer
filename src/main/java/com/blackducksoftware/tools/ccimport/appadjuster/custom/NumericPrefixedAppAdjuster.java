@@ -47,12 +47,108 @@ import com.blackducksoftware.tools.commonframework.standard.protex.ProtexProject
 
 /**
  * A custom appAdjuster for ccimporter for application names with a numeric
- * prefix. Application name formats: <numericPrefix>-<workstream>-<state>
- * <numericPrefix>-<appdescription>-<workstream>-<state>
+ * prefix.<br>
+ * <br>
+ * Application name formats:
+ * <ol>
+ * <li>&lt;numericPrefix&gt;-&lt;workstream&gt;-&lt;state&gt;<br>
+ * <li>
+ * &lt;numericPrefix&gt;-&lt;appdescription&gt;-&lt;workstream&gt;-&lt;state&gt;
+ * </ol>
+ * <br>
+ * For each application, this AppAdjuster will:
+ * <ol>
+ * <li>If it was just created, append the app name to the "new apps" file
+ * <li>Update the application's attribute values:
+ * <ul>
+ * <li>numeric prefix
+ * <li>workstream
+ * <li>state
+ * <li>AppEdit URL
+ * <li>Last analyzed date
+ * </ul>
+ * </ol>
+ * <br>
+ * <br>
+ * Select this AppAdjuster by setting the following property in the utility's
+ * configuration:<br>
+ * <br>
+ * app.adjuster.classname=com.blackducksoftware.tools.ccimport.appadjuster.
+ * custom.NumericPrefixedAppAdjuster<br>
+ * <br>
+ * Use the NumericPrefixedAppAdjuster to modify each application after it is
+ * sync'd the NumericPrefixedAppAdjuster expects application names of the form:<br>
+ * &lt;numericprefix&gt;&lt;separator&gt;&lt;application
+ * description&gt;&lt;separator&gt;&lt;work
+ * stream&gt;&lt;separator&gt;&lt;project state&gt;<br>
+ * <br>
+ * The format of application names is specified by properties set in the
+ * Properties object associated with the CCIConfigurationManager object passed
+ * into the init(...) method.<br>
+ * <br>
+ * &lt;separator&gt; is described by numprefixed.appname.pattern.separator (a
+ * java regex pattern)<br>
+ * &lt;numericprefix&gt; is described by numprefixed.app.attribute.numericprefix
+ * (a java regex pattern)<br>
+ * &lt;application description&gt; is a string that starts after the separator
+ * that follows &lt;numericprefix&gt; and ends before the pattern described by
+ * numprefixed.appname.pattern.follows.description.<br>
+ * &lt;work stream&gt; is described bynumprefixed.appname.pattern.workstream (a
+ * java regex pattern)<br>
+ * &lt;project state&gt; is the value of numprefixed.app.value.projectstatus.<br>
+ * <br>
+ * The behavior of the NumericPrefixedAppAdjuster is controlled via the
+ * following properties:<br>
+ * <br>
+ * app.adjuster.only.if.bomedits=true will cause the utility to only run the
+ * specified AppAdjuster if BOM changes have been applied to the CC app<br>
+ * <br>
+ * The remaining properties are specific to the NumericPrefixAppAdjuster:<br>
+ * <br>
+ * numprefixed.new.app.list.filename=&lt;The file to which the list of
+ * newly-created apps should be written&gt;<br>
+ * <br>
+ * Specify the destination custom attribute (by name) for each of the following
+ * values<br>
+ * <br>
+ * numprefixed.app.attribute.numericprefix=&lt;The numeric prefix parsed from
+ * the application name&gt;<br>
+ * <br>
+ * numprefixed.app.attribute.analyzeddate=&lt;The Protex project last analyzed
+ * date attribute&gt;<br>
+ * numprefixed.app.attribute.workstream=&lt;The workstream attribute&gt;<br>
+ * numprefixed.app.attribute.projectstatus=&lt;The project status attribute&gt;<br>
+ * numprefixed.app.value.projectstatus=&lt;The project status value&gt;<br>
+ * numprefixed.analyzed.date.format=&lt;The last analyzed date format,
+ * interpreted using java.text.SimpleDateFormat&gt;<br>
+ * <br>
+ * These patterns are used to parse the numeric prefix and workstream from the
+ * app name<br>
+ * numprefixed.appname.pattern.separator=&lt;The string used to separate parts
+ * of the application name, such as: -&gt;<br>
+ * numprefixed.appname.pattern.numericprefix=&lt;The regex pattern for the
+ * numeric prefix, such as: \[0-9\]\[0-9\]\[0-9\]+&gt;<br>
+ * numprefixed.appname.pattern.workstream=&lt;The regex pattern for the
+ * workstream, such as: \(PROD|RC1|RC2|RC3|RC4|RC5\)&gt;<br>
+ * <br>
+ * The next two patterns are used to identify the format of the app name: with
+ * or without description<br>
+ * numprefixed.app.name.format.without.description=&lt;The format of an
+ * application name that has no description, such as:
+ * \[0-9\]\[0-9\]\[0-9\]+-\(PROD|RC1|RC2|RC3|RC4|RC5\)-CURRENT&gt;<br>
+ * numprefixed.app.name.format.with.description=&lt;The format of an application
+ * name that does have the description, such as:
+ * \[0-9\]\[0-9\]\[0-9\]+-.*-\(PROD|RC1|RC2|RC3|RC4|RC5\)-CURRENT&gt;<br>
+ * <br>
+ * This patterns is used to determine where the application description ends<br>
+ * numprefixed.appname.pattern.follows.description=&lt;The pattern of the parts
+ * of the app name that follow the description:
+ * -\(PROD|RC1|RC2|RC3|RC4|RC5\)-CURRENT&gt;<br>
+ * <br>
+ * The value used for scan date if it has never been scanned<br>
+ * numprefixed.analyzeddate.never=&lt;The value to be inserted into the last
+ * analyzed date field if the project has never been analyzed&gt;<br>
  *
- * For each application: If it was just created, append it to the "new apps"
- * file Update the application's attribute values: numeric prefix workstream
- * state AppEdit URL Last analyzed date
  *
  * @author sbillings
  *

@@ -36,6 +36,13 @@ public abstract class ComponentCollector {
 	    .getName());
     protected SortedSet<ComponentPojo> compPojoList;
 
+    /**
+     * Get a string showing the difference between this component list and the
+     * given component list.
+     * 
+     * @param o
+     * @return
+     */
     public String getDiffString(Object o) {
 	String diffString = null; // Null means they ComponentCollections are
 				  // identical
@@ -110,10 +117,20 @@ public abstract class ComponentCollector {
 	return null; // means compared ComponentCollectors are identical
     }
 
+    /**
+     * Get the component list in sorted set form.
+     * 
+     * @return
+     */
     public SortedSet<ComponentPojo> getSortedSet() {
 	return compPojoList;
     }
 
+    /**
+     * Get the size of this component list.
+     * 
+     * @return
+     */
     public int size() {
 	return compPojoList.size();
     }

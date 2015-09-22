@@ -25,8 +25,8 @@ import com.blackducksoftware.sdk.codecenter.application.data.Application;
 import com.blackducksoftware.tools.commonframework.standard.protex.ProtexProjectPojo;
 
 /**
- * Project Pojo that contains both the Protex project name and the CC version
- * During import it acquires a CC Application Object
+ * Project Pojo that contains the details of both the Protex project and the
+ * Code Center application.
  *
  * @author Ari Kamen
  * @date Jun 30, 2014
@@ -40,10 +40,20 @@ public class CCIProject extends ProtexProjectPojo {
 	super();
     }
 
+    /**
+     * Get the application version string.
+     *
+     * @return
+     */
     public String getProjectVersion() {
 	return projectVersion;
     }
 
+    /**
+     * Set the application version string.
+     *
+     * @param projectVersion
+     */
     public void setProjectVersion(String projectVersion) {
 	this.projectVersion = projectVersion;
     }
@@ -59,6 +69,11 @@ public class CCIProject extends ProtexProjectPojo {
 	return sb.toString();
     }
 
+    /**
+     * Get the Code Center Application object.
+     *
+     * @return
+     */
     public Application getApplication() {
 	return cciApplication.getApp();
     }
@@ -75,10 +90,20 @@ public class CCIProject extends ProtexProjectPojo {
 	cciApplication = new CCIApplication(application, false);
     }
 
+    /**
+     * Get the underlying CCIApplication object.
+     *
+     * @return
+     */
     public CCIApplication getCciApplication() {
 	return cciApplication;
     }
 
+    /**
+     * Set the underlying CCIApplication object.
+     *
+     * @param cciApplication
+     */
     public void setCciApplication(CCIApplication cciApplication) {
 	this.cciApplication = cciApplication;
     }

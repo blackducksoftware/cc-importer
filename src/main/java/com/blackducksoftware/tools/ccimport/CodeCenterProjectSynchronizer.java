@@ -793,6 +793,11 @@ public class CodeCenterProjectSynchronizer {
 	return associatedProject;
     }
 
+    /**
+     * Get the summary of what happened during synchronization.
+     * 
+     * @return
+     */
     public CCIReportSummary getReportSummary() {
 	return reportSummary;
     }

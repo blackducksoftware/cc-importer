@@ -80,6 +80,12 @@ public class CCIReportGenerator {
 	return projectMap;
     }
 
+    /**
+     * Generate the sync report (an Excel file).
+     *
+     * @param projectList
+     * @throws CodeCenterImportException
+     */
     public void generateReport(CCIProjectList projectList)
 	    throws CodeCenterImportException {
 	try {
@@ -290,6 +296,11 @@ public class CCIReportGenerator {
 	return protexProjectMap;
     }
 
+    /**
+     * Get the generated report.
+     *
+     * @return
+     */
     public DataTable getDataTable() {
 	return dataTable;
     }
