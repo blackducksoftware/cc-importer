@@ -7,7 +7,7 @@ cc-importer imports Protex projects into Code Center.
 
 You can download the latest source from GitHub: https://github.com/blackducksoftware/cc-importer.
 
-You can pull the binary from BinTray via Maven: https://bintray.com/bds/tools/cc-importer/view
+You can download the latest artifacts from releases: https://github.com/blackducksoftware/cc-importer/releases
 
 ## Documentation
 
