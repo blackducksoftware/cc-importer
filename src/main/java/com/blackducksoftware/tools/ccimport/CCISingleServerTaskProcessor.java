@@ -109,12 +109,13 @@ public class CCISingleServerTaskProcessor extends CCIProcessor {
 		    "No valid projects were specified.");
 	}
 
-	int numProjectsSubmitted = submitTasks(completionService, projectList);
+	aggregatedResults = new CCIReportSummary();
+	int numProjectsSubmitted = submitTasks(completionService, projectList,
+		aggregatedResults);
 
 	// Collect results from tasks as they finish
 	boolean threadExceptionThrown = false;
 
-	aggregatedResults = new CCIReportSummary();
 	for (int taskNum = 0; taskNum < numProjectsSubmitted; taskNum++) {
 	    Future<CCIReportSummary> f = null;
 	    CCIReportSummary singleTaskResult = null;
@@ -185,7 +186,7 @@ public class CCISingleServerTaskProcessor extends CCIProcessor {
 
     private int submitTasks(
 	    CompletionService<CCIReportSummary> completionService,
-	    List<CCIProject> projectList) {
+	    List<CCIProject> projectList, CCIReportSummary aggregatedResults) {
 	int numSubmitted = 0;
 	for (CCIProject project : projectList) {
 	    Pattern projectNameFilterPattern = protexConfigManager
@@ -197,6 +198,9 @@ public class CCISingleServerTaskProcessor extends CCIProcessor {
 		    log.info(
 			    "Project {} does not match the project name filter; skipping it",
 			    project.getProjectName());
+		    CCIReportSummary skippedProjectResult = new CCIReportSummary();
+		    skippedProjectResult.addTotalProjectsSkipped();
+		    aggregatedResults.addReportSummary(skippedProjectResult);
 		    continue;
 		}
 	    }

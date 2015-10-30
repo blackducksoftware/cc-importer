@@ -24,6 +24,7 @@ import com.blackducksoftware.tools.commonframework.standard.protex.ProtexProject
 public class CCISingleServerTaskProcessorTest {
 
     private static final int NUM_APPS = 3;
+    private static final String APP_NAME_FILTER = "testApp.*";
     private static final String PROJECT_ID1 = "testProjectId1";
     private static final String APP_NAME1 = "testAppName1";
     private static final String PROJECT_ID2 = "testProjectId2";
@@ -31,6 +32,9 @@ public class CCISingleServerTaskProcessorTest {
     private static final String PROJECT_ID3 = "testProjectId3";
     private static final String APP_NAME3 = "testAppName3";
     private static final String APP_VERSION = "Unspecified";
+
+    private static final String PROJECT_ID_OUT_OF_SCOPE = "testProjectIdOutOfScope";
+    private static final String APP_NAME_OUT_OF_SCOPE = "outOfScopeApp";
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
@@ -64,6 +68,8 @@ public class CCISingleServerTaskProcessorTest {
 		    results.getTotalRequestsAdded());
 	    assertEquals(Integer.valueOf(NUM_APPS * 3),
 		    results.getTotalRequestsDeleted());
+
+	    assertEquals(Integer.valueOf(1), results.getTotalProjectsSkipped());
 	}
     }
 
@@ -86,7 +92,7 @@ public class CCISingleServerTaskProcessorTest {
 		    results.getTotalCCApplications());
 	    assertEquals(Integer.valueOf(NUM_APPS),
 		    results.getTotalProtexProjects());
-	    assertEquals(Integer.valueOf(0), results.getTotalProjectsSkipped());
+	    assertEquals(Integer.valueOf(1), results.getTotalProjectsSkipped());
 	    assertEquals(Integer.valueOf(0),
 		    results.getTotalValidatesPerfomed());
 
@@ -137,6 +143,11 @@ public class CCISingleServerTaskProcessorTest {
 	ProjectPojo projectPojo3 = new ProtexProjectPojo(PROJECT_ID3, APP_NAME3);
 	when(psw.getProjectByName(APP_NAME3)).thenReturn(projectPojo3);
 
+	ProjectPojo projectPojoOutOfScope = new ProtexProjectPojo(
+		PROJECT_ID_OUT_OF_SCOPE, APP_NAME_OUT_OF_SCOPE);
+	when(psw.getProjectByName(APP_NAME_OUT_OF_SCOPE)).thenReturn(
+		projectPojoOutOfScope);
+
 	return psw;
     }
 
@@ -156,12 +167,14 @@ public class CCISingleServerTaskProcessorTest {
 	props.setProperty("cc.workflow", "testWorkflow");
 	props.setProperty("cc.owner", "testOwner");
 	props.setProperty("protex.project.list", appName1 + "," + appName2
-		+ "," + appName3);
+		+ "," + appName3 + "," + APP_NAME_OUT_OF_SCOPE);
 	props.setProperty("validate.application", "true");
 	props.setProperty("validate.application.smart", "true");
 	props.setProperty("cc.submit.request", "true");
 	props.setProperty("validate.requests.delete", "true");
 	props.setProperty("num.threads", String.valueOf(numThreads));
+
+	props.setProperty("protex.project.name.filter", APP_NAME_FILTER);
 	return props;
     }
 }
