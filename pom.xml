@@ -4,7 +4,7 @@
 
 	<groupId>com.blackducksoftware.tools</groupId>
 	<artifactId>cc-importer</artifactId>
-	<version>1.4.0-SNAPSHOT</version>
+	<version>1.4.1-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<name>cc-importer</name>
@@ -23,6 +23,12 @@
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>4.10</version>
+		</dependency>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
+			<version>1.9.5</version>
+
 		</dependency>
 		<dependency>
 			<groupId>com.github.stefanbirkner</groupId>

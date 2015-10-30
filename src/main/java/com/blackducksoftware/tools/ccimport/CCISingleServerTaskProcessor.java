@@ -1,0 +1,222 @@
+/*******************************************************************************
+ * Copyright (C) 2015 Black Duck Software, Inc.
+ * http://www.blackducksoftware.com/
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License version 2 only
+ * as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License version 2
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *******************************************************************************/
+
+/**
+ *
+ */
+package com.blackducksoftware.tools.ccimport;
+
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CompletionService;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorCompletionService;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.blackducksoftware.tools.ccimport.exception.CodeCenterImportException;
+import com.blackducksoftware.tools.ccimport.report.CCIReportGenerator;
+import com.blackducksoftware.tools.ccimport.report.CCIReportSummary;
+import com.blackducksoftware.tools.ccimporter.config.CodeCenterConfigManager;
+import com.blackducksoftware.tools.ccimporter.config.ProtexConfigManager;
+import com.blackducksoftware.tools.ccimporter.model.CCIProject;
+import com.blackducksoftware.tools.ccimporter.model.CCIProjectList;
+import com.blackducksoftware.tools.commonframework.connector.protex.ProtexServerWrapper;
+import com.blackducksoftware.tools.commonframework.core.config.server.ServerBean;
+import com.blackducksoftware.tools.commonframework.standard.codecenter.CodeCenterServerWrapper;
+import com.blackducksoftware.tools.commonframework.standard.protex.ProtexProjectPojo;
+
+/**
+ * Synchronizes a single Protex server with a Code Center server using a
+ * Producer/Consumer task approach.
+ *
+ * @author sbillings
+ * @date Oct 29, 2015
+ *
+ */
+public class CCISingleServerTaskProcessor extends CCIProcessor {
+
+    private static final Logger log = LoggerFactory
+	    .getLogger(CCISingleServerTaskProcessor.class.getName());
+
+    private final ExecutorService exec;
+    private final ProtexConfigManager protexConfigManager;
+    private final ProtexServerWrapper<ProtexProjectPojo> protexServerWrapper;
+
+    private final SyncProjectTaskFactory taskFactory;
+
+    private CCIReportSummary aggregatedResults;
+    private StringBuilder threadExceptionMessages = new StringBuilder();
+
+    /**
+     * @param ccConfigManager
+     * @param protexConfigManager
+     * @throws Exception
+     */
+    public CCISingleServerTaskProcessor(
+	    CodeCenterConfigManager ccConfigManager,
+	    ProtexConfigManager protexConfigManager,
+	    CodeCenterServerWrapper codeCenterServerWrapper,
+	    ProtexServerWrapper<ProtexProjectPojo> protexServerWrapper,
+	    SyncProjectTaskFactory taskFactory) throws Exception {
+
+	super(ccConfigManager, codeCenterServerWrapper);
+	this.protexConfigManager = protexConfigManager;
+	this.protexServerWrapper = protexServerWrapper;
+	this.taskFactory = taskFactory;
+
+	exec = Executors.newFixedThreadPool(ccConfigManager.getNumThreads());
+
+	// There will only be one in the single instance
+	ServerBean protexBean = protexConfigManager.getServerBean();
+	log.info("Using Protex URL [{}]", protexBean.getServerName());
+    }
+
+    /**
+     * Synchronize Code Center with Protex.
+     */
+    @Override
+    public void performSynchronize() throws CodeCenterImportException {
+	CompletionService<CCIReportSummary> completionService = new ExecutorCompletionService<>(
+		exec);
+	List<CCIProject> projectList = getProjects().getList();
+
+	log.info("Processing {} projects for synchronization", projectList);
+	if (projectList.size() == 0) {
+	    throw new CodeCenterImportException(
+		    "No valid projects were specified.");
+	}
+
+	int numProjectsSubmitted = submitTasks(completionService, projectList);
+
+	// Collect results from tasks as they finish
+	boolean threadExceptionThrown = false;
+
+	aggregatedResults = new CCIReportSummary();
+	for (int taskNum = 0; taskNum < numProjectsSubmitted; taskNum++) {
+	    Future<CCIReportSummary> f = null;
+	    try {
+		f = completionService.take();
+	    } catch (InterruptedException e) {
+		// TODO can I get project name?
+		String msg = "InterruptedException waiting for task to finish: "
+			+ e.getMessage() + ": " + e.getCause().getMessage();
+		log.error(msg, e);
+		// TODO redundant with below
+		threadExceptionThrown = true;
+		threadExceptionMessages.append("; ");
+		threadExceptionMessages.append(msg);
+	    }
+	    // TODO if exception above, I should update results but not proceed
+	    CCIReportSummary singleTaskResult = null;
+	    try {
+		singleTaskResult = f.get();
+	    } catch (InterruptedException | ExecutionException e) {
+		// TODO can I get project name?
+		String msg = "Task was interrupted or failed: "
+			+ e.getMessage() + ": " + e.getCause().getMessage();
+		log.error(msg, e);
+		threadExceptionThrown = true;
+		threadExceptionMessages.append("; ");
+		threadExceptionMessages.append(msg);
+		singleTaskResult = new CCIReportSummary();
+		singleTaskResult.addTotalImportsFailed();
+		singleTaskResult.addToFailedImportList("tbd"); // TODO
+	    }
+	    System.out.println("Got result " + taskNum + " of "
+		    + numProjectsSubmitted + ": " + singleTaskResult);
+
+	    aggregatedResults.addReportSummary(singleTaskResult);
+	    // TODO what about total projects, and skipped projects... have
+	    // those been set in summary?
+
+	}
+	if (threadExceptionThrown) {
+	    log.error("Exception(s) thrown from worker thread(s): "
+		    + getThreadExceptionMessages());
+	} else {
+	    log.info("All threads finished.");
+	}
+    }
+
+    private int submitTasks(
+	    CompletionService<CCIReportSummary> completionService,
+	    List<CCIProject> projectList) {
+	int numSubmitted = 0;
+	for (CCIProject project : projectList) {
+	    Pattern projectNameFilterPattern = protexConfigManager
+		    .getProtexProjectNameFilterPattern();
+	    if (projectNameFilterPattern != null) {
+		Matcher m = projectNameFilterPattern.matcher(project
+			.getProjectName());
+		if (!m.matches()) {
+		    log.info(
+			    "Project {} does not match the project name filter; skipping it",
+			    project.getProjectName());
+		    continue;
+		}
+	    }
+	    numSubmitted++;
+	    Callable<CCIReportSummary> task = taskFactory.createTask(project);
+	    completionService.submit(task);
+	}
+	return numSubmitted;
+    }
+
+    /**
+     * Get exception messages generated during performSynchronize() method.
+     *
+     * @return
+     */
+    public String getThreadExceptionMessages() {
+	return threadExceptionMessages.toString();
+    }
+
+    private CCIProjectList getProjects() throws CodeCenterImportException {
+	return getProjects(protexServerWrapper);
+    }
+
+    /**
+     * Generate report which can be used to verify whether or not Code Center
+     * and Protex are in sync.
+     *
+     */
+    // TODO remove report functionality?
+    @Override
+    public void runReport() throws CodeCenterImportException {
+	throw new UnsupportedOperationException("runReport() not supported");
+    }
+
+    /**
+     * Get the report generator object.
+     */
+    @Override
+    public CCIReportGenerator getReportGen() {
+	throw new UnsupportedOperationException("getReportGen() not supported");
+    }
+
+    public CCIReportSummary getAggregatedResults() {
+	return aggregatedResults;
+    }
+}
