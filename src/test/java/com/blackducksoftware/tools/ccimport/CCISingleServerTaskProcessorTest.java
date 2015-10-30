@@ -1,9 +1,11 @@
 package com.blackducksoftware.tools.ccimport;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
 import java.util.Properties;
 
 import org.junit.AfterClass;
@@ -75,9 +77,24 @@ public class CCISingleServerTaskProcessorTest {
 	    CCIReportSummary results = testGivenWithNumberOfThreads(numThreads,
 		    taskFactory);
 
+	    System.out.println("==================\nAggregate Results:\n"
+		    + results + "\n================================");
+
 	    assertEquals(Integer.valueOf(NUM_APPS),
 		    results.getTotalImportsFailed());
-	    // TODO lots more to check here
+	    assertEquals(Integer.valueOf(NUM_APPS),
+		    results.getTotalCCApplications());
+	    assertEquals(Integer.valueOf(NUM_APPS),
+		    results.getTotalProtexProjects());
+	    assertEquals(Integer.valueOf(0), results.getTotalProjectsSkipped());
+	    assertEquals(Integer.valueOf(0),
+		    results.getTotalValidatesPerfomed());
+
+	    List<String> failedImportList = results.getFailedImportList();
+	    assertEquals(NUM_APPS, failedImportList.size());
+	    assertTrue(failedImportList.contains(APP_NAME1));
+	    assertTrue(failedImportList.contains(APP_NAME2));
+	    assertTrue(failedImportList.contains(APP_NAME3));
 	}
     }
 
@@ -86,7 +103,7 @@ public class CCISingleServerTaskProcessorTest {
 	    CommonFrameworkException {
 
 	Properties props = createBasicProperties(APP_NAME1, APP_NAME2,
-		APP_NAME2, numThreads);
+		APP_NAME3, numThreads);
 
 	CodeCenterConfigManager ccConfigManager = new CodeCenterConfigManager(
 		props);

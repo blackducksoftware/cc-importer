@@ -28,6 +28,7 @@ import com.blackducksoftware.sdk.codecenter.request.data.RequestSummary;
 import com.blackducksoftware.sdk.codecenter.role.data.RoleNameToken;
 import com.blackducksoftware.sdk.codecenter.user.data.UserNameToken;
 import com.blackducksoftware.tools.ccimport.exception.CodeCenterImportException;
+import com.blackducksoftware.tools.ccimport.exception.CodeCenterImportNamedException;
 import com.blackducksoftware.tools.ccimport.report.CCIReportSummary;
 import com.blackducksoftware.tools.ccimporter.config.CCIConfigurationManager;
 import com.blackducksoftware.tools.ccimporter.config.CCIConstants;
@@ -62,38 +63,44 @@ public class SyncProjectTask implements Callable<CCIReportSummary> {
     }
 
     @Override
-    public CCIReportSummary call() {
+    public CCIReportSummary call() throws CodeCenterImportNamedException {
+	try {
+	    Date now = new Date();
+	    long startMilliseconds = now.getTime();
+	    log.info("Processing {}", project.getProjectName());
 
-	Date now = new Date();
-	long startMilliseconds = now.getTime();
-	log.info("Processing {}", project.getProjectName());
+	    boolean retryImport = false;
+	    int importRetryCount = 0;
+	    do {
+		importRetryCount++;
+		retryImport = false;
+		boolean importSuccess = false;
+		CCIProject importedProject = null;
+		try {
+		    importedProject = processImport(project);
+		    importSuccess = true;
+		} catch (Exception e) {
+		    log.error(
+			    "[{}] Unable to perform import: " + e.getMessage(),
+			    project.getProjectName());
+		}
 
-	boolean retryImport = false;
-	int importRetryCount = 0;
-	do {
-	    importRetryCount++;
-	    retryImport = false;
-	    boolean importSuccess = false;
-	    CCIProject importedProject = null;
-	    try {
-		importedProject = processImport(project);
-		importSuccess = true;
-	    } catch (Exception e) {
-		log.error("[{}] Unable to perform import: " + e.getMessage(),
-			project.getProjectName());
-	    }
+		if (importSuccess) {
+		    retryImport = validate(project, importedProject,
+			    importRetryCount);
+		}
+	    } while (retryImport);
+	    now = new Date();
+	    long endMilliseconds = now.getTime();
+	    long duration = endMilliseconds - startMilliseconds;
+	    log.info("cc-import app import time (seconds): "
+		    + Math.round(duration / 1000.0));
 
-	    if (importSuccess) {
-		retryImport = validate(project, importedProject,
-			importRetryCount);
-	    }
-	} while (retryImport);
-	now = new Date();
-	long endMilliseconds = now.getTime();
-	long duration = endMilliseconds - startMilliseconds;
-	log.info("cc-import app import time (seconds): "
-		+ Math.round(duration / 1000.0));
-
+	} catch (Throwable t) {
+	    throw new CodeCenterImportNamedException(project.getProjectName(),
+		    "Error processing project " + project.getProjectName()
+			    + ": " + t.getMessage());
+	}
 	return reportSummary;
     }
 

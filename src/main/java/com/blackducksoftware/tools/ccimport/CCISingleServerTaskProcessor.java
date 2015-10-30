@@ -36,6 +36,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.blackducksoftware.tools.ccimport.exception.CodeCenterImportException;
+import com.blackducksoftware.tools.ccimport.exception.CodeCenterImportNamedException;
 import com.blackducksoftware.tools.ccimport.report.CCIReportGenerator;
 import com.blackducksoftware.tools.ccimport.report.CCIReportSummary;
 import com.blackducksoftware.tools.ccimporter.config.CodeCenterConfigManager;
@@ -116,34 +117,20 @@ public class CCISingleServerTaskProcessor extends CCIProcessor {
 	aggregatedResults = new CCIReportSummary();
 	for (int taskNum = 0; taskNum < numProjectsSubmitted; taskNum++) {
 	    Future<CCIReportSummary> f = null;
-	    try {
-		f = completionService.take();
-	    } catch (InterruptedException e) {
-		// TODO can I get project name?
-		String msg = "InterruptedException waiting for task to finish: "
-			+ e.getMessage() + ": " + e.getCause().getMessage();
-		log.error(msg, e);
-		// TODO redundant with below
-		threadExceptionThrown = true;
-		threadExceptionMessages.append("; ");
-		threadExceptionMessages.append(msg);
-	    }
-	    // TODO if exception above, I should update results but not proceed
 	    CCIReportSummary singleTaskResult = null;
 	    try {
+		f = completionService.take();
 		singleTaskResult = f.get();
 	    } catch (InterruptedException | ExecutionException e) {
-		// TODO can I get project name?
-		String msg = "Task was interrupted or failed: "
-			+ e.getMessage() + ": " + e.getCause().getMessage();
+		String appName = getAppNameFromException(e);
+		String msg = composeErrorMessage(appName, e);
 		log.error(msg, e);
 		threadExceptionThrown = true;
 		threadExceptionMessages.append("; ");
 		threadExceptionMessages.append(msg);
-		singleTaskResult = new CCIReportSummary();
-		singleTaskResult.addTotalImportsFailed();
-		singleTaskResult.addToFailedImportList("tbd"); // TODO
+		singleTaskResult = generateErrorTaskResults(appName);
 	    }
+
 	    System.out.println("Got result " + taskNum + " of "
 		    + numProjectsSubmitted + ": " + singleTaskResult);
 
@@ -158,6 +145,42 @@ public class CCISingleServerTaskProcessor extends CCIProcessor {
 	} else {
 	    log.info("All threads finished.");
 	}
+    }
+
+    private String composeErrorMessage(String appName, Exception e) {
+	StringBuilder sb = new StringBuilder("Error in task for app ");
+	sb.append(appName);
+	sb.append(": ");
+	String eMessage = e.getMessage();
+	sb.append(eMessage);
+	String causeMessage = e.getCause().getMessage();
+	if ((eMessage != null) && (e.getCause() != null)
+		&& (!eMessage.contains(causeMessage))) {
+	    sb.append(" (");
+	    sb.append(causeMessage);
+	    sb.append(")");
+	}
+	return sb.toString();
+    }
+
+    private CCIReportSummary generateErrorTaskResults(String appName) {
+	CCIReportSummary singleTaskResult = new CCIReportSummary();
+	singleTaskResult.setTotalCCApplications(1);
+	singleTaskResult.setTotalProtexProjects(1);
+	singleTaskResult.addTotalImportsFailed();
+	singleTaskResult.addToFailedImportList(appName);
+	return singleTaskResult;
+    }
+
+    private String getAppNameFromException(Exception e) {
+	String appName = "<unknown>";
+	if (e instanceof ExecutionException) {
+	    if (e.getCause() instanceof CodeCenterImportNamedException) {
+		appName = ((CodeCenterImportNamedException) e.getCause())
+			.getAppName();
+	    }
+	}
+	return appName;
     }
 
     private int submitTasks(
