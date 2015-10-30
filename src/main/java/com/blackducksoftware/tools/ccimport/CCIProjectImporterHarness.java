@@ -102,13 +102,18 @@ public class CCIProjectImporterHarness {
 		processor = new CCIMultiServerProcessor(ccConfigManager,
 			protexConfigManager, codeCenterServerWrapper);
 	    } else {
-		/**
-		 * In the case of single, we want to pass along the protex
-		 * config manager
-		 */
 		log.info("Single-Protex mode started");
-		processor = new CCISingleServerProcessor(ccConfigManager,
-			protexConfigManager, codeCenterServerWrapper);
+		ProtexServerWrapper<ProtexProjectPojo> protexServerWrapper = createProtexServerWrapper(protexConfigManager);
+		Object appAdjusterObject = getAppAdjusterObject(ccConfigManager);
+		Method appAdjusterMethod = getAppAdjusterMethod(
+			codeCenterServerWrapper, protexServerWrapper,
+			ccConfigManager, appAdjusterObject);
+		processor = new CCISingleServerTaskProcessor(ccConfigManager,
+			protexConfigManager, codeCenterServerWrapper,
+			protexServerWrapper, new SyncProjectTaskFactoryImpl(
+				ccConfigManager, codeCenterServerWrapper,
+				protexServerWrapper, appAdjusterObject,
+				appAdjusterMethod));
 	    }
 
 	    if (ccConfigManager.isRunReport()) {
@@ -123,6 +128,29 @@ public class CCIProjectImporterHarness {
 	} catch (Exception e) {
 	    log.error("General failure: " + e.getMessage());
 	}
+    }
+
+    private static ProtexServerWrapper<ProtexProjectPojo> createProtexServerWrapper(
+	    ProtexConfigManager configManager) throws Exception {
+	ProtexServerWrapper<ProtexProjectPojo> protexWrapper;
+	try {
+	    // Always just one code center
+	    ServerBean ccBean = configManager.getServerBean();
+	    if (ccBean == null) {
+		throw new Exception(
+			"No valid Protex server configurations found");
+	    }
+
+	    log.info("Using Protex URL [{}]", ccBean.getServerName());
+
+	    protexWrapper = new ProtexServerWrapper<>(ccBean, configManager,
+		    true);
+
+	} catch (Exception e) {
+	    throw new Exception("Unable to establish Protex connection: "
+		    + e.getMessage());
+	}
+	return protexWrapper;
     }
 
     private static CodeCenterServerWrapper createCodeCenterServerWrapper(

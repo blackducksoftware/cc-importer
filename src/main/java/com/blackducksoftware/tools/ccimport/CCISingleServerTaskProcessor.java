@@ -61,7 +61,7 @@ public class CCISingleServerTaskProcessor extends CCIProcessor {
     private static final Logger log = LoggerFactory
 	    .getLogger(CCISingleServerTaskProcessor.class.getName());
 
-    private final ExecutorService exec;
+    private final int numThreads;
     private final ProtexConfigManager protexConfigManager;
     private final ProtexServerWrapper<ProtexProjectPojo> protexServerWrapper;
 
@@ -86,8 +86,7 @@ public class CCISingleServerTaskProcessor extends CCIProcessor {
 	this.protexConfigManager = protexConfigManager;
 	this.protexServerWrapper = protexServerWrapper;
 	this.taskFactory = taskFactory;
-
-	exec = Executors.newFixedThreadPool(ccConfigManager.getNumThreads());
+	numThreads = ccConfigManager.getNumThreads();
 
 	// There will only be one in the single instance
 	ServerBean protexBean = protexConfigManager.getServerBean();
@@ -99,46 +98,51 @@ public class CCISingleServerTaskProcessor extends CCIProcessor {
      */
     @Override
     public void performSynchronize() throws CodeCenterImportException {
-	CompletionService<CCIReportSummary> completionService = new ExecutorCompletionService<>(
-		exec);
-	List<CCIProject> projectList = getProjects().getList();
-
-	log.info("Processing {} projects for synchronization", projectList);
-	if (projectList.size() == 0) {
-	    throw new CodeCenterImportException(
-		    "No valid projects were specified.");
-	}
-
-	aggregatedResults = new CCIReportSummary();
-	int numProjectsSubmitted = submitTasks(completionService, projectList,
-		aggregatedResults);
-
-	// Collect results from tasks as they finish
+	ExecutorService exec = Executors.newFixedThreadPool(numThreads);
 	boolean threadExceptionThrown = false;
+	try {
+	    CompletionService<CCIReportSummary> completionService = new ExecutorCompletionService<>(
+		    exec);
+	    List<CCIProject> projectList = getProjects().getList();
 
-	for (int taskNum = 0; taskNum < numProjectsSubmitted; taskNum++) {
-	    Future<CCIReportSummary> f = null;
-	    CCIReportSummary singleTaskResult = null;
-	    try {
-		f = completionService.take();
-		singleTaskResult = f.get();
-	    } catch (InterruptedException | ExecutionException e) {
-		String appName = getAppNameFromException(e);
-		String msg = composeErrorMessage(appName, e);
-		log.error(msg, e);
-		threadExceptionThrown = true;
-		threadExceptionMessages.append("; ");
-		threadExceptionMessages.append(msg);
-		singleTaskResult = generateErrorTaskResults(appName);
+	    log.info("Processing {} projects for synchronization", projectList);
+	    if (projectList.size() == 0) {
+		throw new CodeCenterImportException(
+			"No valid projects were specified.");
 	    }
 
-	    System.out.println("Got result " + taskNum + " of "
-		    + numProjectsSubmitted + ": " + singleTaskResult);
+	    aggregatedResults = new CCIReportSummary();
+	    int numProjectsSubmitted = submitTasks(completionService,
+		    projectList, aggregatedResults);
 
-	    aggregatedResults.addReportSummary(singleTaskResult);
-	    // TODO what about total projects, and skipped projects... have
-	    // those been set in summary?
+	    // Collect results from tasks as they finish
 
+	    for (int taskNum = 0; taskNum < numProjectsSubmitted; taskNum++) {
+		Future<CCIReportSummary> f = null;
+		CCIReportSummary singleTaskResult = null;
+		try {
+		    f = completionService.take();
+		    singleTaskResult = f.get();
+		} catch (InterruptedException | ExecutionException e) {
+		    String appName = getAppNameFromException(e);
+		    String msg = composeErrorMessage(appName, e);
+		    log.error(msg, e);
+		    threadExceptionThrown = true;
+		    threadExceptionMessages.append("; ");
+		    threadExceptionMessages.append(msg);
+		    singleTaskResult = generateErrorTaskResults(appName);
+		}
+
+		System.out.println("Got result " + taskNum + " of "
+			+ numProjectsSubmitted + ": " + singleTaskResult);
+
+		aggregatedResults.addReportSummary(singleTaskResult);
+		// TODO what about total projects, and skipped projects... have
+		// those been set in summary?
+
+	    }
+	} finally {
+	    exec.shutdown();
 	}
 	if (threadExceptionThrown) {
 	    log.error("Exception(s) thrown from worker thread(s): "
