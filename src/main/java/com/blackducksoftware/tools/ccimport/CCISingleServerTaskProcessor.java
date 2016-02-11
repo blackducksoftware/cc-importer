@@ -137,9 +137,6 @@ public class CCISingleServerTaskProcessor extends CCIProcessor {
 			+ numProjectsSubmitted + ": " + singleTaskResult);
 
 		aggregatedResults.addReportSummary(singleTaskResult);
-		// TODO what about total projects, and skipped projects... have
-		// those been set in summary?
-
 	    }
 	} finally {
 	    exec.shutdown();
