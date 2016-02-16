@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2015 Black Duck Software, Inc.
+ * Copyright (C) 2016 Black Duck Software, Inc.
  * http://www.blackducksoftware.com/
  *
  * This program is free software; you can redistribute it and/or
