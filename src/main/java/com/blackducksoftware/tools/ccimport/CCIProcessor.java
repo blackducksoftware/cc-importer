@@ -33,8 +33,8 @@ import com.blackducksoftware.tools.ccimport.report.CCIReportSummary;
 import com.blackducksoftware.tools.ccimporter.config.CodeCenterConfigManager;
 import com.blackducksoftware.tools.ccimporter.model.CCIProject;
 import com.blackducksoftware.tools.ccimporter.model.CCIProjectList;
-import com.blackducksoftware.tools.commonframework.connector.protex.ProtexServerWrapper;
-import com.blackducksoftware.tools.commonframework.standard.codecenter.CodeCenterServerWrapper;
+import com.blackducksoftware.tools.connector.protex.ProtexServerWrapper;
+import com.blackducksoftware.tools.connector.codecenter.CodeCenterServerWrapper;
 import com.blackducksoftware.tools.commonframework.standard.common.ProjectPojo;
 import com.blackducksoftware.tools.commonframework.standard.protex.ProtexProjectPojo;
 

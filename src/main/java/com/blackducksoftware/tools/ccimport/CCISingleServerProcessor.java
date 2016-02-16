@@ -36,10 +36,10 @@ import com.blackducksoftware.tools.ccimporter.config.CodeCenterConfigManager;
 import com.blackducksoftware.tools.ccimporter.config.ProtexConfigManager;
 import com.blackducksoftware.tools.ccimporter.model.CCIProject;
 import com.blackducksoftware.tools.ccimporter.model.CCIProjectList;
-import com.blackducksoftware.tools.commonframework.connector.protex.ProtexServerWrapper;
+import com.blackducksoftware.tools.connector.protex.ProtexServerWrapper;
 import com.blackducksoftware.tools.commonframework.core.config.server.ServerBean;
 import com.blackducksoftware.tools.commonframework.core.multithreading.ListDistributor;
-import com.blackducksoftware.tools.commonframework.standard.codecenter.CodeCenterServerWrapper;
+import com.blackducksoftware.tools.connector.codecenter.CodeCenterServerWrapper;
 import com.blackducksoftware.tools.commonframework.standard.protex.ProtexProjectPojo;
 
 /**

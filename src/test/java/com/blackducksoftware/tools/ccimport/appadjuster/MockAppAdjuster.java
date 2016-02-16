@@ -8,12 +8,12 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License version 2
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  *******************************************************************************/
 
 package com.blackducksoftware.tools.ccimport.appadjuster;
@@ -24,26 +24,26 @@ import com.blackducksoftware.tools.ccimport.exception.CodeCenterImportException;
 import com.blackducksoftware.tools.ccimporter.config.CCIConfigurationManager;
 import com.blackducksoftware.tools.ccimporter.model.CCIApplication;
 import com.blackducksoftware.tools.ccimporter.model.CCIProject;
-import com.blackducksoftware.tools.commonframework.connector.protex.ProtexServerWrapper;
-import com.blackducksoftware.tools.commonframework.standard.codecenter.CodeCenterServerWrapper;
 import com.blackducksoftware.tools.commonframework.standard.protex.ProtexProjectPojo;
+import com.blackducksoftware.tools.connector.codecenter.CodeCenterServerWrapper;
+import com.blackducksoftware.tools.connector.protex.ProtexServerWrapper;
 
 public class MockAppAdjuster implements AppAdjuster {
     private int adjustAppCalledCount = 0;
 
     @Override
     public void init(CodeCenterServerWrapper ccWrapper,
-	    ProtexServerWrapper<ProtexProjectPojo> protexWrapper,
-	    CCIConfigurationManager config, TimeZone tz) {
+            ProtexServerWrapper<ProtexProjectPojo> protexWrapper,
+            CCIConfigurationManager config, TimeZone tz) {
     }
 
     @Override
     public void adjustApp(CCIApplication app, CCIProject project)
-	    throws CodeCenterImportException {
-	adjustAppCalledCount++;
+            throws CodeCenterImportException {
+        adjustAppCalledCount++;
     }
 
     public int getAdjustAppCalledCount() {
-	return adjustAppCalledCount;
+        return adjustAppCalledCount;
     }
 }

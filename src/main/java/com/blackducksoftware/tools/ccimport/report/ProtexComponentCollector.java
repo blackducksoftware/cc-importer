@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
 import com.blackducksoftware.sdk.protex.common.ComponentInfo;
 import com.blackducksoftware.sdk.protex.common.ComponentType;
 import com.blackducksoftware.sdk.protex.project.bom.BomComponent;
-import com.blackducksoftware.tools.commonframework.connector.protex.ProtexServerWrapper;
+import com.blackducksoftware.tools.connector.protex.ProtexServerWrapper;
 import com.blackducksoftware.tools.commonframework.standard.codecenter.pojo.ComponentPojo;
 import com.blackducksoftware.tools.commonframework.standard.codecenter.pojo.ComponentPojoImpl;
 import com.blackducksoftware.tools.commonframework.standard.common.ProjectPojo;
