@@ -60,8 +60,8 @@ public class CCISingleServerTaskProcessorTest {
 
             assertEquals(Integer.valueOf(NUM_APPS),
                     results.getTotalCCApplications());
-            assertEquals(Integer.valueOf(NUM_APPS),
-                    results.getTotalProtexProjects());
+            assertEquals(Integer.valueOf(NUM_APPS + 1),
+                    results.getTotalProtexProjects()); // one protex project was ignored
 
             assertEquals(Integer.valueOf(NUM_APPS * 2),
                     results.getTotalPotentialAdds());
@@ -94,8 +94,8 @@ public class CCISingleServerTaskProcessorTest {
                     results.getTotalImportsFailed());
             assertEquals(Integer.valueOf(NUM_APPS),
                     results.getTotalCCApplications());
-            assertEquals(Integer.valueOf(NUM_APPS),
-                    results.getTotalProtexProjects());
+            assertEquals(Integer.valueOf(NUM_APPS + 1),
+                    results.getTotalProtexProjects()); // we added an ignored project
             assertEquals(Integer.valueOf(1), results.getTotalProjectsSkipped());
             assertEquals(Integer.valueOf(0),
                     results.getTotalValidatesPerfomed());

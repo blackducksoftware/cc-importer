@@ -108,13 +108,15 @@ public class CCISingleServerTaskProcessor extends CCIProcessor {
                     exec);
             List<CCIProject> projectList = getProjects().getList();
 
-            log.info("Processing {} projects for synchronization", projectList);
+            log.info("Processing {} projects for synchronization", projectList.size());
             if (projectList.size() == 0) {
                 throw new CodeCenterImportException(
                         "No valid projects were specified.");
             }
 
             aggregatedResults = new CCIReportSummary();
+            aggregatedResults.setTotalProtexProjects(projectList.size());
+
             int numProjectsSubmitted = submitTasks(completionService,
                     projectList, aggregatedResults);
 
@@ -135,9 +137,6 @@ public class CCISingleServerTaskProcessor extends CCIProcessor {
                     threadExceptionMessages.append(msg);
                     singleTaskResult = generateErrorTaskResults(appName);
                 }
-
-                System.out.println("Got result " + (taskNum + 1) + " of "
-                        + numProjectsSubmitted + ": " + singleTaskResult);
 
                 aggregatedResults.addReportSummary(singleTaskResult);
             }
@@ -171,7 +170,7 @@ public class CCISingleServerTaskProcessor extends CCIProcessor {
     private CCIReportSummary generateErrorTaskResults(String appName) {
         CCIReportSummary singleTaskResult = new CCIReportSummary();
         singleTaskResult.setTotalCCApplications(1);
-        singleTaskResult.setTotalProtexProjects(1);
+        // singleTaskResult.setTotalProtexProjects(1);
         singleTaskResult.addTotalImportsFailed();
         singleTaskResult.addToFailedImportList(appName);
         return singleTaskResult;

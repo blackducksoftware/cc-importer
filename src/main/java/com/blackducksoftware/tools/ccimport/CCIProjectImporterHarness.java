@@ -124,7 +124,7 @@ public class CCIProjectImporterHarness {
             } else {
                 processor.performSynchronize();
                 if (processor instanceof CCISingleServerTaskProcessor) {
-                    System.out.println("\nSummary report: " + ((CCISingleServerTaskProcessor) (processor)).getAggregatedResults());
+                    System.out.println("\nConsolidated summary: " + ((CCISingleServerTaskProcessor) (processor)).getAggregatedResults());
                 }
             }
 
