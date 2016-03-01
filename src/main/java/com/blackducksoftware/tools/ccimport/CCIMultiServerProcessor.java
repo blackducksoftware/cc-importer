@@ -8,12 +8,12 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License version 2
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  *******************************************************************************/
 
 package com.blackducksoftware.tools.ccimport;
@@ -30,11 +30,11 @@ import com.blackducksoftware.tools.ccimporter.config.CCIConstants;
 import com.blackducksoftware.tools.ccimporter.config.CodeCenterConfigManager;
 import com.blackducksoftware.tools.ccimporter.config.ProtexConfigManager;
 import com.blackducksoftware.tools.ccimporter.model.CCIProject;
-import com.blackducksoftware.tools.connector.protex.ProtexServerWrapper;
 import com.blackducksoftware.tools.commonframework.core.config.ConfigConstants.APPLICATION;
 import com.blackducksoftware.tools.commonframework.core.config.server.ServerBean;
-import com.blackducksoftware.tools.connector.codecenter.CodeCenterServerWrapper;
 import com.blackducksoftware.tools.commonframework.standard.protex.ProtexProjectPojo;
+import com.blackducksoftware.tools.connector.codecenter.CodeCenterServerWrapper;
+import com.blackducksoftware.tools.connector.protex.ProtexServerWrapper;
 
 /**
  * Synchronizes multiple Protex servers with one Code Center server.
@@ -45,7 +45,7 @@ import com.blackducksoftware.tools.commonframework.standard.protex.ProtexProject
 public class CCIMultiServerProcessor extends CCIProcessor {
 
     private final Logger log = LoggerFactory.getLogger(this.getClass()
-	    .getName());
+            .getName());
 
     private final ProtexConfigManager protexConfig;
 
@@ -56,12 +56,12 @@ public class CCIMultiServerProcessor extends CCIProcessor {
      * @throws Exception
      */
     public CCIMultiServerProcessor(CodeCenterConfigManager configManager,
-	    ProtexConfigManager protexConfigManager,
-	    CodeCenterServerWrapper codeCenterServerWrapper) throws Exception {
-	super(configManager, codeCenterServerWrapper);
-	protexConfig = protexConfigManager;
-	log.info("Using Protex URL [{}]", protexConfig.getServerBean()
-		.getServerName());
+            ProtexConfigManager protexConfigManager,
+            CodeCenterServerWrapper codeCenterServerWrapper) throws Exception {
+        super(configManager, codeCenterServerWrapper);
+        protexConfig = protexConfigManager;
+        log.info("Using Protex URL [{}]", protexConfig.getServerBean(APPLICATION.PROTEX)
+                .getServerName());
     }
 
     /**
@@ -72,61 +72,61 @@ public class CCIMultiServerProcessor extends CCIProcessor {
      */
     @Override
     public void performSynchronize() throws CodeCenterImportException {
-	// First thing we do, is blank out any project lists that the user has
-	// specified
-	List<CCIProject> userProjectList = codeCenterConfigManager
-		.getProjectList();
-	List<ServerBean> protexServers = codeCenterConfigManager
-		.getServerListByApplication(APPLICATION.PROTEX);
+        // First thing we do, is blank out any project lists that the user has
+        // specified
+        List<CCIProject> userProjectList = codeCenterConfigManager
+                .getProjectList();
+        List<ServerBean> protexServers = codeCenterConfigManager
+                .getServerListByApplication(APPLICATION.PROTEX);
 
-	if (userProjectList.size() > 0) {
-	    log.warn("Project list detected, ignoring in multi-server mode!");
-	    userProjectList.clear();
-	}
+        if (userProjectList.size() > 0) {
+            log.warn("Project list detected, ignoring in multi-server mode!");
+            userProjectList.clear();
+        }
 
-	// For every server bean we have, create a new protexWrapper
-	// Use the supplied alias to set the:
-	// - Protex Server Name / Alias
-	// - Owner
-	// Grab the projects and process import
-	for (ServerBean protexServer : protexServers) {
-	    log.info("Performing synchronization against:" + protexServer);
-	    String protexAlias = protexServer.getAlias();
+        // For every server bean we have, create a new protexWrapper
+        // Use the supplied alias to set the:
+        // - Protex Server Name / Alias
+        // - Owner
+        // Grab the projects and process import
+        for (ServerBean protexServer : protexServers) {
+            log.info("Performing synchronization against:" + protexServer);
+            String protexAlias = protexServer.getAlias();
 
-	    if (protexAlias.isEmpty()) {
-		throw new CodeCenterImportException(
-			"Protex alias cannot be empty!");
-	    } else {
-		log.info("Setting {} to {}",
-			CCIConstants.PROTEX_SERVER_URL_PROPERTY, protexAlias);
-		codeCenterConfigManager.setProtexServerName(protexAlias);
-	    }
+            if (protexAlias.isEmpty()) {
+                throw new CodeCenterImportException(
+                        "Protex alias cannot be empty!");
+            } else {
+                log.info("Setting {} to {}",
+                        CCIConstants.PROTEX_SERVER_URL_PROPERTY, protexAlias);
+                codeCenterConfigManager.setProtexServerName(protexAlias);
+            }
 
-	    ProtexServerWrapper<ProtexProjectPojo> wrapper = null;
-	    try {
-		wrapper = new ProtexServerWrapper<>(protexServer, protexConfig,
-			true);
-	    } catch (Exception e) {
-		throw new CodeCenterImportException(
-			"Unable to establish connection against: "
-				+ protexServer);
-	    }
-	    Object appAdjusterObject = CCIProjectImporterHarness
-		    .getAppAdjusterObject(codeCenterConfigManager);
-	    Method appAdjusterMethod = CCIProjectImporterHarness
-		    .getAppAdjusterMethod(super.codeCenterWrapper, wrapper,
-			    codeCenterConfigManager, appAdjusterObject);
-	    CodeCenterProjectSynchronizer synchronizer = new CodeCenterProjectSynchronizer(
-		    codeCenterWrapper, wrapper, codeCenterConfigManager,
-		    appAdjusterObject, appAdjusterMethod);
-	    List<CCIProject> projectList = getAllProjects(wrapper);
-	    synchronizer.synchronize(projectList);
-	}
+            ProtexServerWrapper<ProtexProjectPojo> wrapper = null;
+            try {
+                wrapper = new ProtexServerWrapper<>(protexServer, protexConfig,
+                        true);
+            } catch (Exception e) {
+                throw new CodeCenterImportException(
+                        "Unable to establish connection against: "
+                                + protexServer);
+            }
+            Object appAdjusterObject = CCIProjectImporterHarness
+                    .getAppAdjusterObject(codeCenterConfigManager);
+            Method appAdjusterMethod = CCIProjectImporterHarness
+                    .getAppAdjusterMethod(super.codeCenterWrapper, wrapper,
+                            codeCenterConfigManager, appAdjusterObject);
+            CodeCenterProjectSynchronizer synchronizer = new CodeCenterProjectSynchronizer(
+                    codeCenterWrapper, wrapper, codeCenterConfigManager,
+                    appAdjusterObject, appAdjusterMethod);
+            List<CCIProject> projectList = getAllProjects(wrapper);
+            synchronizer.synchronize(projectList);
+        }
     }
 
     @Override
     public void runReport() throws CodeCenterImportException {
-	log.error("Not implemented");
+        log.error("Not implemented");
     }
 
     /**
@@ -138,17 +138,17 @@ public class CCIMultiServerProcessor extends CCIProcessor {
      * @throws CodeCenterImportException
      */
     private List<CCIProject> getAllProjects(
-	    ProtexServerWrapper<ProtexProjectPojo> protexWrapper)
-	    throws CodeCenterImportException {
-	return getProjects(protexWrapper).getList();
+            ProtexServerWrapper<ProtexProjectPojo> protexWrapper)
+            throws CodeCenterImportException {
+        return getProjects(protexWrapper).getList();
 
     }
 
     // Used by unit tests
     @Override
     public CCIReportGenerator getReportGen() {
-	throw new UnsupportedOperationException(
-		"getReportGen() not implemented for CCIMultiServerProcessor");
+        throw new UnsupportedOperationException(
+                "getReportGen() not implemented for CCIMultiServerProcessor");
     }
 
 }

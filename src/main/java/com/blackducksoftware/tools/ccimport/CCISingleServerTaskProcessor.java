@@ -43,6 +43,7 @@ import com.blackducksoftware.tools.ccimporter.config.CodeCenterConfigManager;
 import com.blackducksoftware.tools.ccimporter.config.ProtexConfigManager;
 import com.blackducksoftware.tools.ccimporter.model.CCIProject;
 import com.blackducksoftware.tools.ccimporter.model.CCIProjectList;
+import com.blackducksoftware.tools.commonframework.core.config.ConfigConstants.APPLICATION;
 import com.blackducksoftware.tools.commonframework.core.config.server.ServerBean;
 import com.blackducksoftware.tools.commonframework.standard.protex.ProtexProjectPojo;
 import com.blackducksoftware.tools.connector.codecenter.CodeCenterServerWrapper;
@@ -92,7 +93,7 @@ public class CCISingleServerTaskProcessor extends CCIProcessor {
         numThreads = ccConfigManager.getNumThreads();
 
         // There will only be one in the single instance
-        ServerBean protexBean = protexConfigManager.getServerBean();
+        ServerBean protexBean = protexConfigManager.getServerBean(APPLICATION.PROTEX);
         log.info("Using Protex URL [{}]", protexBean.getServerName());
     }
 
