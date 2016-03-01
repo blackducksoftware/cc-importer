@@ -2,6 +2,7 @@ package com.blackducksoftware.tools.ccimport.deprecatedcomp;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import com.blackducksoftware.tools.connector.protex.common.ComponentNameVersionIds;
 
@@ -19,6 +20,11 @@ public class MockDeprecatedComponentReplacementTable implements DeprecatedCompon
     @Override
     public ComponentNameVersionIds getReplacement(ComponentNameVersionIds deprecatedComponent) {
         return table.get(deprecatedComponent);
+    }
+
+    @Override
+    public Set<ComponentNameVersionIds> getDeprecatedComponents() {
+        return table.keySet();
     }
 
 }

@@ -18,6 +18,10 @@ import com.blackducksoftware.tools.commonframework.core.config.ConfigurationMana
 import com.blackducksoftware.tools.connector.protex.common.ComponentNameVersionIds;
 
 public class SqlDeprecatedComponentReplacementTable implements DeprecatedComponentReplacementTable {
+    private static final String SQL_GET_VERSIONED = "SELECT old_project_id, old_release_id, new_project_id, new_release_id FROM standard_project_release_deprecated";
+
+    private static final String SQL_GET_UNVERSIONED = "SELECT old_project_id, new_project_id FROM standard_project_deprecated";
+
     private final Logger log = LoggerFactory.getLogger(this.getClass().getName());
 
     private Map<ComponentNameVersionIds, ComponentNameVersionIds> table = new HashMap<>(512);
@@ -42,24 +46,45 @@ public class SqlDeprecatedComponentReplacementTable implements DeprecatedCompone
         }
         try {
             Connection conn = connectToDb(dbServerName, dbPort, dbName, dbUserName, dbPassword);
-            Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery("SELECT old_project_id, old_release_id, new_project_id, new_release_id FROM standard_project_release_deprecated");
-
-            while (rs.next()) {
-                String oldCompId = rs.getString("old_project_id");
-                String oldCompVersionId = rs.getString("old_release_id");
-                String newCompId = rs.getString("new_project_id");
-                String newCompVersionId = rs.getString("new_release_id");
-                ComponentNameVersionIds deprecatedComponent = new ComponentNameVersionIds(oldCompId, oldCompVersionId);
-                ComponentNameVersionIds replacementComponent = new ComponentNameVersionIds(newCompId, newCompVersionId);
-                table.put(deprecatedComponent, replacementComponent);
-            }
+            loadVersioned(conn, table);
+            loadUnVersioned(conn, table);
             conn.close();
         } catch (SQLException e) {
             String msg = "Error loading replacement table from database " + dbName + " on " + dbServerName + ": " + e.getMessage();
             log.error(msg);
             throw new CodeCenterImportException(msg);
         }
+    }
+
+    private void loadVersioned(Connection conn, Map<ComponentNameVersionIds, ComponentNameVersionIds> table) throws SQLException {
+        Statement stmt = conn.createStatement();
+        ResultSet rs = stmt.executeQuery(SQL_GET_VERSIONED);
+
+        while (rs.next()) {
+            String oldCompId = rs.getString("old_project_id");
+            String oldCompVersionId = rs.getString("old_release_id");
+            String newCompId = rs.getString("new_project_id");
+            String newCompVersionId = rs.getString("new_release_id");
+            addToTable(table, oldCompId, oldCompVersionId, newCompId, newCompVersionId);
+        }
+    }
+
+    private void loadUnVersioned(Connection conn, Map<ComponentNameVersionIds, ComponentNameVersionIds> table) throws SQLException {
+        Statement stmt = conn.createStatement();
+        ResultSet rs = stmt.executeQuery(SQL_GET_UNVERSIONED);
+
+        while (rs.next()) {
+            String oldCompId = rs.getString("old_project_id");
+            String newCompId = rs.getString("new_project_id");
+            addToTable(table, oldCompId, null, newCompId, null);
+        }
+    }
+
+    private void addToTable(Map<ComponentNameVersionIds, ComponentNameVersionIds> table, String oldCompId, String oldCompVersionId, String newCompId,
+            String newCompVersionId) {
+        ComponentNameVersionIds deprecatedComponent = new ComponentNameVersionIds(oldCompId, oldCompVersionId);
+        ComponentNameVersionIds replacementComponent = new ComponentNameVersionIds(newCompId, newCompVersionId);
+        table.put(deprecatedComponent, replacementComponent);
     }
 
     @Override
