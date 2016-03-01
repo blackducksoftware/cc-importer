@@ -5,8 +5,10 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,7 +20,7 @@ import com.blackducksoftware.tools.connector.protex.common.ComponentNameVersionI
 public class SqlDeprecatedComponentReplacementTable implements DeprecatedComponentReplacementTable {
     private final Logger log = LoggerFactory.getLogger(this.getClass().getName());
 
-    private Map<ComponentNameVersionIds, ComponentNameVersionIds> table;
+    private Map<ComponentNameVersionIds, ComponentNameVersionIds> table = new HashMap<>(512);
 
     public SqlDeprecatedComponentReplacementTable(ConfigurationManager config) throws CodeCenterImportException {
         String dbServerName = config.getProperty("protex.db.server");
@@ -42,6 +44,7 @@ public class SqlDeprecatedComponentReplacementTable implements DeprecatedCompone
             Connection conn = connectToDb(dbServerName, dbPort, dbName, dbUserName, dbPassword);
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery("SELECT old_project_id, old_release_id, new_project_id, new_release_id FROM standard_project_release_deprecated");
+
             while (rs.next()) {
                 String oldCompId = rs.getString("old_project_id");
                 String oldCompVersionId = rs.getString("old_release_id");
@@ -72,5 +75,10 @@ public class SqlDeprecatedComponentReplacementTable implements DeprecatedCompone
         dbProps.setProperty("password", dbPassword);
         log.info("Connecting to: " + url);
         return DriverManager.getConnection(url, dbProps);
+    }
+
+    @Override
+    public Set<ComponentNameVersionIds> getDeprecatedComponents() {
+        return table.keySet();
     }
 }
