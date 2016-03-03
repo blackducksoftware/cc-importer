@@ -17,6 +17,13 @@ import com.blackducksoftware.tools.ccimport.exception.CodeCenterImportException;
 import com.blackducksoftware.tools.commonframework.core.config.ConfigurationManager;
 import com.blackducksoftware.tools.connector.protex.common.ComponentNameVersionIds;
 
+/**
+ * Load deprecated component replacement via SQL.
+ * As of the Cactus release, we should be able to do this via the SDK, and we can replace this implementation.
+ * 
+ * @author sbillings
+ *
+ */
 public class SqlDeprecatedComponentReplacementTable implements DeprecatedComponentReplacementTable {
     private static final String SQL_GET_VERSIONED = "SELECT old_project_id, old_release_id, new_project_id, new_release_id FROM standard_project_release_deprecated";
 

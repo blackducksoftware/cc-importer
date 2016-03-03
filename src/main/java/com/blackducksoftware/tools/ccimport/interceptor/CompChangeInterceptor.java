@@ -12,7 +12,7 @@ public interface CompChangeInterceptor {
 
     boolean preProcessAdd(String compId) throws InterceptorException;
 
-    void postProcessAdd(String requestId) throws InterceptorException;
+    void postProcessAdd(String requestId, String compId) throws InterceptorException;
 
-    boolean preProcessDelete(String requestId) throws InterceptorException;
+    boolean preProcessDelete(String requestId, String compId) throws InterceptorException;
 }
