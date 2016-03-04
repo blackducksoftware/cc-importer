@@ -1,5 +1,6 @@
 package com.blackducksoftware.tools.ccimport.mocks;
 
+import java.util.Date;
 import java.util.List;
 
 import com.blackducksoftware.tools.commonframework.core.config.ConfigurationManager;
@@ -25,11 +26,11 @@ public class MockCodeCenterServerWrapper implements ICodeCenterServerWrapper {
 
     private final IRequestManager mockRequestManager;
 
-    public MockCodeCenterServerWrapper(boolean simulateRequestedUsersAlreadyExisted, boolean simulateSomeApps) {
+    public MockCodeCenterServerWrapper(boolean simulateRequestedUsersAlreadyExisted, boolean simulateSomeApps, Date today) {
         mockApplicationManager = new MockApplicationManager(simulateSomeApps);
         mockCodeCenterUserManager = new MockCodeCenterUserManager(simulateRequestedUsersAlreadyExisted);
         mockCodeCenterComponentManager = new MockCodeCenterComponentManager();
-        mockRequestManager = new MockRequestManager();
+        mockRequestManager = new MockRequestManager(today);
     }
 
     @Override

@@ -1,5 +1,9 @@
 package com.blackducksoftware.tools.ccimport;
 
+import static org.junit.Assert.assertEquals;
+
+import java.util.Date;
+import java.util.List;
 import java.util.Properties;
 
 import org.junit.AfterClass;
@@ -13,9 +17,11 @@ import com.blackducksoftware.tools.ccimport.interceptor.InterceptorException;
 import com.blackducksoftware.tools.ccimport.interceptor.SalvageRemediationData;
 import com.blackducksoftware.tools.ccimport.mocks.MockCodeCenterServerWrapper;
 import com.blackducksoftware.tools.ccimport.mocks.MockProtexServerWrapper;
+import com.blackducksoftware.tools.ccimport.mocks.MockRequestManager;
 import com.blackducksoftware.tools.ccimporter.config.CodeCenterConfigManager;
 import com.blackducksoftware.tools.commonframework.standard.protex.ProtexProjectPojo;
 import com.blackducksoftware.tools.connector.codecenter.ICodeCenterServerWrapper;
+import com.blackducksoftware.tools.connector.codecenter.common.RequestVulnerabilityPojo;
 import com.blackducksoftware.tools.connector.protex.IProtexServerWrapper;
 
 public class SalvageRemediationDataTest {
@@ -35,12 +41,14 @@ public class SalvageRemediationDataTest {
 
     private static IProtexServerWrapper<ProtexProjectPojo> psw;
 
+    private static Date today = new Date();
+
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
         Properties props = createBasicProperties(APP_NAME);
 
         ccConfig = new CodeCenterConfigManager(props);
-        ccsw = new MockCodeCenterServerWrapper(false, true);
+        ccsw = new MockCodeCenterServerWrapper(false, true, today);
         psw = new MockProtexServerWrapper();
     }
 
@@ -59,6 +67,17 @@ public class SalvageRemediationDataTest {
         interceptor.preProcessAdd(ADDED_COMP_ID);
         interceptor.postProcessAdd("addRequestId", ADDED_COMP_ID);
         interceptor.preProcessDelete("deleteRequestId", DELETED_COMP_ID);
+
+        MockRequestManager mockRequestManager = (MockRequestManager) ccsw.getRequestManager();
+        List<RequestVulnerabilityPojo> ops = mockRequestManager.getUpdateOperations();
+        assertEquals(1, ops.size());
+        assertEquals("testVulnerabilityId", ops.get(0).getVulnerabilityId());
+        assertEquals("testAddRequestId", ops.get(0).getRequestId());
+        assertEquals(today, ops.get(0).getActualRemediationDate());
+        assertEquals(today, ops.get(0).getTargetRemediationDate());
+        assertEquals("REMEDIATED", ops.get(0).getReviewStatusName());
+        assertEquals("test comments", ops.get(0).getComments());
+
     }
 
     private static Properties createBasicProperties(String appName) {
