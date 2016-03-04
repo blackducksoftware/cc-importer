@@ -72,12 +72,6 @@ public class SalvageRemediationData implements CompChangeInterceptor {
     @Override
     public void initForApp(String appId) throws InterceptorException {
         log.info("Initializing for app ID: " + appId);
-        // try {
-        // app = ccsw.getApplicationManager().getApplicationById(appId);
-        // log.info("Loaded app: " + app.getName() + " / " + app.getVersion());
-        // } catch (CommonFrameworkException e) {
-        // throw new InterceptorException(e.getMessage());
-        // }
         addedRequestIds = new HashMap<>();
         addedComponents = new HashMap<>();
     }
@@ -98,13 +92,7 @@ public class SalvageRemediationData implements CompChangeInterceptor {
         // ColaApi().getCatalogComponentByKbComponentRelease(token);] to get only the
         // replacements for deprecated, but I have not been able to get that to work;
         // Don't understand how kb IDs work in Code Center
-        CodeCenterComponentPojo addedComp;
-        try {
-            addedComp = ccsw.getComponentManager().getComponentById(CodeCenterComponentPojo.class, compId);
-        } catch (CommonFrameworkException e) {
-            throw new InterceptorException("Error looking up added component: " + e.getMessage());
-        }
-        log.info("Loaded component: " + addedComp);
+        CodeCenterComponentPojo addedComp = loadComponent(compId);
 
         // Custom components: kb ids will both be empty; skip over those, they will not be replacements
         if (StringUtils.isBlank(addedComp.getKbComponentId()) && StringUtils.isBlank(addedComp.getKbReleaseId())) {
@@ -120,13 +108,7 @@ public class SalvageRemediationData implements CompChangeInterceptor {
     public boolean preProcessDelete(String deleteRequestId, String compId) throws InterceptorException {
         log.info("preProcessDelete(): deleteRequestId: " + deleteRequestId + "; compId: " + compId);
         // Get the component, so we can check its deprecated flag and its KB ID pair
-        CodeCenterComponentPojo deleteComp;
-        try {
-            deleteComp = ccsw.getComponentManager().getComponentById(CodeCenterComponentPojo.class, compId);
-        } catch (CommonFrameworkException e) {
-            throw new InterceptorException(e);
-        }
-        log.info("Loaded delete comp: " + deleteComp);
+        CodeCenterComponentPojo deleteComp = loadComponent(compId);
         // If not deprecated, return true
         if (checkCompDeprecatedFlag && !deleteComp.isDeprecated()) {
             log.info("This delete component is not deprecated); nothing to do");
@@ -155,6 +137,17 @@ public class SalvageRemediationData implements CompChangeInterceptor {
         return true;
     }
 
+    private CodeCenterComponentPojo loadComponent(String compId) throws InterceptorException {
+        CodeCenterComponentPojo comp;
+        try {
+            comp = ccsw.getComponentManager().getComponentById(CodeCenterComponentPojo.class, compId);
+        } catch (CommonFrameworkException e) {
+            throw new InterceptorException(e);
+        }
+        log.info("Loaded comp: " + comp);
+        return comp;
+    }
+
     /**
      * Copy remediation data for any vulns common to the given deleted and added comps from deleted to added.
      * For each vulnerability on the given about-to-be-deleted component that also exists on the given just-added
@@ -172,30 +165,13 @@ public class SalvageRemediationData implements CompChangeInterceptor {
                 ", deleted comp: " + deleteComp + ", to add comp: " + addComp);
 
         // In this map we'll put add-side vulnerabilities that yet have no remediation data
-        Map<String, RequestVulnerabilityPojo> addVulnsNeedingRemData = new HashMap<>();
-        log.info("Getting the vulnerabilities for this add request");
-        List<RequestVulnerabilityPojo> addVulns;
-        try {
-            addVulns = ccsw.getRequestManager().getVulnerabilitiesByRequestId(addRequestId);
-        } catch (CommonFrameworkException e) {
-            throw new InterceptorException(e);
-        }
-        for (RequestVulnerabilityPojo addVuln : addVulns) {
-            log.info("add vuln: " + addVuln);
-            if (!addVuln.isRemediationDataSet()) {
-                log.info("This add vuln has no remediation, so is a candidate destination for salvaged remediation data");
-                addVulnsNeedingRemData.put(addVuln.getVulnerabilityId(), addVuln);
-            }
-        }
+        Map<String, RequestVulnerabilityPojo> addVulnsNeedingRemData = collectAddVulnsNeedingRemData(addRequestId);
 
         // Get the vulnerabilities for this delete request
         log.info("Getting the vulnerabilities for this delete request");
-        List<RequestVulnerabilityPojo> deleteVulns;
-        try {
-            deleteVulns = ccsw.getRequestManager().getVulnerabilitiesByRequestId(deleteRequestId);
-        } catch (CommonFrameworkException e) {
-            throw new InterceptorException(e);
-        }
+        List<RequestVulnerabilityPojo> deleteVulns = loadVulnerabilitiesByRequestId(deleteRequestId);
+
+        // For each deleteVuln: if possible/appropriate, copy rem data to added replacement
         for (RequestVulnerabilityPojo deleteVuln : deleteVulns) {
             log.info("delete vuln: " + deleteVuln);
             String vulnerabilityIdEquivalentToDeleteVulnerability = getEquivalentVulnerability(deleteVuln.getVulnerabilityId());
@@ -204,6 +180,30 @@ public class SalvageRemediationData implements CompChangeInterceptor {
                 copyRemediationData(deleteVuln, addVulnsNeedingRemData.get(vulnerabilityIdEquivalentToDeleteVulnerability));
             }
         }
+    }
+
+    private List<RequestVulnerabilityPojo> loadVulnerabilitiesByRequestId(String deleteRequestId) throws InterceptorException {
+        List<RequestVulnerabilityPojo> deleteVulns;
+        try {
+            deleteVulns = ccsw.getRequestManager().getVulnerabilitiesByRequestId(deleteRequestId);
+        } catch (CommonFrameworkException e) {
+            throw new InterceptorException(e);
+        }
+        return deleteVulns;
+    }
+
+    private Map<String, RequestVulnerabilityPojo> collectAddVulnsNeedingRemData(String addRequestId) throws InterceptorException {
+        Map<String, RequestVulnerabilityPojo> addVulnsNeedingRemData = new HashMap<>();
+        log.info("Getting the vulnerabilities for this add request");
+        List<RequestVulnerabilityPojo> addVulns = loadVulnerabilitiesByRequestId(addRequestId);
+        for (RequestVulnerabilityPojo addVuln : addVulns) {
+            log.info("add vuln: " + addVuln);
+            if (!addVuln.isRemediationDataSet()) {
+                log.info("This add vuln has no remediation, so is a candidate destination for salvaged remediation data");
+                addVulnsNeedingRemData.put(addVuln.getVulnerabilityId(), addVuln);
+            }
+        }
+        return addVulnsNeedingRemData;
     }
 
     /**
