@@ -1,4 +1,4 @@
-package com.blackducksoftware.tools.ccimport;
+package com.blackducksoftware.tools.ccimport.interceptor;
 
 import static org.junit.Assert.assertEquals;
 
@@ -11,18 +11,12 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.blackducksoftware.tools.ccimport.deprecatedcomp.DeprecatedComponentReplacementTable;
-import com.blackducksoftware.tools.ccimport.deprecatedcomp.MockDeprecatedComponentReplacementTable;
-import com.blackducksoftware.tools.ccimport.interceptor.CompChangeInterceptor;
-import com.blackducksoftware.tools.ccimport.interceptor.InterceptorException;
-import com.blackducksoftware.tools.ccimport.interceptor.SalvageRemediationData;
 import com.blackducksoftware.tools.ccimport.mocks.MockCodeCenterServerWrapper;
-import com.blackducksoftware.tools.ccimport.mocks.MockProtexServerWrapper;
+import com.blackducksoftware.tools.ccimport.mocks.MockDeprecatedComponentReplacementTable;
 import com.blackducksoftware.tools.ccimport.mocks.MockRequestManager;
 import com.blackducksoftware.tools.ccimporter.config.CodeCenterConfigManager;
-import com.blackducksoftware.tools.commonframework.standard.protex.ProtexProjectPojo;
 import com.blackducksoftware.tools.connector.codecenter.ICodeCenterServerWrapper;
 import com.blackducksoftware.tools.connector.codecenter.common.RequestVulnerabilityPojo;
-import com.blackducksoftware.tools.connector.protex.IProtexServerWrapper;
 
 public class SalvageRemediationDataTest {
     private static final String ADDED_COMP_ID = "addedCompId";
@@ -39,8 +33,6 @@ public class SalvageRemediationDataTest {
 
     private static ICodeCenterServerWrapper ccsw;
 
-    private static IProtexServerWrapper<ProtexProjectPojo> psw;
-
     private static Date today = new Date();
 
     @BeforeClass
@@ -49,7 +41,6 @@ public class SalvageRemediationDataTest {
 
         ccConfig = new CodeCenterConfigManager(props);
         ccsw = new MockCodeCenterServerWrapper(false, true, today);
-        psw = new MockProtexServerWrapper();
     }
 
     @AfterClass
@@ -59,10 +50,10 @@ public class SalvageRemediationDataTest {
     @Test
     public void test() throws InterceptorException {
 
-        DeprecatedComponentReplacementTable table = new MockDeprecatedComponentReplacementTable();
-        CompChangeInterceptor interceptor = new SalvageRemediationData(table);
+        DeprecatedComponentReplacementTable table = new MockDeprecatedComponentReplacementTable(false);
+        CompChangeInterceptor interceptor = new SalvageRemediationData(table, true, null);
 
-        interceptor.init(ccConfig, ccsw, psw);
+        interceptor.init(ccConfig, ccsw, null); // this interceptor does not use Protex
         interceptor.initForApp(APP_ID);
         interceptor.preProcessAdd(ADDED_COMP_ID);
         interceptor.postProcessAdd("addRequestId", ADDED_COMP_ID);
