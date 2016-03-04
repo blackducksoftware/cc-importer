@@ -271,11 +271,4 @@ public class MockCodeCenterComponentManager implements
         return comp;
     }
 
-    @Override
-    public <T extends CodeCenterComponentPojo> T getComponentByKbId(Class<T> pojoClass, String kbComponentId, String kbVersionId)
-            throws CommonFrameworkException {
-        // TODO Auto-generated function stub
-        return null;
-    }
-
 }
