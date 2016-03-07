@@ -84,18 +84,18 @@ public class PluginManagerTest {
         IProtexServerWrapper<ProtexProjectPojo> protexWrapper = new MockProtexServerWrapper();
         PlugInManager plugInManager = new PlugInManager(config, ccWrapper, protexWrapper);
 
-        plugInManager.invokeComponentChangeIntercepterInitMethod();
-        plugInManager.invokeComponentChangeIntercepterInitForAppMethod("testAppId1");
-        plugInManager.invokeComponentChangeIntercepterPreProcessAddMethod("addedComp1");
-        plugInManager.invokeComponentChangeIntercepterPostProcessAddMethod("addedRequest1", "addedComp1");
-        plugInManager.invokeComponentChangeIntercepterPreProcessDeleteMethod("deletedRequest1", "deletedComp1");
+        plugInManager.invokeComponentChangeInterceptorInitMethod();
+        plugInManager.invokeComponentChangeInterceptorInitForAppMethod("testAppId1");
+        plugInManager.invokeComponentChangeInterceptorPreProcessAddMethod("addedComp1");
+        plugInManager.invokeComponentChangeInterceptorPostProcessAddMethod("addedRequest1", "addedComp1");
+        plugInManager.invokeComponentChangeInterceptorPreProcessDeleteMethod("deletedRequest1", "deletedComp1");
 
-        plugInManager.invokeComponentChangeIntercepterInitForAppMethod("testAppId2");
-        plugInManager.invokeComponentChangeIntercepterPreProcessAddMethod("addedComp2");
-        plugInManager.invokeComponentChangeIntercepterPostProcessAddMethod("addedRequest2", "addedComp2");
-        plugInManager.invokeComponentChangeIntercepterPreProcessDeleteMethod("deletedRequest2", "deletedComp2");
+        plugInManager.invokeComponentChangeInterceptorInitForAppMethod("testAppId2");
+        plugInManager.invokeComponentChangeInterceptorPreProcessAddMethod("addedComp2");
+        plugInManager.invokeComponentChangeInterceptorPostProcessAddMethod("addedRequest2", "addedComp2");
+        plugInManager.invokeComponentChangeInterceptorPreProcessDeleteMethod("deletedRequest2", "deletedComp2");
 
-        plugInManager.invokeComponentChangeIntercepterPreProcessDeleteMethod("deletedRequest3", "deletedComp3");
+        plugInManager.invokeComponentChangeInterceptorPreProcessDeleteMethod("deletedRequest3", "deletedComp3");
 
         MockCompChangeInterceptor mockCompChangeInterceptor = (MockCompChangeInterceptor) plugInManager.getComponentChangeInterceptorObject();
 

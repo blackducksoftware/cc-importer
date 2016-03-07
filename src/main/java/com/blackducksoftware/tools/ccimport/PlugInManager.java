@@ -415,13 +415,13 @@ public class PlugInManager {
     }
 
     /**
-     * Invoke the Component Change Intercepter init() method.
+     * Invoke the Component Change Interceptor init() method.
      *
      * @param cciApp
      * @param project
      * @throws CodeCenterImportException
      */
-    public void invokeComponentChangeIntercepterInitMethod()
+    public void invokeComponentChangeInterceptorInitMethod()
             throws CodeCenterImportException {
         if ((componentChangeInterceptorObject != null) && (componentChangeInterceptorInitMethod != null)) {
             try {
@@ -440,7 +440,7 @@ public class PlugInManager {
         }
     }
 
-    public void invokeComponentChangeIntercepterInitForAppMethod(String appId)
+    public void invokeComponentChangeInterceptorInitForAppMethod(String appId)
             throws CodeCenterImportException {
         if ((componentChangeInterceptorObject != null) && (componentChangeInterceptorInitForAppMethod != null)) {
             try {
@@ -459,7 +459,7 @@ public class PlugInManager {
         }
     }
 
-    public void invokeComponentChangeIntercepterPreProcessAddMethod(String compId)
+    public void invokeComponentChangeInterceptorPreProcessAddMethod(String compId)
             throws CodeCenterImportException {
         if ((componentChangeInterceptorObject != null) && (componentChangeInterceptorPreProcessAddMethod != null)) {
             try {
@@ -478,7 +478,7 @@ public class PlugInManager {
         }
     }
 
-    public void invokeComponentChangeIntercepterPostProcessAddMethod(String requestId, String compId)
+    public void invokeComponentChangeInterceptorPostProcessAddMethod(String requestId, String compId)
             throws CodeCenterImportException {
         if ((componentChangeInterceptorObject != null) && (componentChangeInterceptorPostProcessAddMethod != null)) {
             try {
@@ -497,7 +497,7 @@ public class PlugInManager {
         }
     }
 
-    public void invokeComponentChangeIntercepterPreProcessDeleteMethod(String deleteRequestId, String compId)
+    public void invokeComponentChangeInterceptorPreProcessDeleteMethod(String deleteRequestId, String compId)
             throws CodeCenterImportException {
         if ((componentChangeInterceptorObject != null) && (componentChangeInterceptorPreProcessDeleteMethod != null)) {
             try {
