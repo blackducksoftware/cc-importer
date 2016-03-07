@@ -8,12 +8,12 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License version 2
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  *******************************************************************************/
 
 package com.blackducksoftware.tools.ccimport.appadjuster;
@@ -25,8 +25,8 @@ import com.blackducksoftware.tools.ccimporter.config.CCIConfigurationManager;
 import com.blackducksoftware.tools.ccimporter.model.CCIApplication;
 import com.blackducksoftware.tools.ccimporter.model.CCIProject;
 import com.blackducksoftware.tools.commonframework.standard.protex.ProtexProjectPojo;
-import com.blackducksoftware.tools.connector.codecenter.CodeCenterServerWrapper;
-import com.blackducksoftware.tools.connector.protex.ProtexServerWrapper;
+import com.blackducksoftware.tools.connector.codecenter.ICodeCenterServerWrapper;
+import com.blackducksoftware.tools.connector.protex.IProtexServerWrapper;
 
 /**
  * AppAdjusters make changes to each app after it is imported. Must be
@@ -45,8 +45,8 @@ public interface AppAdjuster {
      * @param tz
      * @throws CodeCenterImportException
      */
-    void init(CodeCenterServerWrapper ccWrapper,
-            ProtexServerWrapper<ProtexProjectPojo> protexWrapper,
+    void init(ICodeCenterServerWrapper ccWrapper,
+            IProtexServerWrapper<ProtexProjectPojo> protexWrapper,
             CCIConfigurationManager config, TimeZone tz)
             throws CodeCenterImportException;
 

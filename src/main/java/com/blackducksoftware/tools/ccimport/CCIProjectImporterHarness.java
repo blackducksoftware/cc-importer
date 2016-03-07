@@ -36,6 +36,7 @@ import com.blackducksoftware.tools.commonframework.core.config.ConfigConstants.A
 import com.blackducksoftware.tools.commonframework.core.config.server.ServerBean;
 import com.blackducksoftware.tools.commonframework.standard.protex.ProtexProjectPojo;
 import com.blackducksoftware.tools.connector.codecenter.CodeCenterServerWrapper;
+import com.blackducksoftware.tools.connector.codecenter.ICodeCenterServerWrapper;
 import com.blackducksoftware.tools.connector.protex.IProtexServerWrapper;
 import com.blackducksoftware.tools.connector.protex.ProtexServerWrapper;
 
@@ -223,7 +224,7 @@ public class CCIProjectImporterHarness {
      * @param config
      * @throws CodeCenterImportException
      */
-    static Method getAppAdjusterMethod(CodeCenterServerWrapper ccWrapper,
+    static Method getAppAdjusterMethod(ICodeCenterServerWrapper ccWrapper,
             IProtexServerWrapper<ProtexProjectPojo> protexWrapper,
             CCIConfigurationManager config, Object appAdjusterObject)
             throws CodeCenterImportException {
@@ -246,8 +247,8 @@ public class CCIProjectImporterHarness {
 
         // Get the init method on the custom app adjuster class
         Method initMethod = null;
-        Class<?>[] initMethodArgTypes = { CodeCenterServerWrapper.class,
-                ProtexServerWrapper.class, CCIConfigurationManager.class,
+        Class<?>[] initMethodArgTypes = { ICodeCenterServerWrapper.class,
+                IProtexServerWrapper.class, CCIConfigurationManager.class,
                 TimeZone.class };
         try {
             initMethod = sourceClass.getDeclaredMethod("init",

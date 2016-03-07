@@ -25,15 +25,15 @@ import com.blackducksoftware.tools.ccimporter.config.CCIConfigurationManager;
 import com.blackducksoftware.tools.ccimporter.model.CCIApplication;
 import com.blackducksoftware.tools.ccimporter.model.CCIProject;
 import com.blackducksoftware.tools.commonframework.standard.protex.ProtexProjectPojo;
-import com.blackducksoftware.tools.connector.codecenter.CodeCenterServerWrapper;
-import com.blackducksoftware.tools.connector.protex.ProtexServerWrapper;
+import com.blackducksoftware.tools.connector.codecenter.ICodeCenterServerWrapper;
+import com.blackducksoftware.tools.connector.protex.IProtexServerWrapper;
 
 public class MockAppAdjuster implements AppAdjuster {
     private int adjustAppCalledCount = 0;
 
     @Override
-    public void init(CodeCenterServerWrapper ccWrapper,
-            ProtexServerWrapper<ProtexProjectPojo> protexWrapper,
+    public void init(ICodeCenterServerWrapper ccWrapper,
+            IProtexServerWrapper<ProtexProjectPojo> protexWrapper,
             CCIConfigurationManager config, TimeZone tz) {
     }
 
