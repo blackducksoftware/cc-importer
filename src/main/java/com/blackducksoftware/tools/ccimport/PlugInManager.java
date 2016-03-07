@@ -4,6 +4,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.TimeZone;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.blackducksoftware.tools.ccimport.appadjuster.AppAdjuster;
 import com.blackducksoftware.tools.ccimport.exception.CodeCenterImportException;
 import com.blackducksoftware.tools.ccimport.interceptor.CompChangeInterceptor;
@@ -15,6 +18,8 @@ import com.blackducksoftware.tools.connector.codecenter.ICodeCenterServerWrapper
 import com.blackducksoftware.tools.connector.protex.IProtexServerWrapper;
 
 public class PlugInManager {
+    private static final Logger log = LoggerFactory.getLogger(PlugInManager.class.getName());
+
     static Object getAppAdjusterObject(CCIConfigurationManager config)
             throws CodeCenterImportException {
 
@@ -63,21 +68,11 @@ public class PlugInManager {
             CCIConfigurationManager config, Object appAdjusterObject)
             throws CodeCenterImportException {
 
-        // See if the user has configured a custom app adjuster
-        String appAdjusterClassname = config.getAppAdjusterClassname();
-        if (appAdjusterClassname == null) {
-            return null; // No custom app adjuster has been configured
+        if (appAdjusterObject == null) {
+            log.warn("App Adjuster object is null");
+            return null;
         }
-        // Get the user-configured custom app adjuster class
-        Class<AppAdjuster> sourceClass = null;
-        try {
-            sourceClass = (Class<AppAdjuster>) Class
-                    .forName(appAdjusterClassname);
-        } catch (ClassNotFoundException e) {
-            String msg = "Unable to convert name to class for custom app adjuster: Class not found: "
-                    + appAdjusterClassname;
-            throw new CodeCenterImportException(msg);
-        }
+        Class<AppAdjuster> sourceClass = (Class<AppAdjuster>) appAdjusterObject.getClass();
 
         // Get the init method on the custom app adjuster class
         Method initMethod = null;
@@ -89,7 +84,7 @@ public class PlugInManager {
                     initMethodArgTypes);
         } catch (NoSuchMethodException e) {
             String msg = "Unable to get app adjuster init method: No such method exception: "
-                    + appAdjusterClassname;
+                    + appAdjusterObject.getClass().getName();
             throw new CodeCenterImportException(msg);
         }
 
@@ -102,7 +97,7 @@ public class PlugInManager {
                     adjustAppMethodArgTypes);
         } catch (NoSuchMethodException e) {
             String msg = "Unable to get app adjuster method: No such method exception: "
-                    + appAdjusterClassname;
+                    + appAdjusterObject.getClass().getName();
             throw new CodeCenterImportException(msg);
         }
 
@@ -157,7 +152,7 @@ public class PlugInManager {
                     + compChangeInterceptorClassname;
             throw new CodeCenterImportException(msg);
         }
-
+        log.info("Instantiated " + sourceClass.getName());
         return compChangeInterceptorObject;
     }
 
@@ -166,21 +161,7 @@ public class PlugInManager {
             CCIConfigurationManager config, Object compChangeInterceptorObject)
             throws CodeCenterImportException {
 
-        // See if the user has configured a custom comp change interceptor
-        String compChangeInterceptorClassname = config.getCompChangeInterceptorClassname();
-        if (compChangeInterceptorClassname == null) {
-            return null; // No custom comp change interceptor has been configured
-        }
-        // Get the user-configured custom comp change interceptor class
-        Class<CompChangeInterceptor> sourceClass = null;
-        try {
-            sourceClass = (Class<CompChangeInterceptor>) Class
-                    .forName(compChangeInterceptorClassname);
-        } catch (ClassNotFoundException e) {
-            String msg = "Unable to convert name to class for custom comp change interceptor: Class not found: "
-                    + compChangeInterceptorClassname;
-            throw new CodeCenterImportException(msg);
-        }
+        Class<CompChangeInterceptor> sourceClass = (Class<CompChangeInterceptor>) compChangeInterceptorObject.getClass();
 
         // Get the init method on the custom comp change interceptor class
         Method initMethod = null;
@@ -191,7 +172,7 @@ public class PlugInManager {
                     initMethodArgTypes);
         } catch (NoSuchMethodException e) {
             String msg = "Unable to get component change interceptor init method: No such method exception: "
-                    + compChangeInterceptorClassname;
+                    + sourceClass.getName();
             throw new CodeCenterImportException(msg);
         }
         return initMethod;
@@ -202,21 +183,7 @@ public class PlugInManager {
             CCIConfigurationManager config, Object compChangeInterceptorObject)
             throws CodeCenterImportException {
 
-        // See if the user has configured a custom comp change interceptor
-        String compChangeInterceptorClassname = config.getCompChangeInterceptorClassname();
-        if (compChangeInterceptorClassname == null) {
-            return null; // No custom comp change interceptor has been configured
-        }
-        // Get the user-configured custom comp change interceptor class
-        Class<CompChangeInterceptor> sourceClass = null;
-        try {
-            sourceClass = (Class<CompChangeInterceptor>) Class
-                    .forName(compChangeInterceptorClassname);
-        } catch (ClassNotFoundException e) {
-            String msg = "Unable to convert name to class for custom comp change interceptor: Class not found: "
-                    + compChangeInterceptorClassname;
-            throw new CodeCenterImportException(msg);
-        }
+        Class<CompChangeInterceptor> sourceClass = (Class<CompChangeInterceptor>) compChangeInterceptorObject.getClass();
 
         // Get the initForApp(String appName) method on the custom comp change interceptor class
         Class<?>[] adjustAppMethodArgTypes = { String.class };
@@ -226,7 +193,7 @@ public class PlugInManager {
                     adjustAppMethodArgTypes);
         } catch (NoSuchMethodException e) {
             String msg = "Unable to get comp change interceptor initForApp(String appName) method: No such method exception: "
-                    + compChangeInterceptorClassname;
+                    + sourceClass.getName();
             throw new CodeCenterImportException(msg);
         }
 

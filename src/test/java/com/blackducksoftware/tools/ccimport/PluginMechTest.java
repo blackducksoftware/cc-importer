@@ -50,7 +50,6 @@ public class PluginMechTest {
     @Test
     public void testCompChangeInterceptor() throws CodeCenterImportException {
         Properties props = getProperties();
-        props.setProperty("protex.db.server", "tbd");
 
         CCIConfigurationManager config = new CodeCenterConfigManager(props);
 
