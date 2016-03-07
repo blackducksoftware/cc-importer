@@ -96,8 +96,8 @@ public class SyncProjectTaskTest {
         project.setProjectVersion(APP_VERSION);
         project.setProjectKey(PROJECT_ID);
 
-        MockAppAdjuster mockAppAdjuster = new MockAppAdjuster();
-        PlugInManager plugInManager = new PlugInManager(ccConfig, ccsw, psw, mockAppAdjuster);
+        PlugInManager plugInManager = new PlugInManager(ccConfig, ccsw, psw);
+        MockAppAdjuster mockAppAdjuster = (MockAppAdjuster) plugInManager.getAppAdjusterObject();
 
         // Create task to test
         SyncProjectTask task = new SyncProjectTask(ccConfig, ccsw, psw,
@@ -141,6 +141,7 @@ public class SyncProjectTaskTest {
         props.setProperty("validate.application.smart", "true");
         props.setProperty("cc.submit.request", "true");
         props.setProperty("validate.requests.delete", "true");
+        props.setProperty("app.adjuster.classname", "com.blackducksoftware.tools.ccimport.appadjuster.MockAppAdjuster");
         return props;
     }
 

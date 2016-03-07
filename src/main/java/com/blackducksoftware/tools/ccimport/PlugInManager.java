@@ -63,41 +63,15 @@ public class PlugInManager {
         this.ccWrapper = ccWrapper;
         this.protexWrapper = protexWrapper;
 
-        appAdjusterObject = getAppAdjusterObject();
-        appAdjusterAdjustAppMethod = getAppAdjusterAdjustAppMethod();
+        appAdjusterObject = initAppAdjusterObject();
+        appAdjusterAdjustAppMethod = initAppAdjusterAdjustAppMethod();
 
-        componentChangeInterceptorObject = getComponentChangeInterceptorObject();
-        componentChangeInterceptorInitMethod = getComponentChangeInterceptorInitMethod();
-        componentChangeInterceptorInitForAppMethod = getComponentChangeInterceptorInitForAppMethod();
-        componentChangeInterceptorPreProcessAddMethod = getComponentChangeInterceptorPreProcessAddMethod();
-        componentChangeInterceptorPostProcessAddMethod = getComponentChangeInterceptorPostProcessAddMethod();
-        componentChangeInterceptorPreProcessDeleteMethod = getComponentChangeInterceptorPreProcessDeleteMethod();
-    }
-
-    /**
-     * Use this constructor to force a specific app adjuster object.
-     *
-     * @param config
-     * @param ccWrapper
-     * @param protexWrapper
-     * @param appAdjusterObject
-     * @throws CodeCenterImportException
-     */
-    public PlugInManager(CCIConfigurationManager config, ICodeCenterServerWrapper ccWrapper,
-            IProtexServerWrapper<ProtexProjectPojo> protexWrapper, Object appAdjusterObject)
-            throws CodeCenterImportException {
-        this.config = config;
-        this.ccWrapper = ccWrapper;
-        this.protexWrapper = protexWrapper;
-
-        this.appAdjusterObject = appAdjusterObject;
-        appAdjusterAdjustAppMethod = getAppAdjusterAdjustAppMethod();
-
-        componentChangeInterceptorInitMethod = getComponentChangeInterceptorInitMethod();
-        componentChangeInterceptorInitForAppMethod = getComponentChangeInterceptorInitForAppMethod();
-        componentChangeInterceptorPreProcessAddMethod = getComponentChangeInterceptorPreProcessAddMethod();
-        componentChangeInterceptorPostProcessAddMethod = getComponentChangeInterceptorPostProcessAddMethod();
-        componentChangeInterceptorPreProcessDeleteMethod = getComponentChangeInterceptorPreProcessDeleteMethod();
+        componentChangeInterceptorObject = initComponentChangeInterceptorObject();
+        componentChangeInterceptorInitMethod = initComponentChangeInterceptorInitMethod();
+        componentChangeInterceptorInitForAppMethod = initComponentChangeInterceptorInitForAppMethod();
+        componentChangeInterceptorPreProcessAddMethod = initComponentChangeInterceptorPreProcessAddMethod();
+        componentChangeInterceptorPostProcessAddMethod = initComponentChangeInterceptorPostProcessAddMethod();
+        componentChangeInterceptorPreProcessDeleteMethod = initComponentChangeInterceptorPreProcessDeleteMethod();
     }
 
     /**
@@ -133,7 +107,7 @@ public class PlugInManager {
      * @return
      * @throws CodeCenterImportException
      */
-    Object getAppAdjusterObject()
+    Object initAppAdjusterObject()
             throws CodeCenterImportException {
 
         // See if the user has configured a custom app adjuster
@@ -177,7 +151,7 @@ public class PlugInManager {
      * @param config
      * @throws CodeCenterImportException
      */
-    Method getAppAdjusterAdjustAppMethod()
+    Method initAppAdjusterAdjustAppMethod()
             throws CodeCenterImportException {
 
         if (appAdjusterObject == null) {
@@ -239,7 +213,7 @@ public class PlugInManager {
      * @return
      * @throws CodeCenterImportException
      */
-    Object getComponentChangeInterceptorObject()
+    Object initComponentChangeInterceptorObject()
             throws CodeCenterImportException {
 
         // See if the user has configured a custom component change interceptor
@@ -287,9 +261,8 @@ public class PlugInManager {
      * @return
      * @throws CodeCenterImportException
      */
-    Method getComponentChangeInterceptorInitMethod(
-            )
-                    throws CodeCenterImportException {
+    Method initComponentChangeInterceptorInitMethod()
+            throws CodeCenterImportException {
 
         if (componentChangeInterceptorObject == null) {
             log.warn("Component Change Interceptor object is null");
@@ -320,7 +293,7 @@ public class PlugInManager {
      * @return
      * @throws CodeCenterImportException
      */
-    Method getComponentChangeInterceptorInitForAppMethod()
+    Method initComponentChangeInterceptorInitForAppMethod()
             throws CodeCenterImportException {
 
         if (componentChangeInterceptorObject == null) {
@@ -352,7 +325,7 @@ public class PlugInManager {
      * @return
      * @throws CodeCenterImportException
      */
-    Method getComponentChangeInterceptorPreProcessAddMethod()
+    Method initComponentChangeInterceptorPreProcessAddMethod()
             throws CodeCenterImportException {
 
         if (componentChangeInterceptorObject == null) {
@@ -384,7 +357,7 @@ public class PlugInManager {
      * @return
      * @throws CodeCenterImportException
      */
-    Method getComponentChangeInterceptorPostProcessAddMethod()
+    Method initComponentChangeInterceptorPostProcessAddMethod()
             throws CodeCenterImportException {
 
         if (componentChangeInterceptorObject == null) {
@@ -416,7 +389,7 @@ public class PlugInManager {
      * @return
      * @throws CodeCenterImportException
      */
-    Method getComponentChangeInterceptorPreProcessDeleteMethod()
+    Method initComponentChangeInterceptorPreProcessDeleteMethod()
             throws CodeCenterImportException {
 
         if (componentChangeInterceptorObject == null) {
@@ -440,4 +413,111 @@ public class PlugInManager {
 
         return componentChangeInterceptorPreProcessDeleteMethod;
     }
+
+    /**
+     * Invoke the Component Change Intercepter init() method.
+     *
+     * @param cciApp
+     * @param project
+     * @throws CodeCenterImportException
+     */
+    public void invokeComponentChangeIntercepterInitMethod()
+            throws CodeCenterImportException {
+        if ((componentChangeInterceptorObject != null) && (componentChangeInterceptorInitMethod != null)) {
+            try {
+                componentChangeInterceptorInitMethod.invoke(appAdjusterObject);
+            } catch (InvocationTargetException e) {
+                String msg = "Error invoking componentChangeInterceptorInitMethod: InvocationTargetException: "
+                        + e.getTargetException().getMessage();
+                throw new CodeCenterImportException(msg);
+            } catch (IllegalAccessException e) {
+                String msg = "Error invoking componentChangeInterceptorInitMethod: IllegalAccessException: "
+                        + e.getMessage();
+                throw new CodeCenterImportException(msg);
+            }
+        } else {
+            log.info("No componentChangeInterceptor configured");
+        }
+    }
+
+    public void invokeComponentChangeIntercepterInitForAppMethod(String appId)
+            throws CodeCenterImportException {
+        if ((componentChangeInterceptorObject != null) && (componentChangeInterceptorInitForAppMethod != null)) {
+            try {
+                componentChangeInterceptorInitForAppMethod.invoke(appAdjusterObject, appId);
+            } catch (InvocationTargetException e) {
+                String msg = "Error invoking componentChangeInterceptor InitForApp Method: InvocationTargetException: "
+                        + e.getTargetException().getMessage();
+                throw new CodeCenterImportException(msg);
+            } catch (IllegalAccessException e) {
+                String msg = "Error invoking componentChangeInterceptor InitForApp Method: IllegalAccessException: "
+                        + e.getMessage();
+                throw new CodeCenterImportException(msg);
+            }
+        } else {
+            log.info("No componentChangeInterceptor configured");
+        }
+    }
+
+    public void invokeComponentChangeIntercepterPreProcessAddMethod(String compId)
+            throws CodeCenterImportException {
+        if ((componentChangeInterceptorObject != null) && (componentChangeInterceptorPreProcessAddMethod != null)) {
+            try {
+                componentChangeInterceptorPreProcessAddMethod.invoke(appAdjusterObject, compId);
+            } catch (InvocationTargetException e) {
+                String msg = "Error invoking componentChangeInterceptor PreProcessAdd Method: InvocationTargetException: "
+                        + e.getTargetException().getMessage();
+                throw new CodeCenterImportException(msg);
+            } catch (IllegalAccessException e) {
+                String msg = "Error invoking componentChangeInterceptor PreProcessAdd Method: IllegalAccessException: "
+                        + e.getMessage();
+                throw new CodeCenterImportException(msg);
+            }
+        } else {
+            log.info("No componentChangeInterceptor configured");
+        }
+    }
+
+    public void invokeComponentChangeIntercepterPostProcessAddMethod(String requestId, String compId)
+            throws CodeCenterImportException {
+        if ((componentChangeInterceptorObject != null) && (componentChangeInterceptorPostProcessAddMethod != null)) {
+            try {
+                componentChangeInterceptorPostProcessAddMethod.invoke(appAdjusterObject, requestId, compId);
+            } catch (InvocationTargetException e) {
+                String msg = "Error invoking componentChangeInterceptor PostProcessAdd Method: InvocationTargetException: "
+                        + e.getTargetException().getMessage();
+                throw new CodeCenterImportException(msg);
+            } catch (IllegalAccessException e) {
+                String msg = "Error invoking componentChangeInterceptor PostProcessAdd Method: IllegalAccessException: "
+                        + e.getMessage();
+                throw new CodeCenterImportException(msg);
+            }
+        } else {
+            log.info("No componentChangeInterceptor configured");
+        }
+    }
+
+    public void invokeComponentChangeIntercepterPreProcessDeleteMethod(String deleteRequestId, String compId)
+            throws CodeCenterImportException {
+        if ((componentChangeInterceptorObject != null) && (componentChangeInterceptorPreProcessDeleteMethod != null)) {
+            try {
+                componentChangeInterceptorPreProcessDeleteMethod.invoke(appAdjusterObject, deleteRequestId, compId);
+            } catch (InvocationTargetException e) {
+                String msg = "Error invoking componentChangeInterceptor PreProcessDelete Method: InvocationTargetException: "
+                        + e.getTargetException().getMessage();
+                throw new CodeCenterImportException(msg);
+            } catch (IllegalAccessException e) {
+                String msg = "Error invoking componentChangeInterceptor PreProcessDelete Method: IllegalAccessException: "
+                        + e.getMessage();
+                throw new CodeCenterImportException(msg);
+            }
+        } else {
+            log.info("No componentChangeInterceptor configured");
+        }
+    }
+
+    public Object getAppAdjusterObject() {
+        return appAdjusterObject;
+    }
+
 }

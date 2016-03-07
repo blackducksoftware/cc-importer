@@ -18,7 +18,7 @@ import com.blackducksoftware.tools.commonframework.standard.protex.ProtexProject
 import com.blackducksoftware.tools.connector.codecenter.ICodeCenterServerWrapper;
 import com.blackducksoftware.tools.connector.protex.IProtexServerWrapper;
 
-public class PluginMechTest {
+public class PluginManagerTest {
 
     private static final String APP_ADJUSTER_CLASSNAME = "com.blackducksoftware.tools.ccimport.appadjuster.custom.NumericPrefixedAppAdjuster";
 
@@ -40,10 +40,10 @@ public class PluginMechTest {
         IProtexServerWrapper<ProtexProjectPojo> protexWrapper = new MockProtexServerWrapper();
         PlugInManager plugInManager = new PlugInManager(config, ccWrapper, protexWrapper);
 
-        Object appAdjusterObject = plugInManager.getAppAdjusterObject();
+        Object appAdjusterObject = plugInManager.initAppAdjusterObject();
         assertEquals(APP_ADJUSTER_CLASSNAME, appAdjusterObject.getClass().getName());
 
-        Method adjustAppMethod = plugInManager.getAppAdjusterAdjustAppMethod();
+        Method adjustAppMethod = plugInManager.initAppAdjusterAdjustAppMethod();
 
         assertEquals("adjustApp", adjustAppMethod.getName());
     }
@@ -56,22 +56,22 @@ public class PluginMechTest {
         IProtexServerWrapper<ProtexProjectPojo> protexWrapper = new MockProtexServerWrapper();
         PlugInManager plugInManager = new PlugInManager(config, ccWrapper, protexWrapper);
 
-        Object interceptorObject = plugInManager.getComponentChangeInterceptorObject();
+        Object interceptorObject = plugInManager.initComponentChangeInterceptorObject();
         assertEquals(SALVAGE_REM_DATA_CLASSNAME, interceptorObject.getClass().getName());
 
-        Method initMethod = plugInManager.getComponentChangeInterceptorInitMethod();
+        Method initMethod = plugInManager.initComponentChangeInterceptorInitMethod();
         assertEquals("init", initMethod.getName());
 
-        Method initForAppMethod = plugInManager.getComponentChangeInterceptorInitForAppMethod();
+        Method initForAppMethod = plugInManager.initComponentChangeInterceptorInitForAppMethod();
         assertEquals("initForApp", initForAppMethod.getName());
 
-        Method preProcessAddMethod = plugInManager.getComponentChangeInterceptorPreProcessAddMethod();
+        Method preProcessAddMethod = plugInManager.initComponentChangeInterceptorPreProcessAddMethod();
         assertEquals("preProcessAdd", preProcessAddMethod.getName());
 
-        Method postProcessAddMethod = plugInManager.getComponentChangeInterceptorPostProcessAddMethod();
+        Method postProcessAddMethod = plugInManager.initComponentChangeInterceptorPostProcessAddMethod();
         assertEquals("postProcessAdd", postProcessAddMethod.getName());
 
-        Method preProcessDeleteMethod = plugInManager.getComponentChangeInterceptorPreProcessDeleteMethod();
+        Method preProcessDeleteMethod = plugInManager.initComponentChangeInterceptorPreProcessDeleteMethod();
         assertEquals("preProcessDelete", preProcessDeleteMethod.getName());
     }
 
