@@ -13,7 +13,6 @@ import org.junit.Test;
 import com.blackducksoftware.tools.ccimport.exception.CodeCenterImportException;
 import com.blackducksoftware.tools.ccimport.mocks.MockCodeCenterServerWrapper;
 import com.blackducksoftware.tools.ccimport.mocks.MockProtexServerWrapper;
-import com.blackducksoftware.tools.ccimporter.config.CCIConfigurationManager;
 import com.blackducksoftware.tools.ccimporter.config.CodeCenterConfigManager;
 import com.blackducksoftware.tools.commonframework.standard.protex.ProtexProjectPojo;
 import com.blackducksoftware.tools.connector.codecenter.ICodeCenterServerWrapper;
@@ -37,12 +36,14 @@ public class PluginMechTest {
     public void testAppAdjuster() throws CodeCenterImportException {
         Properties props = getProperties();
         CodeCenterConfigManager config = new CodeCenterConfigManager(props);
-        Object appAdjusterObject = PlugInManager.getAppAdjusterObject(config);
-        assertEquals(APP_ADJUSTER_CLASSNAME, appAdjusterObject.getClass().getName());
-
         ICodeCenterServerWrapper ccWrapper = new MockCodeCenterServerWrapper(false, true, new Date());
         IProtexServerWrapper<ProtexProjectPojo> protexWrapper = new MockProtexServerWrapper();
-        Method adjustAppMethod = PlugInManager.getAppAdjusterMethod(ccWrapper, protexWrapper, config, appAdjusterObject);
+        PlugInManager plugInManager = new PlugInManager(config, ccWrapper, protexWrapper);
+
+        Object appAdjusterObject = plugInManager.getAppAdjusterObject();
+        assertEquals(APP_ADJUSTER_CLASSNAME, appAdjusterObject.getClass().getName());
+
+        Method adjustAppMethod = plugInManager.getAppAdjusterAdjustAppMethod();
 
         assertEquals("adjustApp", adjustAppMethod.getName());
     }
@@ -50,30 +51,27 @@ public class PluginMechTest {
     @Test
     public void testCompChangeInterceptor() throws CodeCenterImportException {
         Properties props = getProperties();
-
-        CCIConfigurationManager config = new CodeCenterConfigManager(props);
-
-        Object interceptorObject = PlugInManager.getCompChangeInterceptorObject(config);
-        assertEquals(SALVAGE_REM_DATA_CLASSNAME, interceptorObject.getClass().getName());
-
+        CodeCenterConfigManager config = new CodeCenterConfigManager(props);
         ICodeCenterServerWrapper ccWrapper = new MockCodeCenterServerWrapper(false, true, new Date());
         IProtexServerWrapper<ProtexProjectPojo> protexWrapper = new MockProtexServerWrapper();
+        PlugInManager plugInManager = new PlugInManager(config, ccWrapper, protexWrapper);
 
-        Method initMethod = PlugInManager.getCompChangeInterceptorInitMethod(ccWrapper,
-                protexWrapper,
-                config, interceptorObject);
+        Object interceptorObject = plugInManager.getComponentChangeInterceptorObject();
+        assertEquals(SALVAGE_REM_DATA_CLASSNAME, interceptorObject.getClass().getName());
+
+        Method initMethod = plugInManager.getComponentChangeInterceptorInitMethod();
         assertEquals("init", initMethod.getName());
 
-        Method initForAppMethod = PlugInManager.getCompChangeInterceptorInitForAppMethod(interceptorObject);
+        Method initForAppMethod = plugInManager.getComponentChangeInterceptorInitForAppMethod();
         assertEquals("initForApp", initForAppMethod.getName());
 
-        Method preProcessAddMethod = PlugInManager.getCompChangeInterceptorPreProcessAddMethod(interceptorObject);
+        Method preProcessAddMethod = plugInManager.getComponentChangeInterceptorPreProcessAddMethod();
         assertEquals("preProcessAdd", preProcessAddMethod.getName());
 
-        Method postProcessAddMethod = PlugInManager.getCompChangeInterceptorPostProcessAddMethod(interceptorObject);
+        Method postProcessAddMethod = plugInManager.getComponentChangeInterceptorPostProcessAddMethod();
         assertEquals("postProcessAdd", postProcessAddMethod.getName());
 
-        Method preProcessDeleteMethod = PlugInManager.getCompChangeInterceptorPreProcessDeleteMethod(interceptorObject);
+        Method preProcessDeleteMethod = plugInManager.getComponentChangeInterceptorPreProcessDeleteMethod();
         assertEquals("preProcessDelete", preProcessDeleteMethod.getName());
     }
 

@@ -21,7 +21,6 @@
  */
 package com.blackducksoftware.tools.ccimport;
 
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -83,18 +82,14 @@ public class CCISingleServerProcessor extends CCIProcessor {
 
         super(ccConfigManager, codeCenterServerWrapper);
         protexServerWrapper = createProtexServerWrapper(protexConfigManager);
-        Object appAdjusterObject = PlugInManager
-                .getAppAdjusterObject(ccConfigManager);
-        Method appAdjusterMethod = PlugInManager
-                .getAppAdjusterMethod(codeCenterServerWrapper,
-                        protexServerWrapper, ccConfigManager, appAdjusterObject);
+        PlugInManager plugInManager = new PlugInManager(ccConfigManager, codeCenterServerWrapper, protexServerWrapper);
 
         // Construct the factory that the processor will use to create
         // the objects (run multi-threaded) to handle each subset of the project
         // list
         threadFactory = new ProjectProcessorThreadWorkerFactoryImpl(
                 codeCenterServerWrapper, protexServerWrapper, ccConfigManager,
-                appAdjusterObject, appAdjusterMethod);
+                plugInManager);
 
         numThreads = ccConfigManager.getNumThreads();
 

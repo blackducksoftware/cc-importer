@@ -17,7 +17,6 @@
  *******************************************************************************/
 package com.blackducksoftware.tools.ccimport;
 
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -65,10 +64,6 @@ public class CodeCenterProjectSynchronizer {
     private final Logger log = LoggerFactory.getLogger(this.getClass()
             .getName());
 
-    private final Object appAdjusterObject;
-
-    private final Method appAdjusterMethod;
-
     private final CodeCenterServerWrapper ccWrapper;
 
     private final IProtexServerWrapper<ProtexProjectPojo> protexWrapper;
@@ -77,16 +72,16 @@ public class CodeCenterProjectSynchronizer {
 
     private final CCIReportSummary reportSummary = new CCIReportSummary();
 
+    private final PlugInManager plugInManager;
+
     public CodeCenterProjectSynchronizer(
             CodeCenterServerWrapper codeCenterWrapper,
             IProtexServerWrapper<ProtexProjectPojo> protexWrapper,
-            CCIConfigurationManager config, Object appAdjusterObject,
-            Method appAdjusterMethod) throws CodeCenterImportException {
+            CCIConfigurationManager config, PlugInManager plugInManager) throws CodeCenterImportException {
         ccWrapper = codeCenterWrapper;
         this.protexWrapper = protexWrapper;
         configManager = config;
-        this.appAdjusterObject = appAdjusterObject;
-        this.appAdjusterMethod = appAdjusterMethod;
+        this.plugInManager = plugInManager;
     }
 
     /**
@@ -174,7 +169,7 @@ public class CodeCenterProjectSynchronizer {
                     && (bomWasChanged || importedProject.getCciApplication()
                             .isJustCreated())) {
                 try {
-                    PlugInManager.invokeAppAdjuster(appAdjusterObject, appAdjusterMethod, configManager,
+                    plugInManager.invokeAppAdjuster(
                             importedProject.getCciApplication(), project);
                 } catch (CodeCenterImportException e) {
                     log.error("Application Adjuster failed, but proceeding with validation.");
@@ -302,7 +297,7 @@ public class CodeCenterProjectSynchronizer {
             }
 
             if (!configManager.isAppAdjusterOnlyIfBomEdits()) {
-                PlugInManager.invokeAppAdjuster(appAdjusterObject, appAdjusterMethod, configManager, cciApp, project);
+                plugInManager.invokeAppAdjuster(cciApp, project);
             }
 
             // If everything goes well, set the application for

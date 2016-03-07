@@ -8,17 +8,15 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License version 2
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  *******************************************************************************/
 package com.blackducksoftware.tools.ccimport;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -69,20 +67,17 @@ public class SyncProjectTask implements Callable<CCIReportSummary> {
 
     private final ProtexServerWrapper<ProtexProjectPojo> protexWrapper;
 
-    private final Object appAdjusterObject;
-
-    private final Method appAdjusterMethod;
+    private final PlugInManager plugInManager;
 
     public SyncProjectTask(CCIConfigurationManager config,
             CodeCenterServerWrapper codeCenterWrapper,
             ProtexServerWrapper<ProtexProjectPojo> protexWrapper,
-            Object appAdjusterObject, Method appAdjusterMethod,
+            PlugInManager plugInManager,
             CCIProject project) {
         configManager = config;
         ccWrapper = codeCenterWrapper;
         this.protexWrapper = protexWrapper;
-        this.appAdjusterObject = appAdjusterObject;
-        this.appAdjusterMethod = appAdjusterMethod;
+        this.plugInManager = plugInManager;
         this.project = project;
     }
 
@@ -481,18 +476,8 @@ public class SyncProjectTask implements Callable<CCIReportSummary> {
     private void invokeAppAdjuster(CCIConfigurationManager configManager,
             CCIApplication cciApp, CCIProject project)
             throws CodeCenterImportException {
-        if ((appAdjusterObject != null) && (appAdjusterMethod != null)) {
-            try {
-                appAdjusterMethod.invoke(appAdjusterObject, cciApp, project);
-            } catch (InvocationTargetException e) {
-                String msg = "Error during post-import application metadata adjustment: InvocationTargetException: "
-                        + e.getTargetException().getMessage();
-                throw new CodeCenterImportException(msg);
-            } catch (IllegalAccessException e) {
-                String msg = "Error during post-import application metadata adjustment: IllegalAccessException: "
-                        + e.getMessage();
-                throw new CodeCenterImportException(msg);
-            }
+        if (plugInManager != null) {
+            plugInManager.invokeAppAdjuster(cciApp, project);
         }
     }
 

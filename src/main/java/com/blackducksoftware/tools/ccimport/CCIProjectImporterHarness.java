@@ -17,7 +17,6 @@
  *******************************************************************************/
 package com.blackducksoftware.tools.ccimport;
 
-import java.lang.reflect.Method;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -99,16 +98,13 @@ public class CCIProjectImporterHarness {
             } else {
                 log.info("Single-Protex mode started");
                 ProtexServerWrapper<ProtexProjectPojo> protexServerWrapper = createProtexServerWrapper(protexConfigManager);
-                Object appAdjusterObject = PlugInManager.getAppAdjusterObject(ccConfigManager);
-                Method appAdjusterMethod = PlugInManager.getAppAdjusterMethod(
-                        codeCenterServerWrapper, protexServerWrapper,
-                        ccConfigManager, appAdjusterObject);
+                PlugInManager plugInManager = new PlugInManager(ccConfigManager, codeCenterServerWrapper, protexServerWrapper);
+
                 processor = new CCISingleServerTaskProcessor(ccConfigManager,
                         protexConfigManager, codeCenterServerWrapper,
                         protexServerWrapper, new SyncProjectTaskFactoryImpl(
                                 ccConfigManager, codeCenterServerWrapper,
-                                protexServerWrapper, appAdjusterObject,
-                                appAdjusterMethod));
+                                protexServerWrapper, plugInManager));
             }
 
             if (ccConfigManager.isRunReport()) {

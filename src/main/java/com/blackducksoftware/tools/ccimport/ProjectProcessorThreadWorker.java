@@ -8,17 +8,16 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License version 2
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  *******************************************************************************/
 
 package com.blackducksoftware.tools.ccimport;
 
-import java.lang.reflect.Method;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -52,24 +51,20 @@ public class ProjectProcessorThreadWorker implements Runnable {
 
     private final CodeCenterConfigManager codeCenterConfigManager;
 
-    private final Object appAdjusterObject;
-
-    private final Method appAdjusterMethod;
+    private final PlugInManager plugInManager;
 
     public ProjectProcessorThreadWorker(
             CodeCenterServerWrapper codeCenterWrapper,
             IProtexServerWrapper<ProtexProjectPojo> protexWrapper,
             CodeCenterConfigManager codeCenterConfigManager,
             List<CCIProject> partialProjectList,
-            List<CCIReportSummary> reportSummaryList, Object appAdjusterObject,
-            Method appAdjusterMethod) {
+            List<CCIReportSummary> reportSummaryList, PlugInManager plugInManager) {
         codeCenterServerWrapper = codeCenterWrapper;
         protexServerWrapper = protexWrapper;
         this.codeCenterConfigManager = codeCenterConfigManager;
         this.partialProjectList = partialProjectList;
         this.reportSummaryList = reportSummaryList;
-        this.appAdjusterObject = appAdjusterObject;
-        this.appAdjusterMethod = appAdjusterMethod;
+        this.plugInManager = plugInManager;
     }
 
     @Override
@@ -78,8 +73,7 @@ public class ProjectProcessorThreadWorker implements Runnable {
         try {
             CodeCenterProjectSynchronizer synchronizer = new CodeCenterProjectSynchronizer(
                     codeCenterServerWrapper, protexServerWrapper,
-                    codeCenterConfigManager, appAdjusterObject,
-                    appAdjusterMethod);
+                    codeCenterConfigManager, plugInManager);
             synchronizer.synchronize(partialProjectList);
             synchronized (reportSummaryList) {
                 if (reportSummaryList.size() == 0) {

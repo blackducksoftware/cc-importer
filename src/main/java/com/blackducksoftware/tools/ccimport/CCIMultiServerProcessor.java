@@ -18,7 +18,6 @@
 
 package com.blackducksoftware.tools.ccimport;
 
-import java.lang.reflect.Method;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -104,21 +103,24 @@ public class CCIMultiServerProcessor extends CCIProcessor {
 
             ProtexServerWrapper<ProtexProjectPojo> wrapper = null;
             try {
-                wrapper = new ProtexServerWrapper<>(protexServer, protexConfig,
+                wrapper = new ProtexServerWrapper<>(protexConfig,
                         true);
             } catch (Exception e) {
                 throw new CodeCenterImportException(
                         "Unable to establish connection against: "
                                 + protexServer);
             }
-            Object appAdjusterObject = PlugInManager
-                    .getAppAdjusterObject(codeCenterConfigManager);
-            Method appAdjusterMethod = PlugInManager
-                    .getAppAdjusterMethod(super.codeCenterWrapper, wrapper,
-                            codeCenterConfigManager, appAdjusterObject);
+
+            PlugInManager plugInManager = new PlugInManager(codeCenterConfigManager, codeCenterWrapper,
+                    wrapper);
+            // Object appAdjusterObject = PlugInManager
+            // .getAppAdjusterObject(codeCenterConfigManager);
+            // Method appAdjusterMethod = PlugInManager
+            // .getAppAdjusterMethod(super.codeCenterWrapper, wrapper,
+            // codeCenterConfigManager, appAdjusterObject);
             CodeCenterProjectSynchronizer synchronizer = new CodeCenterProjectSynchronizer(
                     codeCenterWrapper, wrapper, codeCenterConfigManager,
-                    appAdjusterObject, appAdjusterMethod);
+                    plugInManager);
             List<CCIProject> projectList = getAllProjects(wrapper);
             synchronizer.synchronize(projectList);
         }

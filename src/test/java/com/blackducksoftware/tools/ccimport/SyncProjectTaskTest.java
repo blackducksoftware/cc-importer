@@ -97,10 +97,11 @@ public class SyncProjectTaskTest {
         project.setProjectKey(PROJECT_ID);
 
         MockAppAdjuster mockAppAdjuster = new MockAppAdjuster();
+        PlugInManager plugInManager = new PlugInManager(ccConfig, ccsw, psw, mockAppAdjuster);
 
         // Create task to test
         SyncProjectTask task = new SyncProjectTask(ccConfig, ccsw, psw,
-                mockAppAdjuster, getAppAdjusterMethod(mockAppAdjuster), project);
+                plugInManager, project);
 
         // Execute the task
         CCIReportSummary report = task.call();
