@@ -17,7 +17,6 @@
  *******************************************************************************/
 package com.blackducksoftware.tools.ccimport;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Date;
@@ -175,7 +174,7 @@ public class CodeCenterProjectSynchronizer {
                     && (bomWasChanged || importedProject.getCciApplication()
                             .isJustCreated())) {
                 try {
-                    invokeAppAdjuster(configManager,
+                    PlugInManager.invokeAppAdjuster(appAdjusterObject, appAdjusterMethod, configManager,
                             importedProject.getCciApplication(), project);
                 } catch (CodeCenterImportException e) {
                     log.error("Application Adjuster failed, but proceeding with validation.");
@@ -303,7 +302,7 @@ public class CodeCenterProjectSynchronizer {
             }
 
             if (!configManager.isAppAdjusterOnlyIfBomEdits()) {
-                invokeAppAdjuster(configManager, cciApp, project);
+                PlugInManager.invokeAppAdjuster(appAdjusterObject, appAdjusterMethod, configManager, cciApp, project);
             }
 
             // If everything goes well, set the application for
@@ -319,24 +318,6 @@ public class CodeCenterProjectSynchronizer {
         }
 
         return project;
-    }
-
-    private void invokeAppAdjuster(CCIConfigurationManager configManager,
-            CCIApplication cciApp, CCIProject project)
-            throws CodeCenterImportException {
-        if ((appAdjusterObject != null) && (appAdjusterMethod != null)) {
-            try {
-                appAdjusterMethod.invoke(appAdjusterObject, cciApp, project);
-            } catch (InvocationTargetException e) {
-                String msg = "Error during post-import application metadata adjustment: InvocationTargetException: "
-                        + e.getTargetException().getMessage();
-                throw new CodeCenterImportException(msg);
-            } catch (IllegalAccessException e) {
-                String msg = "Error during post-import application metadata adjustment: IllegalAccessException: "
-                        + e.getMessage();
-                throw new CodeCenterImportException(msg);
-            }
-        }
     }
 
     /**

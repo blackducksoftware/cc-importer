@@ -134,6 +134,24 @@ public class PlugInManager {
         return appAdjusterMethod;
     }
 
+    public static void invokeAppAdjuster(Object appAdjusterObject, Method appAdjusterMethod, CCIConfigurationManager configManager,
+            CCIApplication cciApp, CCIProject project)
+            throws CodeCenterImportException {
+        if ((appAdjusterObject != null) && (appAdjusterMethod != null)) {
+            try {
+                appAdjusterMethod.invoke(appAdjusterObject, cciApp, project);
+            } catch (InvocationTargetException e) {
+                String msg = "Error during post-import application metadata adjustment: InvocationTargetException: "
+                        + e.getTargetException().getMessage();
+                throw new CodeCenterImportException(msg);
+            } catch (IllegalAccessException e) {
+                String msg = "Error during post-import application metadata adjustment: IllegalAccessException: "
+                        + e.getMessage();
+                throw new CodeCenterImportException(msg);
+            }
+        }
+    }
+
     /**
      * Get the Component Change Interceptor
      *
