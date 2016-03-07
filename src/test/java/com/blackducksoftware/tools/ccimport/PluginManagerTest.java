@@ -12,6 +12,7 @@ import org.junit.Test;
 
 import com.blackducksoftware.tools.ccimport.exception.CodeCenterImportException;
 import com.blackducksoftware.tools.ccimport.mocks.MockCodeCenterServerWrapper;
+import com.blackducksoftware.tools.ccimport.mocks.MockCompChangeInterceptor;
 import com.blackducksoftware.tools.ccimport.mocks.MockProtexServerWrapper;
 import com.blackducksoftware.tools.ccimporter.config.CodeCenterConfigManager;
 import com.blackducksoftware.tools.commonframework.standard.protex.ProtexProjectPojo;
@@ -34,7 +35,7 @@ public class PluginManagerTest {
 
     @Test
     public void testAppAdjuster() throws CodeCenterImportException {
-        Properties props = getProperties();
+        Properties props = getPropertiesRealInterceptor();
         CodeCenterConfigManager config = new CodeCenterConfigManager(props);
         ICodeCenterServerWrapper ccWrapper = new MockCodeCenterServerWrapper(false, true, new Date());
         IProtexServerWrapper<ProtexProjectPojo> protexWrapper = new MockProtexServerWrapper();
@@ -49,8 +50,8 @@ public class PluginManagerTest {
     }
 
     @Test
-    public void testCompChangeInterceptor() throws CodeCenterImportException {
-        Properties props = getProperties();
+    public void testCompChangeInterceptorInit() throws CodeCenterImportException {
+        Properties props = getPropertiesRealInterceptor();
         CodeCenterConfigManager config = new CodeCenterConfigManager(props);
         ICodeCenterServerWrapper ccWrapper = new MockCodeCenterServerWrapper(false, true, new Date());
         IProtexServerWrapper<ProtexProjectPojo> protexWrapper = new MockProtexServerWrapper();
@@ -75,7 +76,64 @@ public class PluginManagerTest {
         assertEquals("preProcessDelete", preProcessDeleteMethod.getName());
     }
 
-    private Properties getProperties() {
+    @Test
+    public void testSalvageRemDataInterceptor() throws CodeCenterImportException {
+        Properties props = getPropertiesMockInterceptor();
+        CodeCenterConfigManager config = new CodeCenterConfigManager(props);
+        ICodeCenterServerWrapper ccWrapper = new MockCodeCenterServerWrapper(false, true, new Date());
+        IProtexServerWrapper<ProtexProjectPojo> protexWrapper = new MockProtexServerWrapper();
+        PlugInManager plugInManager = new PlugInManager(config, ccWrapper, protexWrapper);
+
+        plugInManager.invokeComponentChangeIntercepterInitMethod();
+        plugInManager.invokeComponentChangeIntercepterInitForAppMethod("testAppId1");
+        plugInManager.invokeComponentChangeIntercepterPreProcessAddMethod("addedComp1");
+        plugInManager.invokeComponentChangeIntercepterPostProcessAddMethod("addedRequest1", "addedComp1");
+        plugInManager.invokeComponentChangeIntercepterPreProcessDeleteMethod("deletedRequest1", "deletedComp1");
+
+        plugInManager.invokeComponentChangeIntercepterInitForAppMethod("testAppId2");
+        plugInManager.invokeComponentChangeIntercepterPreProcessAddMethod("addedComp2");
+        plugInManager.invokeComponentChangeIntercepterPostProcessAddMethod("addedRequest2", "addedComp2");
+        plugInManager.invokeComponentChangeIntercepterPreProcessDeleteMethod("deletedRequest2", "deletedComp2");
+
+        plugInManager.invokeComponentChangeIntercepterPreProcessDeleteMethod("deletedRequest3", "deletedComp3");
+
+        MockCompChangeInterceptor mockCompChangeInterceptor = (MockCompChangeInterceptor) plugInManager.getComponentChangeInterceptorObject();
+
+        assertEquals(1, mockCompChangeInterceptor.getCallCountInit());
+
+        assertEquals(2, mockCompChangeInterceptor.getCallsInitForApp().size());
+        assertEquals("testAppId1", mockCompChangeInterceptor.getCallsInitForApp().get(0));
+        assertEquals("testAppId2", mockCompChangeInterceptor.getCallsInitForApp().get(1));
+
+        assertEquals(2, mockCompChangeInterceptor.getCallsPreProcessAdd().size());
+        assertEquals("testAppId1|addedComp1", mockCompChangeInterceptor.getCallsPreProcessAdd().get(0));
+        assertEquals("testAppId2|addedComp2", mockCompChangeInterceptor.getCallsPreProcessAdd().get(1));
+
+        assertEquals(2, mockCompChangeInterceptor.getCallsPostProcessAdd().size());
+        assertEquals("testAppId1|addedRequest1|addedComp1", mockCompChangeInterceptor.getCallsPostProcessAdd().get(0));
+        assertEquals("testAppId2|addedRequest2|addedComp2", mockCompChangeInterceptor.getCallsPostProcessAdd().get(1));
+
+        assertEquals(3, mockCompChangeInterceptor.getCallsPreProcessDelete().size());
+        assertEquals("testAppId1|deletedRequest1|deletedComp1", mockCompChangeInterceptor.getCallsPreProcessDelete().get(0));
+        assertEquals("testAppId2|deletedRequest2|deletedComp2", mockCompChangeInterceptor.getCallsPreProcessDelete().get(1));
+        assertEquals("testAppId2|deletedRequest3|deletedComp3", mockCompChangeInterceptor.getCallsPreProcessDelete().get(2));
+    }
+
+    private Properties getPropertiesRealInterceptor() {
+        Properties props = getBasicProperties();
+
+        props.setProperty("component.change.interceptor.classname", SALVAGE_REM_DATA_CLASSNAME);
+        return props;
+    }
+
+    private Properties getPropertiesMockInterceptor() {
+        Properties props = getBasicProperties();
+
+        props.setProperty("component.change.interceptor.classname", "com.blackducksoftware.tools.ccimport.mocks.MockCompChangeInterceptor");
+        return props;
+    }
+
+    private Properties getBasicProperties() {
         Properties props = new Properties();
         props.setProperty("protex.server.name", "notused");
         props.setProperty("protex.user.name", "notused");
@@ -90,7 +148,7 @@ public class PluginManagerTest {
         props.setProperty("cc.workflow", "notused");
         props.setProperty("cc.owner", "notused");
         props.setProperty("app.adjuster.classname", APP_ADJUSTER_CLASSNAME);
-        props.setProperty("component.change.interceptor.classname", SALVAGE_REM_DATA_CLASSNAME);
+
         props.setProperty("numprefixed.app.attribute.numericprefix",
                 "null");
         props.setProperty("numprefixed.app.attribute.analyzeddate", "null");

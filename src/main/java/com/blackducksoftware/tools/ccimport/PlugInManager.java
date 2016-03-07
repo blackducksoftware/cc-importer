@@ -273,13 +273,12 @@ public class PlugInManager {
 
         // Get the init method on the custom comp change interceptor class
         Method initMethod = null;
-        Class<?>[] argTypes = { CCIConfigurationManager.class, ICodeCenterServerWrapper.class,
-                IProtexServerWrapper.class };
+        Class<?>[] argTypes = { CCIConfigurationManager.class, ICodeCenterServerWrapper.class, IProtexServerWrapper.class };
         try {
             initMethod = sourceClass.getDeclaredMethod("init",
                     argTypes);
         } catch (NoSuchMethodException e) {
-            String msg = "Unable to get component change interceptor init(CCIConfigurationManager config, ICodeCenterServerWrapper ccsw, IProtexServerWrapper psw) method: No such method exception: "
+            String msg = "Unable to get component change interceptor init(CCIConfigurationManager config, ICodeCenterServerWrapper ccsw, IProtexServerWrapper<ProtexProjectPojo> psw) method: No such method exception: "
                     + sourceClass.getName();
             throw new CodeCenterImportException(msg);
         }
@@ -367,7 +366,7 @@ public class PlugInManager {
 
         Class<CompChangeInterceptor> sourceClass = (Class<CompChangeInterceptor>) componentChangeInterceptorObject.getClass();
 
-        // Get the postProcessAdd(String compId) method on the custom comp change interceptor class
+        // Get the postProcessAdd(String requestId, String compId) method on the custom comp change interceptor class
         Class<?>[] argTypes = { String.class, String.class };
         Method componentChangeInterceptorPostProcessAddMethod = null;
         try {
@@ -399,7 +398,8 @@ public class PlugInManager {
 
         Class<CompChangeInterceptor> sourceClass = (Class<CompChangeInterceptor>) componentChangeInterceptorObject.getClass();
 
-        // Get the preProcessDelete(String compId) method on the custom comp change interceptor class
+        // Get the preProcessDelete(String deleteRequestId, String compId) method on the custom comp change interceptor
+        // class
         Class<?>[] argTypes = { String.class, String.class };
         Method componentChangeInterceptorPreProcessDeleteMethod = null;
         try {
@@ -425,7 +425,7 @@ public class PlugInManager {
             throws CodeCenterImportException {
         if ((componentChangeInterceptorObject != null) && (componentChangeInterceptorInitMethod != null)) {
             try {
-                componentChangeInterceptorInitMethod.invoke(appAdjusterObject);
+                componentChangeInterceptorInitMethod.invoke(componentChangeInterceptorObject, config, ccWrapper, protexWrapper);
             } catch (InvocationTargetException e) {
                 String msg = "Error invoking componentChangeInterceptorInitMethod: InvocationTargetException: "
                         + e.getTargetException().getMessage();
@@ -444,7 +444,7 @@ public class PlugInManager {
             throws CodeCenterImportException {
         if ((componentChangeInterceptorObject != null) && (componentChangeInterceptorInitForAppMethod != null)) {
             try {
-                componentChangeInterceptorInitForAppMethod.invoke(appAdjusterObject, appId);
+                componentChangeInterceptorInitForAppMethod.invoke(componentChangeInterceptorObject, appId);
             } catch (InvocationTargetException e) {
                 String msg = "Error invoking componentChangeInterceptor InitForApp Method: InvocationTargetException: "
                         + e.getTargetException().getMessage();
@@ -463,7 +463,7 @@ public class PlugInManager {
             throws CodeCenterImportException {
         if ((componentChangeInterceptorObject != null) && (componentChangeInterceptorPreProcessAddMethod != null)) {
             try {
-                componentChangeInterceptorPreProcessAddMethod.invoke(appAdjusterObject, compId);
+                componentChangeInterceptorPreProcessAddMethod.invoke(componentChangeInterceptorObject, compId);
             } catch (InvocationTargetException e) {
                 String msg = "Error invoking componentChangeInterceptor PreProcessAdd Method: InvocationTargetException: "
                         + e.getTargetException().getMessage();
@@ -482,7 +482,7 @@ public class PlugInManager {
             throws CodeCenterImportException {
         if ((componentChangeInterceptorObject != null) && (componentChangeInterceptorPostProcessAddMethod != null)) {
             try {
-                componentChangeInterceptorPostProcessAddMethod.invoke(appAdjusterObject, requestId, compId);
+                componentChangeInterceptorPostProcessAddMethod.invoke(componentChangeInterceptorObject, requestId, compId);
             } catch (InvocationTargetException e) {
                 String msg = "Error invoking componentChangeInterceptor PostProcessAdd Method: InvocationTargetException: "
                         + e.getTargetException().getMessage();
@@ -501,7 +501,7 @@ public class PlugInManager {
             throws CodeCenterImportException {
         if ((componentChangeInterceptorObject != null) && (componentChangeInterceptorPreProcessDeleteMethod != null)) {
             try {
-                componentChangeInterceptorPreProcessDeleteMethod.invoke(appAdjusterObject, deleteRequestId, compId);
+                componentChangeInterceptorPreProcessDeleteMethod.invoke(componentChangeInterceptorObject, deleteRequestId, compId);
             } catch (InvocationTargetException e) {
                 String msg = "Error invoking componentChangeInterceptor PreProcessDelete Method: InvocationTargetException: "
                         + e.getTargetException().getMessage();
@@ -518,6 +518,10 @@ public class PlugInManager {
 
     public Object getAppAdjusterObject() {
         return appAdjusterObject;
+    }
+
+    public Object getComponentChangeInterceptorObject() {
+        return componentChangeInterceptorObject;
     }
 
 }
