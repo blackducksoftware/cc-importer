@@ -17,27 +17,18 @@
  *******************************************************************************/
 package com.blackducksoftware.tools.ccimport;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
-import java.util.TimeZone;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.blackducksoftware.tools.ccimport.appadjuster.AppAdjuster;
-import com.blackducksoftware.tools.ccimport.exception.CodeCenterImportException;
-import com.blackducksoftware.tools.ccimporter.config.CCIConfigurationManager;
 import com.blackducksoftware.tools.ccimporter.config.CodeCenterConfigManager;
 import com.blackducksoftware.tools.ccimporter.config.ProtexConfigManager;
-import com.blackducksoftware.tools.ccimporter.model.CCIApplication;
-import com.blackducksoftware.tools.ccimporter.model.CCIProject;
 import com.blackducksoftware.tools.commonframework.core.config.ConfigConstants.APPLICATION;
 import com.blackducksoftware.tools.commonframework.core.config.server.ServerBean;
 import com.blackducksoftware.tools.commonframework.standard.protex.ProtexProjectPojo;
 import com.blackducksoftware.tools.connector.codecenter.CodeCenterServerWrapper;
-import com.blackducksoftware.tools.connector.codecenter.ICodeCenterServerWrapper;
-import com.blackducksoftware.tools.connector.protex.IProtexServerWrapper;
 import com.blackducksoftware.tools.connector.protex.ProtexServerWrapper;
 
 /**
@@ -108,8 +99,8 @@ public class CCIProjectImporterHarness {
             } else {
                 log.info("Single-Protex mode started");
                 ProtexServerWrapper<ProtexProjectPojo> protexServerWrapper = createProtexServerWrapper(protexConfigManager);
-                Object appAdjusterObject = getAppAdjusterObject(ccConfigManager);
-                Method appAdjusterMethod = getAppAdjusterMethod(
+                Object appAdjusterObject = PlugInManager.getAppAdjusterObject(ccConfigManager);
+                Method appAdjusterMethod = PlugInManager.getAppAdjusterMethod(
                         codeCenterServerWrapper, protexServerWrapper,
                         ccConfigManager, appAdjusterObject);
                 processor = new CCISingleServerTaskProcessor(ccConfigManager,
@@ -179,116 +170,6 @@ public class CCIProjectImporterHarness {
                     + e.getMessage());
         }
         return codeCenterWrapper;
-    }
-
-    static Object getAppAdjusterObject(CCIConfigurationManager config)
-            throws CodeCenterImportException {
-
-        // See if the user has configured a custom app adjuster
-        String appAdjusterClassname = config.getAppAdjusterClassname();
-        if (appAdjusterClassname == null) {
-            return null; // No custom app adjuster has been configured
-        }
-        // Get the user-configured custom app adjuster class
-        Class<AppAdjuster> sourceClass = null;
-        try {
-            sourceClass = (Class<AppAdjuster>) Class
-                    .forName(appAdjusterClassname);
-        } catch (ClassNotFoundException e) {
-            String msg = "Unable to convert name to class for custom app adjuster: Class not found: "
-                    + appAdjusterClassname;
-            throw new CodeCenterImportException(msg);
-        }
-
-        // Create an instance of the custom app adjuster class
-        Object appAdjusterObject = null;
-        try {
-            appAdjusterObject = sourceClass.newInstance();
-        } catch (IllegalAccessException e) {
-            String msg = "Unable to create instance of app adjuster: Illegal access: "
-                    + appAdjusterClassname;
-            throw new CodeCenterImportException(msg);
-        } catch (InstantiationException e) {
-            String msg = "Unable to create instance of app adjuster: Instantiation exception: "
-                    + appAdjusterClassname;
-            throw new CodeCenterImportException(msg);
-        }
-
-        return appAdjusterObject;
-    }
-
-    /**
-     * If a custom app adjuster (to modify app metadata after sync) has been
-     * configured, initialize it.
-     *
-     * @param config
-     * @throws CodeCenterImportException
-     */
-    static Method getAppAdjusterMethod(ICodeCenterServerWrapper ccWrapper,
-            IProtexServerWrapper<ProtexProjectPojo> protexWrapper,
-            CCIConfigurationManager config, Object appAdjusterObject)
-            throws CodeCenterImportException {
-
-        // See if the user has configured a custom app adjuster
-        String appAdjusterClassname = config.getAppAdjusterClassname();
-        if (appAdjusterClassname == null) {
-            return null; // No custom app adjuster has been configured
-        }
-        // Get the user-configured custom app adjuster class
-        Class<AppAdjuster> sourceClass = null;
-        try {
-            sourceClass = (Class<AppAdjuster>) Class
-                    .forName(appAdjusterClassname);
-        } catch (ClassNotFoundException e) {
-            String msg = "Unable to convert name to class for custom app adjuster: Class not found: "
-                    + appAdjusterClassname;
-            throw new CodeCenterImportException(msg);
-        }
-
-        // Get the init method on the custom app adjuster class
-        Method initMethod = null;
-        Class<?>[] initMethodArgTypes = { ICodeCenterServerWrapper.class,
-                IProtexServerWrapper.class, CCIConfigurationManager.class,
-                TimeZone.class };
-        try {
-            initMethod = sourceClass.getDeclaredMethod("init",
-                    initMethodArgTypes);
-        } catch (NoSuchMethodException e) {
-            String msg = "Unable to get init method: No such method exception: "
-                    + appAdjusterClassname;
-            throw new CodeCenterImportException(msg);
-        }
-
-        // Get the adjustApp method on the custom app adjuster class
-        Class<?>[] adjustAppMethodArgTypes = { CCIApplication.class,
-                CCIProject.class };
-        Method appAdjusterMethod = null;
-        try {
-            appAdjusterMethod = sourceClass.getDeclaredMethod("adjustApp",
-                    adjustAppMethodArgTypes);
-        } catch (NoSuchMethodException e) {
-            String msg = "Unable to get app adjuster method: No such method exception: "
-                    + appAdjusterClassname;
-            throw new CodeCenterImportException(msg);
-        }
-
-        TimeZone tz = TimeZone.getTimeZone(config.getTimeZone());
-
-        // Call the init method to initialize the custom app adjuster
-        try {
-            initMethod.invoke(appAdjusterObject, ccWrapper, protexWrapper,
-                    config, tz);
-        } catch (InvocationTargetException e) {
-            String msg = "Error initializing custom app adjuster: InvocationTargetException: "
-                    + e.getTargetException().getMessage();
-            throw new CodeCenterImportException(msg);
-        } catch (IllegalAccessException e) {
-            String msg = "Error initializing custom app adjuster: IllegalAccessException: "
-                    + e.getMessage();
-            throw new CodeCenterImportException(msg);
-        }
-
-        return appAdjusterMethod;
     }
 
 }

@@ -83,9 +83,9 @@ public class CCISingleServerProcessor extends CCIProcessor {
 
         super(ccConfigManager, codeCenterServerWrapper);
         protexServerWrapper = createProtexServerWrapper(protexConfigManager);
-        Object appAdjusterObject = CCIProjectImporterHarness
+        Object appAdjusterObject = PlugInManager
                 .getAppAdjusterObject(ccConfigManager);
-        Method appAdjusterMethod = CCIProjectImporterHarness
+        Method appAdjusterMethod = PlugInManager
                 .getAppAdjusterMethod(codeCenterServerWrapper,
                         protexServerWrapper, ccConfigManager, appAdjusterObject);
 

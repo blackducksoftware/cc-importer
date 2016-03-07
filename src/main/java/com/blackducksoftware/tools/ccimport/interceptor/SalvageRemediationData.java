@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 import com.blackducksoftware.tools.ccimport.deprecatedcomp.DeprecatedComponentReplacementTable;
 import com.blackducksoftware.tools.ccimport.deprecatedcomp.SqlDeprecatedComponentReplacementTable;
 import com.blackducksoftware.tools.ccimport.exception.CodeCenterImportException;
-import com.blackducksoftware.tools.commonframework.core.config.ConfigurationManager;
+import com.blackducksoftware.tools.ccimporter.config.CCIConfigurationManager;
 import com.blackducksoftware.tools.commonframework.core.exception.CommonFrameworkException;
 import com.blackducksoftware.tools.commonframework.standard.protex.ProtexProjectPojo;
 import com.blackducksoftware.tools.connector.codecenter.ICodeCenterServerWrapper;
@@ -56,7 +56,7 @@ public class SalvageRemediationData implements CompChangeInterceptor {
     }
 
     @Override
-    public void init(ConfigurationManager config, ICodeCenterServerWrapper ccsw, IProtexServerWrapper<ProtexProjectPojo> psw) throws InterceptorException {
+    public void init(CCIConfigurationManager config, ICodeCenterServerWrapper ccsw, IProtexServerWrapper<ProtexProjectPojo> psw) throws InterceptorException {
         this.ccsw = ccsw;
         // If no one (like maybe a test) has injected a (possibly mock) replacement table, construct the standard one
         if (deprecatedComponentReplacementTable == null) {

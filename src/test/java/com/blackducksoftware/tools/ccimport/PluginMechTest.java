@@ -13,13 +13,17 @@ import org.junit.Test;
 import com.blackducksoftware.tools.ccimport.exception.CodeCenterImportException;
 import com.blackducksoftware.tools.ccimport.mocks.MockCodeCenterServerWrapper;
 import com.blackducksoftware.tools.ccimport.mocks.MockProtexServerWrapper;
+import com.blackducksoftware.tools.ccimporter.config.CCIConfigurationManager;
 import com.blackducksoftware.tools.ccimporter.config.CodeCenterConfigManager;
+import com.blackducksoftware.tools.commonframework.standard.protex.ProtexProjectPojo;
 import com.blackducksoftware.tools.connector.codecenter.ICodeCenterServerWrapper;
 import com.blackducksoftware.tools.connector.protex.IProtexServerWrapper;
 
-public class AppAdjusterPluginMechTest {
+public class PluginMechTest {
 
     private static final String APP_ADJUSTER_CLASSNAME = "com.blackducksoftware.tools.ccimport.appadjuster.custom.NumericPrefixedAppAdjuster";
+
+    private static final String SALVAGE_REM_DATA_CLASSNAME = "com.blackducksoftware.tools.ccimport.interceptor.SalvageRemediationData";
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
@@ -30,7 +34,45 @@ public class AppAdjusterPluginMechTest {
     }
 
     @Test
-    public void test() throws CodeCenterImportException {
+    public void testAppAdjuster() throws CodeCenterImportException {
+        Properties props = getProperties();
+        CodeCenterConfigManager config = new CodeCenterConfigManager(props);
+        Object appAdjusterObject = PlugInManager.getAppAdjusterObject(config);
+        assertEquals(APP_ADJUSTER_CLASSNAME, appAdjusterObject.getClass().getName());
+
+        ICodeCenterServerWrapper ccWrapper = new MockCodeCenterServerWrapper(false, true, new Date());
+        IProtexServerWrapper<ProtexProjectPojo> protexWrapper = new MockProtexServerWrapper();
+        Method adjustAppMethod = PlugInManager.getAppAdjusterMethod(ccWrapper, protexWrapper, config, appAdjusterObject);
+
+        assertEquals("adjustApp", adjustAppMethod.getName());
+    }
+
+    @Test
+    public void testCompChangeInterceptor() throws CodeCenterImportException {
+        Properties props = getProperties();
+        props.setProperty("protex.db.server", "tbd");
+
+        CCIConfigurationManager config = new CodeCenterConfigManager(props);
+
+        Object interceptorObject = PlugInManager.getCompChangeInterceptorObject(config);
+        assertEquals(SALVAGE_REM_DATA_CLASSNAME, interceptorObject.getClass().getName());
+
+        ICodeCenterServerWrapper ccWrapper = new MockCodeCenterServerWrapper(false, true, new Date());
+        IProtexServerWrapper<ProtexProjectPojo> protexWrapper = new MockProtexServerWrapper();
+
+        Method initMethod = PlugInManager.getCompChangeInterceptorInitMethod(ccWrapper,
+                protexWrapper,
+                config, interceptorObject);
+        assertEquals("init", initMethod.getName());
+
+        Method initForAppMethod = PlugInManager.getCompChangeInterceptorInitForAppMethod(ccWrapper,
+                protexWrapper,
+                config, interceptorObject);
+
+        assertEquals("initForApp", initForAppMethod.getName());
+    }
+
+    private Properties getProperties() {
         Properties props = new Properties();
         props.setProperty("protex.server.name", "notused");
         props.setProperty("protex.user.name", "notused");
@@ -45,6 +87,7 @@ public class AppAdjusterPluginMechTest {
         props.setProperty("cc.workflow", "notused");
         props.setProperty("cc.owner", "notused");
         props.setProperty("app.adjuster.classname", APP_ADJUSTER_CLASSNAME);
+        props.setProperty("component.change.interceptor.classname", SALVAGE_REM_DATA_CLASSNAME);
         props.setProperty("numprefixed.app.attribute.numericprefix",
                 "null");
         props.setProperty("numprefixed.app.attribute.analyzeddate", "null");
@@ -59,15 +102,6 @@ public class AppAdjusterPluginMechTest {
 
         props.setProperty("numprefixed.new.app.list.filename",
                 "new_app_list.txt");
-        CodeCenterConfigManager config = new CodeCenterConfigManager(props);
-        Object appAdjusterObject = CCIProjectImporterHarness.getAppAdjusterObject(config);
-        assertEquals(APP_ADJUSTER_CLASSNAME, appAdjusterObject.getClass().getName());
-
-        ICodeCenterServerWrapper ccWrapper = new MockCodeCenterServerWrapper(false, true, new Date());
-        IProtexServerWrapper protexWrapper = new MockProtexServerWrapper();
-        Method method = CCIProjectImporterHarness.getAppAdjusterMethod(ccWrapper, protexWrapper, config, appAdjusterObject);
-
-        assertEquals("adjustApp", method.getName());
+        return props;
     }
-
 }
