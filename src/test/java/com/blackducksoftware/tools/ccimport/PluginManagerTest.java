@@ -35,7 +35,7 @@ public class PluginManagerTest {
 
     @Test
     public void testAppAdjuster() throws CodeCenterImportException {
-        Properties props = getPropertiesRealInterceptor();
+        Properties props = getPropertiesNoInterceptor();
         CodeCenterConfigManager config = new CodeCenterConfigManager(props);
         ICodeCenterServerWrapper ccWrapper = new MockCodeCenterServerWrapper(false, true, new Date());
         IProtexServerWrapper<ProtexProjectPojo> protexWrapper = new MockProtexServerWrapper();
@@ -119,10 +119,16 @@ public class PluginManagerTest {
         assertEquals("testAppId2|deletedRequest3|deletedComp3", mockCompChangeInterceptor.getCallsPreProcessDelete().get(2));
     }
 
+    private Properties getPropertiesNoInterceptor() {
+        Properties props = getBasicProperties();
+        return props;
+    }
+
     private Properties getPropertiesRealInterceptor() {
         Properties props = getBasicProperties();
 
         props.setProperty("component.change.interceptor.classname", SALVAGE_REM_DATA_CLASSNAME);
+        props.setProperty("protex.db.server", "notUsed");
         return props;
     }
 
@@ -163,6 +169,7 @@ public class PluginManagerTest {
 
         props.setProperty("numprefixed.new.app.list.filename",
                 "new_app_list.txt");
+
         return props;
     }
 }

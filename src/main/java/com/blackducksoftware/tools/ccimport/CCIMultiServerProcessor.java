@@ -113,11 +113,8 @@ public class CCIMultiServerProcessor extends CCIProcessor {
 
             PlugInManager plugInManager = new PlugInManager(codeCenterConfigManager, codeCenterWrapper,
                     wrapper);
-            // Object appAdjusterObject = PlugInManager
-            // .getAppAdjusterObject(codeCenterConfigManager);
-            // Method appAdjusterMethod = PlugInManager
-            // .getAppAdjusterMethod(super.codeCenterWrapper, wrapper,
-            // codeCenterConfigManager, appAdjusterObject);
+            plugInManager.invokeComponentChangeInterceptorInitMethod();
+
             CodeCenterProjectSynchronizer synchronizer = new CodeCenterProjectSynchronizer(
                     codeCenterWrapper, wrapper, codeCenterConfigManager,
                     plugInManager);

@@ -83,6 +83,7 @@ public class CCISingleServerProcessor extends CCIProcessor {
         super(ccConfigManager, codeCenterServerWrapper);
         protexServerWrapper = createProtexServerWrapper(protexConfigManager);
         PlugInManager plugInManager = new PlugInManager(ccConfigManager, codeCenterServerWrapper, protexServerWrapper);
+        plugInManager.invokeComponentChangeInterceptorInitMethod();
 
         // Construct the factory that the processor will use to create
         // the objects (run multi-threaded) to handle each subset of the project

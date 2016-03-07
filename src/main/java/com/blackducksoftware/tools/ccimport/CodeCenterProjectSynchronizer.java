@@ -175,6 +175,8 @@ public class CodeCenterProjectSynchronizer {
                     log.error("Application Adjuster failed, but proceeding with validation.");
                 }
             }
+            // Initialize component change interceptor for this app
+            plugInManager.invokeComponentChangeInterceptorInitForAppMethod(importedProject.getCciApplication().getApp().getId().getId());
 
         } catch (Exception e) {
             String exceptionMessage = e.getMessage();
@@ -515,19 +517,35 @@ public class CodeCenterProjectSynchronizer {
 
             for (ProtexRequest protexRequest : protexOnlyComponents) {
                 try {
-                    RequestCreate request = new RequestCreate();
+                    try {
+                        plugInManager.invokeComponentChangeInterceptorPreProcessAddMethod(protexRequest.getComponentId().getId());
+                    } catch (CodeCenterImportException e) {
+                        log.error("[{}] Error pre-processing add request: " + e.getMessage(),
+                                applicationName, e);
+                        // TODO: this seems too stealth
+                    }
+                    RequestCreate requestCreate = new RequestCreate();
 
                     // Should this be requested
-                    request.setSubmit(configManager.isSubmit());
+                    requestCreate.setSubmit(configManager.isSubmit());
 
                     RequestApplicationComponentToken token = new RequestApplicationComponentToken();
                     token.setApplicationId(app.getId());
                     token.setComponentId(protexRequest.getComponentId());
 
-                    request.setApplicationComponentToken(token);
-                    request.setLicenseId(protexRequest.getLicenseInfo().getId());
-                    newRequests.add(ccWrapper.getInternalApiWrapper()
-                            .getRequestApi().createRequest(request));
+                    requestCreate.setApplicationComponentToken(token);
+                    requestCreate.setLicenseId(protexRequest.getLicenseInfo().getId());
+                    RequestIdToken newRequest = ccWrapper.getInternalApiWrapper()
+                            .getRequestApi().createRequest(requestCreate);
+                    newRequests.add(newRequest);
+
+                    try {
+                        plugInManager.invokeComponentChangeInterceptorPostProcessAddMethod(newRequest.getId(), protexRequest.getComponentId().getId());
+                    } catch (CodeCenterImportException e) {
+                        log.error("[{}] Error post-processing add request: " + e.getMessage(),
+                                applicationName, e);
+                        // TODO: this seems too stealth
+                    }
 
                     requestsAdded++;
                 } catch (SdkFault e) {
@@ -577,6 +595,13 @@ public class CodeCenterProjectSynchronizer {
 
             try {
                 for (RequestSummary request : ccOnlyComps) {
+                    try {
+                        plugInManager.invokeComponentChangeInterceptorPreProcessDeleteMethod(request.getId().getId(), request.getComponentId().getId());
+                    } catch (CodeCenterImportException e) {
+                        log.error("[{}] Error pre-processing delete request: " + e.getMessage(),
+                                applicationName, e);
+                        // TODO: this seems too stealth
+                    }
                     ccWrapper.getInternalApiWrapper().getRequestApi()
                             .deleteRequest(request.getId());
                     totalRequestsDeleted++;

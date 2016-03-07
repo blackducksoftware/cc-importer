@@ -25,8 +25,6 @@ public class SalvageRemediationData implements CompChangeInterceptor {
 
     private ICodeCenterServerWrapper ccsw = null;
 
-    // private ApplicationPojo app;
-
     private Map<ComponentNameVersionIds, String> addedRequestIds;
 
     private Map<ComponentNameVersionIds, CodeCenterComponentPojo> addedComponents;
@@ -57,6 +55,7 @@ public class SalvageRemediationData implements CompChangeInterceptor {
 
     @Override
     public void init(CCIConfigurationManager config, ICodeCenterServerWrapper ccsw, IProtexServerWrapper<ProtexProjectPojo> psw) throws InterceptorException {
+        log.info("init()");
         this.ccsw = ccsw;
         // If no one (like maybe a test) has injected a (possibly mock) replacement table, construct the standard one
         if (deprecatedComponentReplacementTable == null) {

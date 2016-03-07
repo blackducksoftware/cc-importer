@@ -99,7 +99,7 @@ public class CCIProjectImporterHarness {
                 log.info("Single-Protex mode started");
                 ProtexServerWrapper<ProtexProjectPojo> protexServerWrapper = createProtexServerWrapper(protexConfigManager);
                 PlugInManager plugInManager = new PlugInManager(ccConfigManager, codeCenterServerWrapper, protexServerWrapper);
-
+                plugInManager.invokeComponentChangeInterceptorInitMethod();
                 processor = new CCISingleServerTaskProcessor(ccConfigManager,
                         protexConfigManager, codeCenterServerWrapper,
                         protexServerWrapper, new SyncProjectTaskFactoryImpl(
