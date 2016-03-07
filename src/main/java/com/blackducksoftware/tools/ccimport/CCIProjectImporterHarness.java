@@ -171,8 +171,7 @@ public class CCIProjectImporterHarness {
 
             log.info("Using Code Center URL [{}]", ccBean.getServerName());
 
-            codeCenterWrapper = new CodeCenterServerWrapper(ccBean,
-                    configManager);
+            codeCenterWrapper = new CodeCenterServerWrapper(configManager);
 
         } catch (Exception e) {
             throw new Exception("Unable to establish Code Center connection: "
