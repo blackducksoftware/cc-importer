@@ -64,11 +64,17 @@ public class PluginMechTest {
                 config, interceptorObject);
         assertEquals("init", initMethod.getName());
 
-        Method initForAppMethod = PlugInManager.getCompChangeInterceptorInitForAppMethod(ccWrapper,
-                protexWrapper,
-                config, interceptorObject);
-
+        Method initForAppMethod = PlugInManager.getCompChangeInterceptorInitForAppMethod(interceptorObject);
         assertEquals("initForApp", initForAppMethod.getName());
+
+        Method preProcessAddMethod = PlugInManager.getCompChangeInterceptorPreProcessAddMethod(interceptorObject);
+        assertEquals("preProcessAdd", preProcessAddMethod.getName());
+
+        Method postProcessAddMethod = PlugInManager.getCompChangeInterceptorPostProcessAddMethod(interceptorObject);
+        assertEquals("postProcessAdd", postProcessAddMethod.getName());
+
+        Method preProcessDeleteMethod = PlugInManager.getCompChangeInterceptorPreProcessDeleteMethod(interceptorObject);
+        assertEquals("preProcessDelete", preProcessDeleteMethod.getName());
     }
 
     private Properties getProperties() {

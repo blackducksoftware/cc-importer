@@ -17,15 +17,29 @@ import com.blackducksoftware.tools.commonframework.standard.protex.ProtexProject
 import com.blackducksoftware.tools.connector.codecenter.ICodeCenterServerWrapper;
 import com.blackducksoftware.tools.connector.protex.IProtexServerWrapper;
 
+/**
+ * Checks for and instantiates optional configured plugins: AppAdjuster, Component Change Interceptor.
+ *
+ * @author sbillings
+ *
+ */
 public class PlugInManager {
     private static final Logger log = LoggerFactory.getLogger(PlugInManager.class.getName());
 
+    /**
+     * Get AppAdjuster object
+     *
+     * @param config
+     * @return
+     * @throws CodeCenterImportException
+     */
     static Object getAppAdjusterObject(CCIConfigurationManager config)
             throws CodeCenterImportException {
 
         // See if the user has configured a custom app adjuster
         String appAdjusterClassname = config.getAppAdjusterClassname();
         if (appAdjusterClassname == null) {
+            log.info("No App Adjuster has been configured");
             return null; // No custom app adjuster has been configured
         }
         // Get the user-configured custom app adjuster class
@@ -58,7 +72,7 @@ public class PlugInManager {
 
     /**
      * If a custom app adjuster (to modify app metadata after sync) has been
-     * configured, initialize it.
+     * configured, initialize it and return its adjustApp(CCIApplication app, CCIProject project) method.
      *
      * @param config
      * @throws CodeCenterImportException
@@ -89,14 +103,14 @@ public class PlugInManager {
         }
 
         // Get the adjustApp method on the custom app adjuster class
-        Class<?>[] adjustAppMethodArgTypes = { CCIApplication.class,
+        Class<?>[] argTypes = { CCIApplication.class,
                 CCIProject.class };
         Method appAdjusterMethod = null;
         try {
             appAdjusterMethod = sourceClass.getDeclaredMethod("adjustApp",
-                    adjustAppMethodArgTypes);
+                    argTypes);
         } catch (NoSuchMethodException e) {
-            String msg = "Unable to get app adjuster method: No such method exception: "
+            String msg = "Unable to get app adjuster adjustApp(CCIApplication app, CCIProject project) method: No such method exception: "
                     + appAdjusterObject.getClass().getName();
             throw new CodeCenterImportException(msg);
         }
@@ -120,12 +134,20 @@ public class PlugInManager {
         return appAdjusterMethod;
     }
 
+    /**
+     * Get the Component Change Interceptor
+     *
+     * @param config
+     * @return
+     * @throws CodeCenterImportException
+     */
     static Object getCompChangeInterceptorObject(CCIConfigurationManager config)
             throws CodeCenterImportException {
 
         // See if the user has configured a custom component change interceptor
         String compChangeInterceptorClassname = config.getCompChangeInterceptorClassname();
         if (compChangeInterceptorClassname == null) {
+            log.info("No Component Change Interceptor has been configured");
             return null; // No custom app adjuster has been configured
         }
         // Get the user-configured custom app adjuster class
@@ -156,41 +178,67 @@ public class PlugInManager {
         return compChangeInterceptorObject;
     }
 
+    /**
+     * Get the Component Change Interceptor init(CCIConfigurationManager config, ICodeCenterServerWrapper ccsw,
+     * IProtexServerWrapper psw) method.
+     *
+     * @param ccWrapper
+     * @param protexWrapper
+     * @param config
+     * @param compChangeInterceptorObject
+     * @return
+     * @throws CodeCenterImportException
+     */
     static Method getCompChangeInterceptorInitMethod(ICodeCenterServerWrapper ccWrapper,
             IProtexServerWrapper<ProtexProjectPojo> protexWrapper,
             CCIConfigurationManager config, Object compChangeInterceptorObject)
             throws CodeCenterImportException {
 
+        if (compChangeInterceptorObject == null) {
+            log.warn("Component Change Interceptor object is null");
+            return null;
+        }
+
         Class<CompChangeInterceptor> sourceClass = (Class<CompChangeInterceptor>) compChangeInterceptorObject.getClass();
 
         // Get the init method on the custom comp change interceptor class
         Method initMethod = null;
-        Class<?>[] initMethodArgTypes = { CCIConfigurationManager.class, ICodeCenterServerWrapper.class,
+        Class<?>[] argTypes = { CCIConfigurationManager.class, ICodeCenterServerWrapper.class,
                 IProtexServerWrapper.class };
         try {
             initMethod = sourceClass.getDeclaredMethod("init",
-                    initMethodArgTypes);
+                    argTypes);
         } catch (NoSuchMethodException e) {
-            String msg = "Unable to get component change interceptor init method: No such method exception: "
+            String msg = "Unable to get component change interceptor init(CCIConfigurationManager config, ICodeCenterServerWrapper ccsw, IProtexServerWrapper psw) method: No such method exception: "
                     + sourceClass.getName();
             throw new CodeCenterImportException(msg);
         }
         return initMethod;
     }
 
-    static Method getCompChangeInterceptorInitForAppMethod(ICodeCenterServerWrapper ccWrapper,
-            IProtexServerWrapper<ProtexProjectPojo> protexWrapper,
-            CCIConfigurationManager config, Object compChangeInterceptorObject)
+    /**
+     * Get the Component Change Interceptor initForApp(String appName) method.
+     *
+     * @param compChangeInterceptorObject
+     * @return
+     * @throws CodeCenterImportException
+     */
+    static Method getCompChangeInterceptorInitForAppMethod(Object compChangeInterceptorObject)
             throws CodeCenterImportException {
+
+        if (compChangeInterceptorObject == null) {
+            log.warn("Component Change Interceptor object is null");
+            return null;
+        }
 
         Class<CompChangeInterceptor> sourceClass = (Class<CompChangeInterceptor>) compChangeInterceptorObject.getClass();
 
         // Get the initForApp(String appName) method on the custom comp change interceptor class
-        Class<?>[] adjustAppMethodArgTypes = { String.class };
+        Class<?>[] argTypes = { String.class };
         Method compChangeInterceptorInitForAppMethod = null;
         try {
             compChangeInterceptorInitForAppMethod = sourceClass.getDeclaredMethod("initForApp",
-                    adjustAppMethodArgTypes);
+                    argTypes);
         } catch (NoSuchMethodException e) {
             String msg = "Unable to get comp change interceptor initForApp(String appName) method: No such method exception: "
                     + sourceClass.getName();
@@ -198,5 +246,101 @@ public class PlugInManager {
         }
 
         return compChangeInterceptorInitForAppMethod;
+    }
+
+    /**
+     * Get the Component Change Interceptor preProcessAdd(String compId) method.
+     *
+     * @param compChangeInterceptorObject
+     * @return
+     * @throws CodeCenterImportException
+     */
+    static Method getCompChangeInterceptorPreProcessAddMethod(Object compChangeInterceptorObject)
+            throws CodeCenterImportException {
+
+        if (compChangeInterceptorObject == null) {
+            log.warn("Component Change Interceptor object is null");
+            return null;
+        }
+
+        Class<CompChangeInterceptor> sourceClass = (Class<CompChangeInterceptor>) compChangeInterceptorObject.getClass();
+
+        // Get the preProcessAdd(String compId) method on the custom comp change interceptor class
+        Class<?>[] argTypes = { String.class };
+        Method compChangeInterceptorPreProcessAddMethod = null;
+        try {
+            compChangeInterceptorPreProcessAddMethod = sourceClass.getDeclaredMethod("preProcessAdd",
+                    argTypes);
+        } catch (NoSuchMethodException e) {
+            String msg = "Unable to get comp change interceptor preProcessAdd(String compId) method: No such method exception: "
+                    + sourceClass.getName();
+            throw new CodeCenterImportException(msg);
+        }
+
+        return compChangeInterceptorPreProcessAddMethod;
+    }
+
+    /**
+     * Get the Component Change Interceptor postProcessAdd(String requestId, String compId) method.
+     *
+     * @param compChangeInterceptorObject
+     * @return
+     * @throws CodeCenterImportException
+     */
+    static Method getCompChangeInterceptorPostProcessAddMethod(Object compChangeInterceptorObject)
+            throws CodeCenterImportException {
+
+        if (compChangeInterceptorObject == null) {
+            log.warn("Component Change Interceptor object is null");
+            return null;
+        }
+
+        Class<CompChangeInterceptor> sourceClass = (Class<CompChangeInterceptor>) compChangeInterceptorObject.getClass();
+
+        // Get the postProcessAdd(String compId) method on the custom comp change interceptor class
+        Class<?>[] argTypes = { String.class, String.class };
+        Method compChangeInterceptorPostProcessAddMethod = null;
+        try {
+            compChangeInterceptorPostProcessAddMethod = sourceClass.getDeclaredMethod("postProcessAdd",
+                    argTypes);
+        } catch (NoSuchMethodException e) {
+            String msg = "Unable to get comp change interceptor postProcessAdd(String requestId, String compId) method: No such method exception: "
+                    + sourceClass.getName();
+            throw new CodeCenterImportException(msg);
+        }
+
+        return compChangeInterceptorPostProcessAddMethod;
+    }
+
+    /**
+     * Get the Component Change Interceptor preProcessDelete(String requestId, String compId) method.
+     *
+     * @param compChangeInterceptorObject
+     * @return
+     * @throws CodeCenterImportException
+     */
+    static Method getCompChangeInterceptorPreProcessDeleteMethod(Object compChangeInterceptorObject)
+            throws CodeCenterImportException {
+
+        if (compChangeInterceptorObject == null) {
+            log.warn("Component Change Interceptor object is null");
+            return null;
+        }
+
+        Class<CompChangeInterceptor> sourceClass = (Class<CompChangeInterceptor>) compChangeInterceptorObject.getClass();
+
+        // Get the preProcessDelete(String compId) method on the custom comp change interceptor class
+        Class<?>[] argTypes = { String.class, String.class };
+        Method compChangeInterceptorPreProcessDeleteMethod = null;
+        try {
+            compChangeInterceptorPreProcessDeleteMethod = sourceClass.getDeclaredMethod("preProcessDelete",
+                    argTypes);
+        } catch (NoSuchMethodException e) {
+            String msg = "Unable to get comp change interceptor preProcessDelete(String requestId, String compId) method: No such method exception: "
+                    + sourceClass.getName();
+            throw new CodeCenterImportException(msg);
+        }
+
+        return compChangeInterceptorPreProcessDeleteMethod;
     }
 }
