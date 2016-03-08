@@ -316,78 +316,78 @@ public class SyncProjectTask implements Callable<CCIReportSummary> {
         appNameVersionToken.setName(applicationName);
         appNameVersionToken.setVersion(version);
 
-        // try {
-        // // Check if Application exists; TODO TAKE OUT THIS CHECK; WE WOULD
-        // NOT BE HERE IF IT EXISTED
-        // app = ccWrapper.getInternalApiWrapper().getApplicationApi()
-        // .getApplication(appNameVersionToken);
-        // log.info("[{}] Exists in Code Center.", applicationName);
-        //
-        // // wrap it in a CCIApplication, which tracks whether it's new or not
-        // return new CCIApplication(app, false);
-        //
-        // } catch (SdkFault e) {
-        // ErrorCode code = e.getFaultInfo().getErrorCode();
-        // if (code == ErrorCode.NO_APPLICATION_NAMEVERISON_FOUND) {
-        // createNewApplication = true;
-        // log.info(
-        // "[{}] Does NOT exist in Code Center. Attempting to create it...",
-        // applicationName);
-        // } else {
-        // log.info(
-        // "[{}] Exception occurred when checking if application exists:{}",
-        // applicationName, e.getMessage());
-        // throw new CodeCenterImportException(
-        // "Error when getting Application:" + e.getMessage(), e);
-        // }
-        // }
-
-        // if (createNewApplication) {
+        boolean createNewApplication = false;
         try {
-            String workflowName = configManager.getWorkflow();
-            String owner = configManager.getOwner();
-
-            // Setup application to create it
-            ApplicationCreate appCreate = new ApplicationCreate();
-            appCreate.setName(applicationName);
-            appCreate.setVersion(version);
-
-            // This is the description that will show up in the main
-            // application
-            // view in Code Center.
-            String description = CCIConstants.DESCRIPTION
-                    + configManager.getVersion();
-            appCreate.setDescription(description);
-            WorkflowNameToken wf = new WorkflowNameToken();
-            wf.setName(workflowName);
-            appCreate.setWorkflowId(wf);
-            UserNameToken ownerToken = new UserNameToken();
-            ownerToken.setName(owner);
-            appCreate.setOwnerId(ownerToken);
-            RoleNameToken role = new RoleNameToken();
-            role.setName("Application Administrator"); // TODO should be
-            // configurable
-            appCreate.setOwnerRoleId(role);
-
-            // create Application
-            appIdToken = ccWrapper.getInternalApiWrapper().getApplicationApi()
-                    .createApplication(appCreate);
-
-            // retrieve it
+            // Check if Application exists (it may or may not)
             app = ccWrapper.getInternalApiWrapper().getApplicationApi()
-                    .getApplication(appIdToken);
+                    .getApplication(appNameVersionToken);
+            log.info("[{}] Exists in Code Center.", applicationName);
 
-            // wrap it in a CCIApplication, which tracks whether it's new or
-            // not
-            cciApp = new CCIApplication(app, true);
-            log.info("...success!");
+            // wrap it in a CCIApplication, which tracks whether it's new or not
+            return new CCIApplication(app, false);
 
-        } catch (SdkFault sdke) {
-            throw new CodeCenterImportException(
-                    "Creating Code Center application failed:"
-                            + sdke.getMessage(), sdke);
+        } catch (SdkFault e) {
+            ErrorCode code = e.getFaultInfo().getErrorCode();
+            if (code == ErrorCode.NO_APPLICATION_NAMEVERISON_FOUND) {
+                createNewApplication = true;
+                log.info(
+                        "[{}] Does NOT exist in Code Center. Attempting to create it...",
+                        applicationName);
+            } else {
+                log.info(
+                        "[{}] Exception occurred when checking if application exists:{}",
+                        applicationName, e.getMessage());
+                throw new CodeCenterImportException(
+                        "Error when getting Application:" + e.getMessage(), e);
+            }
         }
-        // }
+
+        if (createNewApplication) {
+            try {
+                String workflowName = configManager.getWorkflow();
+                String owner = configManager.getOwner();
+
+                // Setup application to create it
+                ApplicationCreate appCreate = new ApplicationCreate();
+                appCreate.setName(applicationName);
+                appCreate.setVersion(version);
+
+                // This is the description that will show up in the main
+                // application
+                // view in Code Center.
+                String description = CCIConstants.DESCRIPTION
+                        + configManager.getVersion();
+                appCreate.setDescription(description);
+                WorkflowNameToken wf = new WorkflowNameToken();
+                wf.setName(workflowName);
+                appCreate.setWorkflowId(wf);
+                UserNameToken ownerToken = new UserNameToken();
+                ownerToken.setName(owner);
+                appCreate.setOwnerId(ownerToken);
+                RoleNameToken role = new RoleNameToken();
+                role.setName("Application Administrator"); // TODO should be
+                // configurable
+                appCreate.setOwnerRoleId(role);
+
+                // create Application
+                appIdToken = ccWrapper.getInternalApiWrapper().getApplicationApi()
+                        .createApplication(appCreate);
+
+                // retrieve it
+                app = ccWrapper.getInternalApiWrapper().getApplicationApi()
+                        .getApplication(appIdToken);
+
+                // wrap it in a CCIApplication, which tracks whether it's new or
+                // not
+                cciApp = new CCIApplication(app, true);
+                log.info("...success!");
+
+            } catch (SdkFault sdke) {
+                throw new CodeCenterImportException(
+                        "Creating Code Center application failed:"
+                                + sdke.getMessage(), sdke);
+            }
+        }
 
         return cciApp;
     }
