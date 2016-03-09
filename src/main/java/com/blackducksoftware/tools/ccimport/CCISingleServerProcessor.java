@@ -40,6 +40,8 @@ import com.blackducksoftware.tools.commonframework.core.config.server.ServerBean
 import com.blackducksoftware.tools.commonframework.core.multithreading.ListDistributor;
 import com.blackducksoftware.tools.commonframework.standard.protex.ProtexProjectPojo;
 import com.blackducksoftware.tools.connector.codecenter.CodeCenterServerWrapper;
+import com.blackducksoftware.tools.connector.codecenter.ICodeCenterServerWrapper;
+import com.blackducksoftware.tools.connector.protex.IProtexServerWrapper;
 import com.blackducksoftware.tools.connector.protex.ProtexServerWrapper;
 
 /**
@@ -57,7 +59,7 @@ public class CCISingleServerProcessor extends CCIProcessor {
     private static final Logger log = LoggerFactory
             .getLogger(CCISingleServerProcessor.class.getName());
 
-    private final ProtexServerWrapper<ProtexProjectPojo> protexServerWrapper;
+    private final IProtexServerWrapper<ProtexProjectPojo> protexServerWrapper;
 
     private final int numThreads;
 
@@ -78,7 +80,7 @@ public class CCISingleServerProcessor extends CCIProcessor {
      */
     public CCISingleServerProcessor(CodeCenterConfigManager ccConfigManager,
             ProtexConfigManager protexConfigManager,
-            CodeCenterServerWrapper codeCenterServerWrapper) throws Exception {
+            ICodeCenterServerWrapper codeCenterServerWrapper) throws Exception {
 
         super(ccConfigManager, codeCenterServerWrapper);
         protexServerWrapper = createProtexServerWrapper(protexConfigManager);

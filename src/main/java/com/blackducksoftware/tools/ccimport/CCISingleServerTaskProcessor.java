@@ -46,8 +46,8 @@ import com.blackducksoftware.tools.ccimporter.model.CCIProjectList;
 import com.blackducksoftware.tools.commonframework.core.config.ConfigConstants.APPLICATION;
 import com.blackducksoftware.tools.commonframework.core.config.server.ServerBean;
 import com.blackducksoftware.tools.commonframework.standard.protex.ProtexProjectPojo;
-import com.blackducksoftware.tools.connector.codecenter.CodeCenterServerWrapper;
-import com.blackducksoftware.tools.connector.protex.ProtexServerWrapper;
+import com.blackducksoftware.tools.connector.codecenter.ICodeCenterServerWrapper;
+import com.blackducksoftware.tools.connector.protex.IProtexServerWrapper;
 
 /**
  * Synchronizes a single Protex server with a Code Center server using a
@@ -66,7 +66,7 @@ public class CCISingleServerTaskProcessor extends CCIProcessor {
 
     private final ProtexConfigManager protexConfigManager;
 
-    private final ProtexServerWrapper<ProtexProjectPojo> protexServerWrapper;
+    private final IProtexServerWrapper<ProtexProjectPojo> protexServerWrapper;
 
     private final SyncProjectTaskFactory taskFactory;
 
@@ -82,8 +82,8 @@ public class CCISingleServerTaskProcessor extends CCIProcessor {
     public CCISingleServerTaskProcessor(
             CodeCenterConfigManager ccConfigManager,
             ProtexConfigManager protexConfigManager,
-            CodeCenterServerWrapper codeCenterServerWrapper,
-            ProtexServerWrapper<ProtexProjectPojo> protexServerWrapper,
+            ICodeCenterServerWrapper codeCenterServerWrapper,
+            IProtexServerWrapper<ProtexProjectPojo> protexServerWrapper,
             SyncProjectTaskFactory taskFactory) throws Exception {
 
         super(ccConfigManager, codeCenterServerWrapper);

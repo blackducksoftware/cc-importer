@@ -23,7 +23,7 @@ import com.blackducksoftware.tools.ccimport.report.CCIReportSummary;
 import com.blackducksoftware.tools.ccimporter.config.CodeCenterConfigManager;
 import com.blackducksoftware.tools.ccimporter.model.CCIProject;
 import com.blackducksoftware.tools.commonframework.standard.protex.ProtexProjectPojo;
-import com.blackducksoftware.tools.connector.codecenter.CodeCenterServerWrapper;
+import com.blackducksoftware.tools.connector.codecenter.ICodeCenterServerWrapper;
 import com.blackducksoftware.tools.connector.protex.IProtexServerWrapper;
 
 /**
@@ -35,7 +35,7 @@ import com.blackducksoftware.tools.connector.protex.IProtexServerWrapper;
  */
 public class ProjectProcessorThreadWorkerFactoryImpl implements
         ProjectProcessorThreadWorkerFactory {
-    private final CodeCenterServerWrapper codeCenterWrapper;
+    private final ICodeCenterServerWrapper codeCenterWrapper;
 
     private final IProtexServerWrapper<ProtexProjectPojo> protexServerWrapper;
 
@@ -44,7 +44,7 @@ public class ProjectProcessorThreadWorkerFactoryImpl implements
     private final PlugInManager plugInManager;
 
     public ProjectProcessorThreadWorkerFactoryImpl(
-            CodeCenterServerWrapper codeCenterWrapper,
+            ICodeCenterServerWrapper codeCenterWrapper,
             IProtexServerWrapper<ProtexProjectPojo> protexServerWrapper,
             CodeCenterConfigManager codeCenterConfigManager,
             PlugInManager plugInManager) {

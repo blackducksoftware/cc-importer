@@ -32,7 +32,7 @@ import com.blackducksoftware.tools.ccimporter.model.CCIProject;
 import com.blackducksoftware.tools.commonframework.core.config.ConfigConstants.APPLICATION;
 import com.blackducksoftware.tools.commonframework.core.config.server.ServerBean;
 import com.blackducksoftware.tools.commonframework.standard.protex.ProtexProjectPojo;
-import com.blackducksoftware.tools.connector.codecenter.CodeCenterServerWrapper;
+import com.blackducksoftware.tools.connector.codecenter.ICodeCenterServerWrapper;
 import com.blackducksoftware.tools.connector.protex.ProtexServerWrapper;
 
 /**
@@ -56,7 +56,7 @@ public class CCIMultiServerProcessor extends CCIProcessor {
      */
     public CCIMultiServerProcessor(CodeCenterConfigManager configManager,
             ProtexConfigManager protexConfigManager,
-            CodeCenterServerWrapper codeCenterServerWrapper) throws Exception {
+            ICodeCenterServerWrapper codeCenterServerWrapper) throws Exception {
         super(configManager, codeCenterServerWrapper);
         protexConfig = protexConfigManager;
         log.info("Using Protex URL [{}]", protexConfig.getServerBean(APPLICATION.PROTEX)

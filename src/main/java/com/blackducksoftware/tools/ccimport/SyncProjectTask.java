@@ -50,8 +50,8 @@ import com.blackducksoftware.tools.ccimporter.config.CCIConstants;
 import com.blackducksoftware.tools.ccimporter.model.CCIApplication;
 import com.blackducksoftware.tools.ccimporter.model.CCIProject;
 import com.blackducksoftware.tools.commonframework.standard.protex.ProtexProjectPojo;
-import com.blackducksoftware.tools.connector.codecenter.CodeCenterServerWrapper;
-import com.blackducksoftware.tools.connector.protex.ProtexServerWrapper;
+import com.blackducksoftware.tools.connector.codecenter.ICodeCenterServerWrapper;
+import com.blackducksoftware.tools.connector.protex.IProtexServerWrapper;
 
 public class SyncProjectTask implements Callable<CCIReportSummary> {
     private final Logger log = LoggerFactory.getLogger(this.getClass()
@@ -63,15 +63,15 @@ public class SyncProjectTask implements Callable<CCIReportSummary> {
 
     private final CCIReportSummary reportSummary = new CCIReportSummary();
 
-    private final CodeCenterServerWrapper ccWrapper;
+    private final ICodeCenterServerWrapper ccWrapper;
 
-    private final ProtexServerWrapper<ProtexProjectPojo> protexWrapper;
+    private final IProtexServerWrapper<ProtexProjectPojo> protexWrapper;
 
     private final PlugInManager plugInManager;
 
     public SyncProjectTask(CCIConfigurationManager config,
-            CodeCenterServerWrapper codeCenterWrapper,
-            ProtexServerWrapper<ProtexProjectPojo> protexWrapper,
+            ICodeCenterServerWrapper codeCenterWrapper,
+            IProtexServerWrapper<ProtexProjectPojo> protexWrapper,
             PlugInManager plugInManager,
             CCIProject project) {
         configManager = config;

@@ -27,7 +27,7 @@ import com.blackducksoftware.tools.ccimport.report.CCIReportSummary;
 import com.blackducksoftware.tools.ccimporter.config.CodeCenterConfigManager;
 import com.blackducksoftware.tools.ccimporter.model.CCIProject;
 import com.blackducksoftware.tools.commonframework.standard.protex.ProtexProjectPojo;
-import com.blackducksoftware.tools.connector.codecenter.CodeCenterServerWrapper;
+import com.blackducksoftware.tools.connector.codecenter.ICodeCenterServerWrapper;
 import com.blackducksoftware.tools.connector.protex.IProtexServerWrapper;
 
 /**
@@ -41,7 +41,7 @@ public class ProjectProcessorThreadWorker implements Runnable {
     private final Logger log = LoggerFactory.getLogger(this.getClass()
             .getName());
 
-    private final CodeCenterServerWrapper codeCenterServerWrapper;
+    private final ICodeCenterServerWrapper codeCenterServerWrapper;
 
     private final IProtexServerWrapper<ProtexProjectPojo> protexServerWrapper;
 
@@ -54,7 +54,7 @@ public class ProjectProcessorThreadWorker implements Runnable {
     private final PlugInManager plugInManager;
 
     public ProjectProcessorThreadWorker(
-            CodeCenterServerWrapper codeCenterWrapper,
+            ICodeCenterServerWrapper codeCenterWrapper,
             IProtexServerWrapper<ProtexProjectPojo> protexWrapper,
             CodeCenterConfigManager codeCenterConfigManager,
             List<CCIProject> partialProjectList,

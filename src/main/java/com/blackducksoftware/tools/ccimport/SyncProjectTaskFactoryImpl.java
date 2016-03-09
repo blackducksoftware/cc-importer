@@ -23,23 +23,23 @@ import com.blackducksoftware.tools.ccimport.report.CCIReportSummary;
 import com.blackducksoftware.tools.ccimporter.config.CCIConfigurationManager;
 import com.blackducksoftware.tools.ccimporter.model.CCIProject;
 import com.blackducksoftware.tools.commonframework.standard.protex.ProtexProjectPojo;
-import com.blackducksoftware.tools.connector.codecenter.CodeCenterServerWrapper;
-import com.blackducksoftware.tools.connector.protex.ProtexServerWrapper;
+import com.blackducksoftware.tools.connector.codecenter.ICodeCenterServerWrapper;
+import com.blackducksoftware.tools.connector.protex.IProtexServerWrapper;
 
 public class SyncProjectTaskFactoryImpl implements SyncProjectTaskFactory {
 
     private final CCIConfigurationManager config;
 
-    private final CodeCenterServerWrapper codeCenterWrapper;
+    private final ICodeCenterServerWrapper codeCenterWrapper;
 
-    private final ProtexServerWrapper<ProtexProjectPojo> protexWrapper;
+    private final IProtexServerWrapper<ProtexProjectPojo> protexWrapper;
 
     private final PlugInManager plugInManager;
 
     public SyncProjectTaskFactoryImpl(
             CCIConfigurationManager config,
-            CodeCenterServerWrapper codeCenterWrapper,
-            ProtexServerWrapper<ProtexProjectPojo> protexWrapper,
+            ICodeCenterServerWrapper codeCenterWrapper,
+            IProtexServerWrapper<ProtexProjectPojo> protexWrapper,
             PlugInManager plugInManager) {
         this.config = config;
         this.codeCenterWrapper = codeCenterWrapper;
