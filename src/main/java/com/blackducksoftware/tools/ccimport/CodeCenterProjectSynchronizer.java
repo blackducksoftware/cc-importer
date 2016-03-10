@@ -52,7 +52,7 @@ import com.blackducksoftware.tools.ccimporter.config.CCIConstants;
 import com.blackducksoftware.tools.ccimporter.model.CCIApplication;
 import com.blackducksoftware.tools.ccimporter.model.CCIProject;
 import com.blackducksoftware.tools.commonframework.standard.protex.ProtexProjectPojo;
-import com.blackducksoftware.tools.connector.codecenter.CodeCenterServerWrapper;
+import com.blackducksoftware.tools.connector.codecenter.ICodeCenterServerWrapper;
 import com.blackducksoftware.tools.connector.protex.IProtexServerWrapper;
 
 /**
@@ -70,7 +70,7 @@ public class CodeCenterProjectSynchronizer {
 
     private final Method appAdjusterMethod;
 
-    private final CodeCenterServerWrapper ccWrapper;
+    private final ICodeCenterServerWrapper ccWrapper;
 
     private final IProtexServerWrapper<ProtexProjectPojo> protexWrapper;
 
@@ -79,7 +79,7 @@ public class CodeCenterProjectSynchronizer {
     private final CCIReportSummary reportSummary = new CCIReportSummary();
 
     public CodeCenterProjectSynchronizer(
-            CodeCenterServerWrapper codeCenterWrapper,
+            ICodeCenterServerWrapper codeCenterWrapper,
             IProtexServerWrapper<ProtexProjectPojo> protexWrapper,
             CCIConfigurationManager config, Object appAdjusterObject,
             Method appAdjusterMethod) throws CodeCenterImportException {

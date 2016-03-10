@@ -8,12 +8,12 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License version 2
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  *******************************************************************************/
 package com.blackducksoftware.tools.ccimport.report;
 
@@ -39,9 +39,9 @@ import com.blackducksoftware.tools.commonframework.standard.datatable.RecordDef;
 import com.blackducksoftware.tools.commonframework.standard.datatable.writer.DataSetWriter;
 import com.blackducksoftware.tools.commonframework.standard.datatable.writer.DataSetWriterExcel;
 import com.blackducksoftware.tools.commonframework.standard.protex.ProtexProjectPojo;
-import com.blackducksoftware.tools.connector.codecenter.CodeCenterServerWrapper;
+import com.blackducksoftware.tools.connector.codecenter.ICodeCenterServerWrapper;
 import com.blackducksoftware.tools.connector.codecenter.dao.CodeCenterApplicationDao;
-import com.blackducksoftware.tools.connector.protex.ProtexServerWrapper;
+import com.blackducksoftware.tools.connector.protex.IProtexServerWrapper;
 
 /**
  * Class responsible for the report generation portion of the CCI.
@@ -57,16 +57,16 @@ public class CCIReportGenerator {
 
     private final static int EXCEL_CELL_MAX_CHARS = 32767;
 
-    private final CodeCenterServerWrapper codeCenterWrapper;
+    private final ICodeCenterServerWrapper codeCenterWrapper;
 
-    private final ProtexServerWrapper<ProtexProjectPojo> protexWrapper;
+    private final IProtexServerWrapper<ProtexProjectPojo> protexWrapper;
 
     private DataTable dataTable;
 
     private RecordDef recordDef;
 
-    public CCIReportGenerator(CodeCenterServerWrapper codeCenterWrapper,
-            ProtexServerWrapper<ProtexProjectPojo> protexWrapper) {
+    public CCIReportGenerator(ICodeCenterServerWrapper codeCenterWrapper,
+            IProtexServerWrapper<ProtexProjectPojo> protexWrapper) {
         this.codeCenterWrapper = codeCenterWrapper;
         this.protexWrapper = protexWrapper;
 

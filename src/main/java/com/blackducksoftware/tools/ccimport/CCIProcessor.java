@@ -8,12 +8,12 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License version 2
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  *******************************************************************************/
 
 /**
@@ -33,10 +33,10 @@ import com.blackducksoftware.tools.ccimport.report.CCIReportSummary;
 import com.blackducksoftware.tools.ccimporter.config.CodeCenterConfigManager;
 import com.blackducksoftware.tools.ccimporter.model.CCIProject;
 import com.blackducksoftware.tools.ccimporter.model.CCIProjectList;
-import com.blackducksoftware.tools.connector.protex.ProtexServerWrapper;
-import com.blackducksoftware.tools.connector.codecenter.CodeCenterServerWrapper;
 import com.blackducksoftware.tools.commonframework.standard.common.ProjectPojo;
 import com.blackducksoftware.tools.commonframework.standard.protex.ProtexProjectPojo;
+import com.blackducksoftware.tools.connector.codecenter.ICodeCenterServerWrapper;
+import com.blackducksoftware.tools.connector.protex.IProtexServerWrapper;
 
 /**
  * Common functionality shared between the single and multi processors.
@@ -47,10 +47,11 @@ import com.blackducksoftware.tools.commonframework.standard.protex.ProtexProject
  */
 public abstract class CCIProcessor {
     private final Logger log = LoggerFactory.getLogger(this.getClass()
-	    .getName());
+            .getName());
 
     protected final CodeCenterConfigManager codeCenterConfigManager;
-    protected final CodeCenterServerWrapper codeCenterWrapper;
+
+    protected final ICodeCenterServerWrapper codeCenterWrapper;
 
     protected List<CCIReportSummary> reportSummaryList = new ArrayList<CCIReportSummary>();
 
@@ -61,9 +62,9 @@ public abstract class CCIProcessor {
      * @throws Exception
      */
     public CCIProcessor(CodeCenterConfigManager configManager,
-	    CodeCenterServerWrapper codeCenterServerWrapper) throws Exception {
-	codeCenterConfigManager = configManager;
-	codeCenterWrapper = codeCenterServerWrapper;
+            ICodeCenterServerWrapper codeCenterServerWrapper) throws Exception {
+        codeCenterConfigManager = configManager;
+        codeCenterWrapper = codeCenterServerWrapper;
     }
 
     /**
@@ -105,45 +106,45 @@ public abstract class CCIProcessor {
      * @throws Exception
      */
     public CCIProjectList getProjects(
-	    ProtexServerWrapper<ProtexProjectPojo> protexWrapper)
-	    throws CodeCenterImportException {
-	List<CCIProject> projectList = new ArrayList<CCIProject>();
-	CCIProjectList listObject;
+            IProtexServerWrapper<ProtexProjectPojo> protexWrapper)
+            throws CodeCenterImportException {
+        List<CCIProject> projectList = new ArrayList<CCIProject>();
+        CCIProjectList listObject;
 
-	List<CCIProject> userProjectList = codeCenterConfigManager
-		.getProjectList();
-	if (userProjectList.size() == 0) {
-	    projectList = getAllProjects(protexWrapper);
-	    listObject = new CCIProjectList(projectList);
-	    listObject.setUserSpecifiedSubset(false);
-	} else {
-	    log.info("Getting user supplied projects");
-	    listObject = new CCIProjectList();
-	    listObject.setUserSpecifiedSubset(true);
+        List<CCIProject> userProjectList = codeCenterConfigManager
+                .getProjectList();
+        if (userProjectList.size() == 0) {
+            projectList = getAllProjects(protexWrapper);
+            listObject = new CCIProjectList(projectList);
+            listObject.setUserSpecifiedSubset(false);
+        } else {
+            log.info("Getting user supplied projects");
+            listObject = new CCIProjectList();
+            listObject.setUserSpecifiedSubset(true);
 
-	    for (CCIProject project : userProjectList) {
-		try {
-		    // Retrieve the POJO from the SDK (this verifies that the
-		    // project name is intact)
-		    ProjectPojo projectPojo = protexWrapper
-			    .getProjectByName(project.getProjectName());
-		    log.info("Found project: " + projectPojo.getProjectName());
+            for (CCIProject project : userProjectList) {
+                try {
+                    // Retrieve the POJO from the SDK (this verifies that the
+                    // project name is intact)
+                    ProjectPojo projectPojo = protexWrapper
+                            .getProjectByName(project.getProjectName());
+                    log.info("Found project: " + projectPojo.getProjectName());
 
-		    // If project came back, it is "valid", add it to our list
-		    // and move on.
-		    project.setProjectKey(projectPojo.getProjectKey());
-		    projectList.add(project);
-		} catch (Exception e) {
-		    log.error("Unable to find Protex project with name: "
-			    + project);
-		    listObject.addInvalidProject(project.getProjectName(),
-			    project.getProjectVersion());
-		}
-	    }
-	}
+                    // If project came back, it is "valid", add it to our list
+                    // and move on.
+                    project.setProjectKey(projectPojo.getProjectKey());
+                    projectList.add(project);
+                } catch (Exception e) {
+                    log.error("Unable to find Protex project with name: "
+                            + project);
+                    listObject.addInvalidProject(project.getProjectName(),
+                            project.getProjectVersion());
+                }
+            }
+        }
 
-	listObject.setList(projectList);
-	return listObject;
+        listObject.setList(projectList);
+        return listObject;
 
     }
 
@@ -153,22 +154,22 @@ public abstract class CCIProcessor {
      * @throws Exception
      */
     private List<CCIProject> getAllProjects(
-	    ProtexServerWrapper<ProtexProjectPojo> protexWrapper)
-	    throws CodeCenterImportException {
-	log.info("Getting ALL user projects.");
-	List<CCIProject> projects = null;
+            IProtexServerWrapper<ProtexProjectPojo> protexWrapper)
+            throws CodeCenterImportException {
+        log.info("Getting ALL user projects.");
+        List<CCIProject> projects = null;
 
-	try {
-	    projects = protexWrapper.getProjects(CCIProject.class);
+        try {
+            projects = protexWrapper.getProjects(CCIProject.class);
 
-	    for (CCIProject pojo : projects) {
-		pojo = setProjectVersion(pojo);
-	    }
-	} catch (Exception e) {
-	    throw new CodeCenterImportException("Unable to get all projects", e);
-	}
+            for (CCIProject pojo : projects) {
+                pojo = setProjectVersion(pojo);
+            }
+        } catch (Exception e) {
+            throw new CodeCenterImportException("Unable to get all projects", e);
+        }
 
-	return projects;
+        return projects;
     }
 
     /**
@@ -179,21 +180,21 @@ public abstract class CCIProcessor {
      * @return
      */
     private CCIProject setProjectVersion(CCIProject project) {
-	if (codeCenterConfigManager.getAppVersion() != null) {
-	    if (project.getProjectVersion() == null) {
-		log.debug("Setting default version '{}' to project {}",
-			codeCenterConfigManager.getAppVersion(),
-			project.getProjectName());
-		project.setProjectVersion(codeCenterConfigManager
-			.getAppVersion());
-	    }
-	}
+        if (codeCenterConfigManager.getAppVersion() != null) {
+            if (project.getProjectVersion() == null) {
+                log.debug("Setting default version '{}' to project {}",
+                        codeCenterConfigManager.getAppVersion(),
+                        project.getProjectName());
+                project.setProjectVersion(codeCenterConfigManager
+                        .getAppVersion());
+            }
+        }
 
-	return project;
+        return project;
     }
 
     protected List<CCIReportSummary> getReportSummaryList() {
-	return reportSummaryList;
+        return reportSummaryList;
     }
 
 }

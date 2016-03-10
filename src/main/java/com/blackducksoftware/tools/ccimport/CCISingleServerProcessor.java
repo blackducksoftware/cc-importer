@@ -8,12 +8,12 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License version 2
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  *******************************************************************************/
 
 /**
@@ -36,11 +36,12 @@ import com.blackducksoftware.tools.ccimporter.config.CodeCenterConfigManager;
 import com.blackducksoftware.tools.ccimporter.config.ProtexConfigManager;
 import com.blackducksoftware.tools.ccimporter.model.CCIProject;
 import com.blackducksoftware.tools.ccimporter.model.CCIProjectList;
-import com.blackducksoftware.tools.connector.protex.ProtexServerWrapper;
+import com.blackducksoftware.tools.commonframework.core.config.ConfigConstants.APPLICATION;
 import com.blackducksoftware.tools.commonframework.core.config.server.ServerBean;
 import com.blackducksoftware.tools.commonframework.core.multithreading.ListDistributor;
-import com.blackducksoftware.tools.connector.codecenter.CodeCenterServerWrapper;
 import com.blackducksoftware.tools.commonframework.standard.protex.ProtexProjectPojo;
+import com.blackducksoftware.tools.connector.codecenter.CodeCenterServerWrapper;
+import com.blackducksoftware.tools.connector.protex.ProtexServerWrapper;
 
 /**
  * Synchronizes a single Protex server with a Code Center server.
@@ -98,7 +99,7 @@ public class CCISingleServerProcessor extends CCIProcessor {
         numThreads = ccConfigManager.getNumThreads();
 
         // There will only be one in the single instance
-        ServerBean protexBean = protexConfigManager.getServerBean();
+        ServerBean protexBean = protexConfigManager.getServerBean(APPLICATION.PROTEX);
 
         log.info("Using Protex URL [{}]", protexBean.getServerName());
     }
@@ -115,7 +116,7 @@ public class CCISingleServerProcessor extends CCIProcessor {
         numThreads = ccConfigManager.getNumThreads();
 
         // There will only be one in the single instance
-        ServerBean protexBean = protexConfigManager.getServerBean();
+        ServerBean protexBean = protexConfigManager.getServerBean(APPLICATION.PROTEX);
 
         log.info("Using Protex URL [{}]", protexBean.getServerName());
     }
@@ -244,7 +245,7 @@ public class CCISingleServerProcessor extends CCIProcessor {
         ProtexServerWrapper<ProtexProjectPojo> protexWrapper;
         try {
             // Always just one code center
-            ServerBean ccBean = configManager.getServerBean();
+            ServerBean ccBean = configManager.getServerBean(APPLICATION.CODECENTER);
             if (ccBean == null) {
                 throw new Exception(
                         "No valid Protex server configurations found");

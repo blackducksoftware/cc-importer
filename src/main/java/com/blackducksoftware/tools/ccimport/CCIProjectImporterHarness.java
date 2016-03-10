@@ -32,9 +32,11 @@ import com.blackducksoftware.tools.ccimporter.config.CodeCenterConfigManager;
 import com.blackducksoftware.tools.ccimporter.config.ProtexConfigManager;
 import com.blackducksoftware.tools.ccimporter.model.CCIApplication;
 import com.blackducksoftware.tools.ccimporter.model.CCIProject;
+import com.blackducksoftware.tools.commonframework.core.config.ConfigConstants.APPLICATION;
 import com.blackducksoftware.tools.commonframework.core.config.server.ServerBean;
 import com.blackducksoftware.tools.commonframework.standard.protex.ProtexProjectPojo;
 import com.blackducksoftware.tools.connector.codecenter.CodeCenterServerWrapper;
+import com.blackducksoftware.tools.connector.codecenter.ICodeCenterServerWrapper;
 import com.blackducksoftware.tools.connector.protex.IProtexServerWrapper;
 import com.blackducksoftware.tools.connector.protex.ProtexServerWrapper;
 
@@ -139,7 +141,7 @@ public class CCIProjectImporterHarness {
         ProtexServerWrapper<ProtexProjectPojo> protexWrapper;
         try {
             // Always just one code center
-            ServerBean ccBean = configManager.getServerBean();
+            ServerBean ccBean = configManager.getServerBean(APPLICATION.CODECENTER);
             if (ccBean == null) {
                 throw new Exception(
                         "No valid Protex server configurations found");
@@ -162,7 +164,7 @@ public class CCIProjectImporterHarness {
         CodeCenterServerWrapper codeCenterWrapper;
         try {
             // Always just one code center
-            ServerBean ccBean = configManager.getServerBean();
+            ServerBean ccBean = configManager.getServerBean(APPLICATION.CODECENTER);
             if (ccBean == null) {
                 throw new Exception(
                         "No valid Code Center server configurations found");
@@ -223,7 +225,7 @@ public class CCIProjectImporterHarness {
      * @param config
      * @throws CodeCenterImportException
      */
-    static Method getAppAdjusterMethod(CodeCenterServerWrapper ccWrapper,
+    static Method getAppAdjusterMethod(ICodeCenterServerWrapper ccWrapper,
             IProtexServerWrapper<ProtexProjectPojo> protexWrapper,
             CCIConfigurationManager config, Object appAdjusterObject)
             throws CodeCenterImportException {
