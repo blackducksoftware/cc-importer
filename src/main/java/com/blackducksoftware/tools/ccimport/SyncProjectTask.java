@@ -188,12 +188,15 @@ public class SyncProjectTask implements Callable<CCIReportSummary> {
             }
 
             if (!configManager.isAppAdjusterOnlyIfBomEdits()) {
-                invokeAppAdjuster(configManager, cciApp, project);
+                plugInManager.invokeAppAdjuster(cciApp, project);
             }
 
             // If everything goes well, set the application for
             // potential validation down the road.
             project.setCciApplication(cciApp);
+
+            // Initialize component change interceptor for this app
+            plugInManager.invokeComponentChangeInterceptorInitForAppMethod(cciApp.getApp().getId().getId());
 
         } catch (CodeCenterImportException ccie) {
             log.error("[{}] IMPORT FAILED, reason: [{}]",
@@ -224,8 +227,7 @@ public class SyncProjectTask implements Callable<CCIReportSummary> {
                     && (bomWasChanged || importedProject.getCciApplication()
                             .isJustCreated())) {
                 try {
-                    invokeAppAdjuster(configManager,
-                            importedProject.getCciApplication(), project);
+                    plugInManager.invokeAppAdjuster(importedProject.getCciApplication(), project);
                 } catch (CodeCenterImportException e) {
                     log.error("Application Adjuster failed, but proceeding with validation.");
                 }
@@ -473,14 +475,6 @@ public class SyncProjectTask implements Callable<CCIReportSummary> {
         return associatedProject;
     }
 
-    private void invokeAppAdjuster(CCIConfigurationManager configManager,
-            CCIApplication cciApp, CCIProject project)
-            throws CodeCenterImportException {
-        if (plugInManager != null) {
-            plugInManager.invokeAppAdjuster(cciApp, project);
-        }
-    }
-
     /**
      * We expand on the concept validation within CCI Not only do we run the
      * actual validation call, but we also perform the adjustments based on what
@@ -645,6 +639,14 @@ public class SyncProjectTask implements Callable<CCIReportSummary> {
 
             for (ProtexRequest protexRequest : protexOnlyComponents) {
                 try {
+                    try {
+                        plugInManager.invokeComponentChangeInterceptorPreProcessAddMethod(protexRequest.getComponentId().getId());
+                    } catch (CodeCenterImportException e) {
+                        log.error("[{}] Error pre-processing add request: " + e.getMessage(),
+                                applicationName, e);
+                        // TODO: this seems too stealth
+                    }
+
                     RequestCreate request = new RequestCreate();
 
                     // Should this be requested
@@ -656,10 +658,20 @@ public class SyncProjectTask implements Callable<CCIReportSummary> {
 
                     request.setApplicationComponentToken(token);
                     request.setLicenseId(protexRequest.getLicenseInfo().getId());
-                    newRequests.add(ccWrapper.getInternalApiWrapper()
-                            .getRequestApi().createRequest(request));
+
+                    RequestIdToken newRequest = ccWrapper.getInternalApiWrapper()
+                            .getRequestApi().createRequest(request);
+                    newRequests.add(newRequest);
 
                     requestsAdded++;
+
+                    try {
+                        plugInManager.invokeComponentChangeInterceptorPostProcessAddMethod(newRequest.getId(), protexRequest.getComponentId().getId());
+                    } catch (CodeCenterImportException e) {
+                        log.error("[{}] Error post-processing add request: " + e.getMessage(),
+                                applicationName, e);
+                        // TODO: this seems too stealth
+                    }
                 } catch (SdkFault e) {
                     log.error("[{}] Error creating request: " + e.getMessage(),
                             applicationName, e);
@@ -707,6 +719,13 @@ public class SyncProjectTask implements Callable<CCIReportSummary> {
 
             try {
                 for (RequestSummary request : ccOnlyComps) {
+                    try {
+                        plugInManager.invokeComponentChangeInterceptorPreProcessDeleteMethod(request.getId().getId(), request.getComponentId().getId());
+                    } catch (CodeCenterImportException e) {
+                        log.error("[{}] Error pre-processing delete request: " + e.getMessage(),
+                                applicationName, e);
+                        // TODO: this seems too stealth
+                    }
                     ccWrapper.getInternalApiWrapper().getRequestApi()
                             .deleteRequest(request.getId());
                     totalRequestsDeleted++;
