@@ -642,7 +642,8 @@ public class SyncProjectTask implements Callable<CCIReportSummary> {
                     } catch (CodeCenterImportException e) {
                         log.error("[{}] Error pre-processing add request: " + e.getMessage(),
                                 applicationName, e);
-                        // TODO: this seems too stealth
+                        summary.addTotalPlugInProcessingFailed();
+                        summary.addToFailedPlugInProcessingList(app.getName() + ":" + app.getVersion());
                     }
 
                     String newRequestId = ccWrapper.getRequestManager().createRequest(app.getId().getId(), protexRequest.getComponentId().getId(),
@@ -655,7 +656,8 @@ public class SyncProjectTask implements Callable<CCIReportSummary> {
                     } catch (CodeCenterImportException e) {
                         log.error("[{}] Error post-processing add request: " + e.getMessage(),
                                 applicationName, e);
-                        // TODO: this seems too stealth
+                        summary.addTotalPlugInProcessingFailed();
+                        summary.addToFailedPlugInProcessingList(app.getName() + ":" + app.getVersion());
                     }
                 } catch (CommonFrameworkException e) {
                     log.error("[{}] Error creating request: " + e.getMessage(),
@@ -709,7 +711,8 @@ public class SyncProjectTask implements Callable<CCIReportSummary> {
                     } catch (CodeCenterImportException e) {
                         log.error("[{}] Error pre-processing delete request: " + e.getMessage(),
                                 applicationName, e);
-                        // TODO: this seems too stealth
+                        summary.addTotalPlugInProcessingFailed();
+                        summary.addToFailedPlugInProcessingList(app.getName() + ":" + app.getVersion());
                     }
                     ccWrapper.getRequestManager().deleteRequest(app.getId().getId(), request.getId().getId());
                     totalRequestsDeleted++;

@@ -85,7 +85,7 @@ public class SalvageRemediationData implements CompChangeInterceptor {
     public void postProcessAdd(String requestId, String compId) throws InterceptorException {
         log.info("postProcessAdd(): requestId: " + requestId + "; compId: " + compId);
 
-        // TODO: performance problem: Now ALL added components are fetched... weren't before
+        // This will impact performance: Now ALL added components are fetched... weren't before
         // The alternative is to use componentManager.getComponentByKbId() [which tries to
         // use ColaApi().getCatalogComponentsByKbComponent(token); and
         // ColaApi().getCatalogComponentByKbComponentRelease(token);] to get only the
