@@ -235,7 +235,6 @@ public class CCISingleServerTaskProcessor extends CCIProcessor {
      * and Protex are in sync.
      *
      */
-    // TODO remove report functionality?
     @Override
     public void runReport() throws CodeCenterImportException {
         reportGen = new CCIReportGenerator(codeCenterWrapper,

@@ -522,7 +522,8 @@ public class CodeCenterProjectSynchronizer {
                     } catch (CodeCenterImportException e) {
                         log.error("[{}] Error pre-processing add request: " + e.getMessage(),
                                 applicationName, e);
-                        // TODO: this seems too stealth
+                        summary.addTotalPlugInProcessingFailed();
+                        summary.addToFailedPlugInProcessingList(app.getName() + ":" + app.getVersion());
                     }
                     RequestCreate requestCreate = new RequestCreate();
 
@@ -544,7 +545,8 @@ public class CodeCenterProjectSynchronizer {
                     } catch (CodeCenterImportException e) {
                         log.error("[{}] Error post-processing add request: " + e.getMessage(),
                                 applicationName, e);
-                        // TODO: this seems too stealth
+                        summary.addTotalPlugInProcessingFailed();
+                        summary.addToFailedPlugInProcessingList(app.getName() + ":" + app.getVersion());
                     }
 
                     requestsAdded++;
@@ -600,7 +602,8 @@ public class CodeCenterProjectSynchronizer {
                     } catch (CodeCenterImportException e) {
                         log.error("[{}] Error pre-processing delete request: " + e.getMessage(),
                                 applicationName, e);
-                        // TODO: this seems too stealth
+                        summary.addTotalPlugInProcessingFailed();
+                        summary.addToFailedPlugInProcessingList(app.getName() + ":" + app.getVersion());
                     }
                     ccWrapper.getInternalApiWrapper().getRequestApi()
                             .deleteRequest(request.getId());
