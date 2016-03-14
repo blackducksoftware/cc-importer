@@ -47,7 +47,7 @@ public class SalvageRemediationData implements CompChangeInterceptor {
      * Test code can call this constructor to inject the DeprecatedComponentReplacementTable and control behavior
      */
     public SalvageRemediationData(DeprecatedComponentReplacementTable table, boolean checkCompDeprecatedFlag, Map<String, String> equivalentVulnerabilityIds) {
-        log.info("Using given DeprecatedComponentReplacementTable");
+        log.info("Constructor: Using given DeprecatedComponentReplacementTable");
         deprecatedComponentReplacementTable = table;
         this.checkCompDeprecatedFlag = checkCompDeprecatedFlag;
         this.equivalentVulnerabilityIds = equivalentVulnerabilityIds;
@@ -70,7 +70,7 @@ public class SalvageRemediationData implements CompChangeInterceptor {
 
     @Override
     public void initForApp(String appId) throws InterceptorException {
-        log.info("Initializing for app ID: " + appId);
+        log.info("initForApp(): Initializing for app ID: " + appId);
         addedRequestIds = new HashMap<>();
         addedComponents = new HashMap<>();
     }

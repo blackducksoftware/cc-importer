@@ -20,7 +20,7 @@ import com.blackducksoftware.tools.connector.protex.common.ComponentNameVersionI
 /**
  * Load deprecated component replacement via SQL.
  * As of the Cactus release, we should be able to do this via the SDK, and we can replace this implementation.
- * 
+ *
  * @author sbillings
  *
  */
@@ -72,6 +72,8 @@ public class SqlDeprecatedComponentReplacementTable implements DeprecatedCompone
             String oldCompVersionId = rs.getString("old_release_id");
             String newCompId = rs.getString("new_project_id");
             String newCompVersionId = rs.getString("new_release_id");
+            log.debug("Old Comp ID: " + oldCompId + ", OldCompVersionId: " + oldCompVersionId + ", New Comp ID: " + newCompId + ", New Comp Version ID: "
+                    + newCompVersionId);
             addToTable(table, oldCompId, oldCompVersionId, newCompId, newCompVersionId);
         }
     }
@@ -83,6 +85,8 @@ public class SqlDeprecatedComponentReplacementTable implements DeprecatedCompone
         while (rs.next()) {
             String oldCompId = rs.getString("old_project_id");
             String newCompId = rs.getString("new_project_id");
+            log.debug("Old Comp ID: " + oldCompId + ", New Comp ID: " + newCompId);
+
             addToTable(table, oldCompId, null, newCompId, null);
         }
     }
