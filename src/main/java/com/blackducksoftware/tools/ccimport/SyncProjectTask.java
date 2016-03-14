@@ -36,9 +36,6 @@ import com.blackducksoftware.sdk.codecenter.application.data.ValidationStatusEnu
 import com.blackducksoftware.sdk.codecenter.approval.data.WorkflowNameToken;
 import com.blackducksoftware.sdk.codecenter.fault.ErrorCode;
 import com.blackducksoftware.sdk.codecenter.fault.SdkFault;
-import com.blackducksoftware.sdk.codecenter.request.data.RequestApplicationComponentToken;
-import com.blackducksoftware.sdk.codecenter.request.data.RequestCreate;
-import com.blackducksoftware.sdk.codecenter.request.data.RequestIdToken;
 import com.blackducksoftware.sdk.codecenter.request.data.RequestSummary;
 import com.blackducksoftware.sdk.codecenter.role.data.RoleNameToken;
 import com.blackducksoftware.sdk.codecenter.user.data.UserNameToken;
@@ -49,6 +46,7 @@ import com.blackducksoftware.tools.ccimporter.config.CCIConfigurationManager;
 import com.blackducksoftware.tools.ccimporter.config.CCIConstants;
 import com.blackducksoftware.tools.ccimporter.model.CCIApplication;
 import com.blackducksoftware.tools.ccimporter.model.CCIProject;
+import com.blackducksoftware.tools.commonframework.core.exception.CommonFrameworkException;
 import com.blackducksoftware.tools.commonframework.standard.protex.ProtexProjectPojo;
 import com.blackducksoftware.tools.connector.codecenter.ICodeCenterServerWrapper;
 import com.blackducksoftware.tools.connector.protex.IProtexServerWrapper;
@@ -632,7 +630,7 @@ public class SyncProjectTask implements Callable<CCIReportSummary> {
             log.info("[{}] Attempting {} component requests...",
                     applicationName, protexOnlyComponents.size());
 
-            List<RequestIdToken> newRequests = new ArrayList<RequestIdToken>();
+            // List<RequestIdToken> newRequests = new ArrayList<RequestIdToken>();
 
             log.debug("User specified submit set to: "
                     + configManager.isSubmit());
@@ -647,32 +645,19 @@ public class SyncProjectTask implements Callable<CCIReportSummary> {
                         // TODO: this seems too stealth
                     }
 
-                    RequestCreate request = new RequestCreate();
-
-                    // Should this be requested
-                    request.setSubmit(configManager.isSubmit());
-
-                    RequestApplicationComponentToken token = new RequestApplicationComponentToken();
-                    token.setApplicationId(app.getId());
-                    token.setComponentId(protexRequest.getComponentId());
-
-                    request.setApplicationComponentToken(token);
-                    request.setLicenseId(protexRequest.getLicenseInfo().getId());
-
-                    RequestIdToken newRequest = ccWrapper.getInternalApiWrapper()
-                            .getRequestApi().createRequest(request);
-                    newRequests.add(newRequest);
+                    String newRequestId = ccWrapper.getRequestManager().createRequest(app.getId().getId(), protexRequest.getComponentId().getId(),
+                            protexRequest.getLicenseInfo().getId().getId(), configManager.isSubmit());
 
                     requestsAdded++;
 
                     try {
-                        plugInManager.invokeComponentChangeInterceptorPostProcessAddMethod(newRequest.getId(), protexRequest.getComponentId().getId());
+                        plugInManager.invokeComponentChangeInterceptorPostProcessAddMethod(newRequestId, protexRequest.getComponentId().getId());
                     } catch (CodeCenterImportException e) {
                         log.error("[{}] Error post-processing add request: " + e.getMessage(),
                                 applicationName, e);
                         // TODO: this seems too stealth
                     }
-                } catch (SdkFault e) {
+                } catch (CommonFrameworkException e) {
                     log.error("[{}] Error creating request: " + e.getMessage(),
                             applicationName, e);
                 }
@@ -726,11 +711,10 @@ public class SyncProjectTask implements Callable<CCIReportSummary> {
                                 applicationName, e);
                         // TODO: this seems too stealth
                     }
-                    ccWrapper.getInternalApiWrapper().getRequestApi()
-                            .deleteRequest(request.getId());
+                    ccWrapper.getRequestManager().deleteRequest(app.getId().getId(), request.getId().getId());
                     totalRequestsDeleted++;
                 }
-            } catch (SdkFault e) {
+            } catch (CommonFrameworkException e) {
                 log.error("[{}] error deleting request", applicationName, e);
             }
 

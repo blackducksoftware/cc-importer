@@ -15,6 +15,10 @@ public class MockRequestManager implements IRequestManager {
 
     private List<RequestVulnerabilityPojo> updateOperations;
 
+    private List<String> createRequestOperations;
+
+    private List<String> deleteRequestOperations;
+
     public MockRequestManager(Date today) {
         addVulns = new ArrayList<>();
         RequestVulnerabilityPojo vuln = new RequestVulnerabilityPojo("testVulnerabilityId", "testVulnerabilityName", "testDescription", "100", "100",
@@ -30,6 +34,8 @@ public class MockRequestManager implements IRequestManager {
         deleteVulns.add(vuln);
 
         updateOperations = new ArrayList<>();
+        createRequestOperations = new ArrayList<>();
+        deleteRequestOperations = new ArrayList<>();
     }
 
     @Override
@@ -51,4 +57,24 @@ public class MockRequestManager implements IRequestManager {
         return updateOperations;
     }
 
+    @Override
+    public String createRequest(String appId, String compId, String licenseId, boolean submit) throws CommonFrameworkException {
+        System.out.println("MockRequestManager.createRequest() called");
+        createRequestOperations.add(appId + "|" + compId + "|" + licenseId + "|" + submit);
+        return "mockRequestId";
+    }
+
+    @Override
+    public void deleteRequest(String appId, String requestId) throws CommonFrameworkException {
+        System.out.println("MockRequestManager.deleteRequest() called");
+        deleteRequestOperations.add(appId + "|" + requestId);
+    }
+
+    public List<String> getCreateRequestOperations() {
+        return createRequestOperations;
+    }
+
+    public List<String> getDeleteRequestOperations() {
+        return deleteRequestOperations;
+    }
 }
