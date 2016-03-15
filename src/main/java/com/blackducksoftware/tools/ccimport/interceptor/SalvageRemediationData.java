@@ -66,6 +66,12 @@ public class SalvageRemediationData implements CompChangeInterceptor {
                 throw new InterceptorException(e);
             }
         }
+        // This provides a way to, via configuration, disable checking of the deprecated flag on component
+        // so all that matters is whether or not it appears in the appropriate replacement table
+        String checkCompDeprecatedFlagString = config.getOptionalProperty("check.component.deprecated.flag");
+        if ("false".equalsIgnoreCase(checkCompDeprecatedFlagString)) {
+            checkCompDeprecatedFlag = false;
+        }
     }
 
     @Override
@@ -110,7 +116,7 @@ public class SalvageRemediationData implements CompChangeInterceptor {
         CodeCenterComponentPojo deleteComp = loadComponent(compId);
         // If not deprecated, return true
         if (checkCompDeprecatedFlag && !deleteComp.isDeprecated()) {
-            log.info("This delete component is not deprecated); nothing to do");
+            log.info("This delete component is not deprecated; nothing to do");
             return true; // nothing to do
         }
 
@@ -120,7 +126,12 @@ public class SalvageRemediationData implements CompChangeInterceptor {
         ComponentNameVersionIds replacementKbComponent = deprecatedComponentReplacementTable.getReplacement(deprecatedKbComponent);
 
         if (replacementKbComponent == null) {
-            throw new InterceptorException("Component " + deleteComp + " is deprecated, but replacement not found");
+            if (checkCompDeprecatedFlag) {
+                throw new InterceptorException("Component " + deleteComp + " is deprecated, but replacement not found");
+            } else {
+                log.info("No replacement found for component... it must not be deprecated; nothing to do: " + deleteComp);
+                return true; // nothing to do
+            }
         }
         log.info("Replacement component KB IDs: " + replacementKbComponent);
 
@@ -172,10 +183,10 @@ public class SalvageRemediationData implements CompChangeInterceptor {
 
         // For each deleteVuln: if possible/appropriate, copy rem data to added replacement
         for (RequestVulnerabilityPojo deleteVuln : deleteVulns) {
-            log.info("delete vuln: " + deleteVuln);
+            log.debug("delete vuln: " + deleteVuln);
             String vulnerabilityIdEquivalentToDeleteVulnerability = getEquivalentVulnerability(deleteVuln.getVulnerabilityId());
             if (addVulnsNeedingRemData.containsKey(vulnerabilityIdEquivalentToDeleteVulnerability)) {
-                log.info("This vuln on the add side has no remediation data; copying from delete request to add request");
+                log.debug("This vuln on the add side has no remediation data; copying from delete request to add request");
                 copyRemediationData(deleteVuln, addVulnsNeedingRemData.get(vulnerabilityIdEquivalentToDeleteVulnerability));
             }
         }
@@ -196,9 +207,9 @@ public class SalvageRemediationData implements CompChangeInterceptor {
         log.info("Getting the vulnerabilities for this add request");
         List<RequestVulnerabilityPojo> addVulns = loadVulnerabilitiesByRequestId(addRequestId);
         for (RequestVulnerabilityPojo addVuln : addVulns) {
-            log.info("add vuln: " + addVuln);
+            log.debug("add vuln: " + addVuln);
             if (!addVuln.isRemediationDataSet()) {
-                log.info("This add vuln has no remediation, so is a candidate destination for salvaged remediation data");
+                log.debug("This add vuln has no remediation data, so is a candidate destination for salvaged remediation data");
                 addVulnsNeedingRemData.put(addVuln.getVulnerabilityId(), addVuln);
             }
         }
@@ -217,7 +228,7 @@ public class SalvageRemediationData implements CompChangeInterceptor {
         }
         if (equivalentVulnerabilityIds.containsKey(originalVulnerabilityId)) {
             String equivalentVulnerabilityId = equivalentVulnerabilityIds.get(originalVulnerabilityId);
-            log.info("Mapping vulnerability ID " + originalVulnerabilityId + " to " + equivalentVulnerabilityId);
+            log.debug("Mapping vulnerability ID " + originalVulnerabilityId + " to " + equivalentVulnerabilityId);
             return equivalentVulnerabilityId;
         }
         return originalVulnerabilityId;
@@ -228,7 +239,7 @@ public class SalvageRemediationData implements CompChangeInterceptor {
         toVuln.setTargetRemediationDate(fromVuln.getTargetRemediationDate());
         toVuln.setComments(fromVuln.getComments());
         toVuln.setReviewStatusName(fromVuln.getReviewStatusName());
-        log.info("Vulnerability update: " + toVuln);
+        log.debug("Vulnerability update: " + toVuln);
         try {
             ccsw.getRequestManager().updateRequestVulnerability(toVuln);
         } catch (CommonFrameworkException e) {

@@ -51,6 +51,7 @@ public class SqlDeprecatedComponentReplacementTable implements DeprecatedCompone
         if (dbName == null) {
             dbName = "bds_customer";
         }
+        log.info("Reading database " + dbName + " for replacement tables (standard_project_release_deprecated, standard_project_deprecated)");
         try {
             Connection conn = connectToDb(dbServerName, dbPort, dbName, dbUserName, dbPassword);
             loadVersioned(conn, table);
