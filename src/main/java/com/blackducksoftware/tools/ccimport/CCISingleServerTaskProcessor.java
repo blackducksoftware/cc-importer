@@ -74,6 +74,8 @@ public class CCISingleServerTaskProcessor extends CCIProcessor {
 
     private StringBuilder threadExceptionMessages = new StringBuilder();
 
+    private CCIReportGenerator reportGen;
+
     /**
      * @param ccConfigManager
      * @param protexConfigManager
@@ -233,10 +235,14 @@ public class CCISingleServerTaskProcessor extends CCIProcessor {
      * and Protex are in sync.
      *
      */
-    // TODO remove report functionality?
     @Override
     public void runReport() throws CodeCenterImportException {
-        throw new UnsupportedOperationException("runReport() not supported");
+        reportGen = new CCIReportGenerator(codeCenterWrapper,
+                protexServerWrapper);
+        CCIProjectList projectList = getProjects();
+
+        log.info("Processing {} projects for reporting", projectList);
+        reportGen.generateReport(projectList);
     }
 
     /**
@@ -244,7 +250,7 @@ public class CCISingleServerTaskProcessor extends CCIProcessor {
      */
     @Override
     public CCIReportGenerator getReportGen() {
-        throw new UnsupportedOperationException("getReportGen() not supported");
+        return reportGen;
     }
 
     public CCIReportSummary getAggregatedResults() {

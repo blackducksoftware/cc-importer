@@ -17,13 +17,20 @@
 					
 			</excludes>
 	    </fileSet>
-		<!--  Drop Readme, notices, license into root -->
+		<!--  Drop example properties file into root -->
 		 <fileSet>
 	       <directory>${project.basedir}/src/main/resources</directory>
 	       	<outputDirectory>/</outputDirectory>
 	       	<includes>
-				<include>*README*</include>
 				<include>*example*</include>
+			</includes>
+	    </fileSet>
+	    <!--  Include Readme, notices, license into root -->
+		 <fileSet>
+	       <directory>${project.basedir}</directory>
+	       	<outputDirectory>/</outputDirectory>
+	       	<includes>
+				<include>*README*</include>
 				<include>LICENSE*</include>
 				<include>notices*</include>
 			</includes>

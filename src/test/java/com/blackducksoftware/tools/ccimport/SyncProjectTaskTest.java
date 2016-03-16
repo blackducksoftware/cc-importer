@@ -3,8 +3,6 @@ package com.blackducksoftware.tools.ccimport;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Method;
@@ -32,9 +30,8 @@ import com.blackducksoftware.sdk.codecenter.fault.ErrorCode;
 import com.blackducksoftware.sdk.codecenter.fault.SdkFault;
 import com.blackducksoftware.sdk.codecenter.fault.SdkFaultDetails;
 import com.blackducksoftware.sdk.codecenter.request.RequestApi;
-import com.blackducksoftware.sdk.codecenter.request.data.RequestApplicationComponentOrIdToken;
 import com.blackducksoftware.sdk.codecenter.request.data.RequestApplicationComponentToken;
-import com.blackducksoftware.sdk.codecenter.request.data.RequestCreate;
+import com.blackducksoftware.sdk.codecenter.request.data.RequestIdToken;
 import com.blackducksoftware.sdk.codecenter.request.data.RequestSummary;
 import com.blackducksoftware.sdk.protex.policy.PolicyApi;
 import com.blackducksoftware.sdk.protex.project.ProjectApi;
@@ -42,6 +39,7 @@ import com.blackducksoftware.sdk.protex.project.bom.BomApi;
 import com.blackducksoftware.sdk.protex.report.ReportApi;
 import com.blackducksoftware.tools.ccimport.appadjuster.MockAppAdjuster;
 import com.blackducksoftware.tools.ccimport.exception.CodeCenterImportException;
+import com.blackducksoftware.tools.ccimport.mocks.MockRequestManager;
 import com.blackducksoftware.tools.ccimport.report.CCIReportSummary;
 import com.blackducksoftware.tools.ccimporter.config.CodeCenterConfigManager;
 import com.blackducksoftware.tools.ccimporter.model.CCIApplication;
@@ -96,19 +94,25 @@ public class SyncProjectTaskTest {
         project.setProjectVersion(APP_VERSION);
         project.setProjectKey(PROJECT_ID);
 
-        MockAppAdjuster mockAppAdjuster = new MockAppAdjuster();
+        PlugInManager plugInManager = new PlugInManager(ccConfig, ccsw, psw);
+        MockAppAdjuster mockAppAdjuster = (MockAppAdjuster) plugInManager.getAppAdjusterObject();
 
         // Create task to test
         SyncProjectTask task = new SyncProjectTask(ccConfig, ccsw, psw,
-                mockAppAdjuster, getAppAdjusterMethod(mockAppAdjuster), project);
+                plugInManager, project);
 
         // Execute the task
         CCIReportSummary report = task.call();
 
-        verify(mockRequestApi, times(1))
-                .createRequest(any(RequestCreate.class));
-        verify(mockRequestApi, times(2)).deleteRequest(
-                any(RequestApplicationComponentOrIdToken.class));
+        MockRequestManager mockRequestManager = (MockRequestManager) ccsw.getRequestManager();
+        List<String> createOperations = mockRequestManager.getCreateRequestOperations();
+        assertEquals(1, createOperations.size());
+        assertEquals("testAppId|testComponentToAddId|testLicenseId|true", createOperations.get(0));
+
+        List<String> deleteOperations = mockRequestManager.getDeleteRequestOperations();
+        assertEquals(2, deleteOperations.size());
+        assertEquals("testAppId|testRequestId", deleteOperations.get(0));
+        assertEquals("testAppId|testRequestId", deleteOperations.get(1));
 
         // Verify results
         System.out.println("Report: " + report);
@@ -140,6 +144,7 @@ public class SyncProjectTaskTest {
         props.setProperty("validate.application.smart", "true");
         props.setProperty("cc.submit.request", "true");
         props.setProperty("validate.requests.delete", "true");
+        props.setProperty("app.adjuster.classname", "com.blackducksoftware.tools.ccimport.appadjuster.MockAppAdjuster");
         return props;
     }
 
@@ -170,7 +175,7 @@ public class SyncProjectTaskTest {
             throws SdkFault {
 
         ApplicationApi mockApplicationApi = mock(ApplicationApi.class);
-        mockRequestApi = mock(RequestApi.class);
+
         ColaApi mockColaApi = mock(ColaApi.class);
         CodeCenterAPIWrapper mockCodeCenterApiWrapper = mock(CodeCenterAPIWrapper.class);
         when(mockCodeCenterApiWrapper.getApplicationApi()).thenReturn(
@@ -178,8 +183,10 @@ public class SyncProjectTaskTest {
         CodeCenterServerWrapper ccsw = mock(CodeCenterServerWrapper.class);
         when(ccsw.getInternalApiWrapper()).thenReturn(mockCodeCenterApiWrapper);
         when(mockCodeCenterApiWrapper.getColaApi()).thenReturn(mockColaApi);
-        when(mockCodeCenterApiWrapper.getRequestApi()).thenReturn(
-                mockRequestApi);
+
+        // ccimporter uses RequestManager to add/delete requests
+        MockRequestManager mockRequestManager = new MockRequestManager(lastRefreshDate);
+        when(ccsw.getRequestManager()).thenReturn(mockRequestManager);
 
         Application mockApplication = mock(Application.class);
 
@@ -246,6 +253,9 @@ public class SyncProjectTaskTest {
         // Component deletes
         List<RequestSummary> ccOnlyComponentRequests = new ArrayList<>();
         RequestSummary ccOnlyComponentRequest = new RequestSummary();
+        RequestIdToken requestIdToken = new RequestIdToken();
+        requestIdToken.setId("testRequestId");
+        ccOnlyComponentRequest.setId(requestIdToken);
         RequestApplicationComponentToken requestApplicationComponentToken = new RequestApplicationComponentToken();
         requestApplicationComponentToken.setApplicationId(appIdToken);
         requestApplicationComponentToken.setComponentId(componentIdToken);

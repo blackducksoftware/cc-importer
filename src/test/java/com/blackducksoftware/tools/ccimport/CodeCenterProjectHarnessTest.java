@@ -68,10 +68,7 @@ public class CodeCenterProjectHarnessTest {
         CCIProjectImporterHarness.main(args);
     }
 
-    /**
-     * This scenario is no longer supported by common framework.
-     */
-    // @Test
+    // @Test // TODO: Command-line only not supported by ConfigurationManager in CF 1.6.5
     public void testBasicArgumentsComplete() {
         String NEWLINE = "\n";
 

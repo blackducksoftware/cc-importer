@@ -17,8 +17,6 @@
  *******************************************************************************/
 package com.blackducksoftware.tools.ccimport;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -38,9 +36,6 @@ import com.blackducksoftware.sdk.codecenter.application.data.ValidationStatusEnu
 import com.blackducksoftware.sdk.codecenter.approval.data.WorkflowNameToken;
 import com.blackducksoftware.sdk.codecenter.fault.ErrorCode;
 import com.blackducksoftware.sdk.codecenter.fault.SdkFault;
-import com.blackducksoftware.sdk.codecenter.request.data.RequestApplicationComponentToken;
-import com.blackducksoftware.sdk.codecenter.request.data.RequestCreate;
-import com.blackducksoftware.sdk.codecenter.request.data.RequestIdToken;
 import com.blackducksoftware.sdk.codecenter.request.data.RequestSummary;
 import com.blackducksoftware.sdk.codecenter.role.data.RoleNameToken;
 import com.blackducksoftware.sdk.codecenter.user.data.UserNameToken;
@@ -51,6 +46,7 @@ import com.blackducksoftware.tools.ccimporter.config.CCIConfigurationManager;
 import com.blackducksoftware.tools.ccimporter.config.CCIConstants;
 import com.blackducksoftware.tools.ccimporter.model.CCIApplication;
 import com.blackducksoftware.tools.ccimporter.model.CCIProject;
+import com.blackducksoftware.tools.commonframework.core.exception.CommonFrameworkException;
 import com.blackducksoftware.tools.commonframework.standard.protex.ProtexProjectPojo;
 import com.blackducksoftware.tools.connector.codecenter.ICodeCenterServerWrapper;
 import com.blackducksoftware.tools.connector.protex.IProtexServerWrapper;
@@ -69,23 +65,23 @@ public class SyncProjectTask implements Callable<CCIReportSummary> {
 
     private final IProtexServerWrapper<ProtexProjectPojo> protexWrapper;
 
-    private final Object appAdjusterObject;
-
-    private final Method appAdjusterMethod;
+    private final PlugInManager plugInManager;
 
     public SyncProjectTask(CCIConfigurationManager config,
             ICodeCenterServerWrapper codeCenterWrapper,
             IProtexServerWrapper<ProtexProjectPojo> protexWrapper,
-            Object appAdjusterObject, Method appAdjusterMethod,
+            PlugInManager plugInManager,
             CCIProject project) {
         configManager = config;
         ccWrapper = codeCenterWrapper;
         this.protexWrapper = protexWrapper;
-        this.appAdjusterObject = appAdjusterObject;
-        this.appAdjusterMethod = appAdjusterMethod;
+        this.plugInManager = plugInManager;
         this.project = project;
     }
 
+    /**
+     * Imports the project (makes sure the app exists) and then syncs app BOM with Protex BOM.
+     */
     @Override
     public CCIReportSummary call() throws CodeCenterImportNamedException {
         try {
@@ -100,6 +96,7 @@ public class SyncProjectTask implements Callable<CCIReportSummary> {
                 retryImport = false;
                 boolean importSuccess = false;
                 CCIProject importedProject = null;
+                // Make sure app exists and is associated
                 try {
                     importedProject = processImport(project);
                     importSuccess = true;
@@ -109,6 +106,7 @@ public class SyncProjectTask implements Callable<CCIReportSummary> {
                             project.getProjectName());
                 }
 
+                // Adjust app BOM so it equals project BOM
                 if (importSuccess) {
                     retryImport = validate(project, importedProject,
                             importRetryCount);
@@ -154,7 +152,7 @@ public class SyncProjectTask implements Callable<CCIReportSummary> {
                         project.getProjectKey());
                 // This will return an existing application, or create a new
                 // one. This is generic and not import specific.
-                cciApp = createApplication(project);
+                cciApp = findOrCreateApplication(project);
 
                 // This takes the Code Center app and attempts to associate it
                 // with a Protex project. We do not need to return anything
@@ -193,12 +191,15 @@ public class SyncProjectTask implements Callable<CCIReportSummary> {
             }
 
             if (!configManager.isAppAdjusterOnlyIfBomEdits()) {
-                invokeAppAdjuster(configManager, cciApp, project);
+                plugInManager.invokeAppAdjuster(cciApp, project);
             }
 
             // If everything goes well, set the application for
             // potential validation down the road.
             project.setCciApplication(cciApp);
+
+            // Initialize component change interceptor for this app
+            plugInManager.invokeComponentChangeInterceptorInitForAppMethod(cciApp.getApp().getId().getId());
 
         } catch (CodeCenterImportException ccie) {
             log.error("[{}] IMPORT FAILED, reason: [{}]",
@@ -211,6 +212,15 @@ public class SyncProjectTask implements Callable<CCIReportSummary> {
         return project;
     }
 
+    /**
+     * Make the application BOM equal the Project BOM, using validation and component adds/deletes.
+     * Run the AppAdjuster, if any, if appropriate.
+     *
+     * @param project
+     * @param importedProject
+     * @param importRetryCount
+     * @return
+     */
     private boolean validate(CCIProject project, CCIProject importedProject,
             int importRetryCount) {
         boolean retryImport = false;
@@ -229,8 +239,7 @@ public class SyncProjectTask implements Callable<CCIReportSummary> {
                     && (bomWasChanged || importedProject.getCciApplication()
                             .isJustCreated())) {
                 try {
-                    invokeAppAdjuster(configManager,
-                            importedProject.getCciApplication(), project);
+                    plugInManager.invokeAppAdjuster(importedProject.getCciApplication(), project);
                 } catch (CodeCenterImportException e) {
                     log.error("Application Adjuster failed, but proceeding with validation.");
                 }
@@ -302,31 +311,34 @@ public class SyncProjectTask implements Callable<CCIReportSummary> {
      * @param project
      * @throws CodeCenterImportException
      */
-    private CCIApplication createApplication(CCIProject project)
+    private CCIApplication findOrCreateApplication(CCIProject project)
             throws CodeCenterImportException {
         // boolean createNewApplication = false;
 
-        // The object to return (either existing or new)
-        CCIApplication cciApp = null;
-        Application app = null;
+        // Look for app that corresponds to this project (same name)
+        CCIApplication cciApp = findApplication(project);
 
-        String applicationName = project.getProjectName();
-        String version = project.getProjectVersion();
+        // If app not there, create it
+        if (cciApp == null) {
+            cciApp = createApplication(cciApp, project.getProjectName(), project.getProjectVersion());
+        }
 
-        ApplicationIdToken appIdToken = null;
-        ApplicationNameVersionToken appNameVersionToken = null;
+        return cciApp;
+    }
+
+    private CCIApplication findApplication(CCIProject project) throws CodeCenterImportException {
 
         // Set up the app name and version token
-        appNameVersionToken = new ApplicationNameVersionToken();
-        appNameVersionToken.setName(applicationName);
-        appNameVersionToken.setVersion(version);
+        ApplicationNameVersionToken appNameVersionToken = new ApplicationNameVersionToken();
+        appNameVersionToken.setName(project.getProjectName());
+        appNameVersionToken.setVersion(project.getProjectVersion());
 
-        boolean createNewApplication = false;
+        Application app = null;
         try {
-            // Check if Application exists
+            // Check if Application exists (it may or may not)
             app = ccWrapper.getInternalApiWrapper().getApplicationApi()
                     .getApplication(appNameVersionToken);
-            log.info("[{}] Exists in Code Center.", applicationName);
+            log.info("[{}] Exists in Code Center.", project.getProjectName());
 
             // wrap it in a CCIApplication, which tracks whether it's new or not
             return new CCIApplication(app, false);
@@ -334,66 +346,67 @@ public class SyncProjectTask implements Callable<CCIReportSummary> {
         } catch (SdkFault e) {
             ErrorCode code = e.getFaultInfo().getErrorCode();
             if (code == ErrorCode.NO_APPLICATION_NAMEVERISON_FOUND) {
-                createNewApplication = true;
                 log.info(
                         "[{}] Does NOT exist in Code Center. Attempting to create it...",
-                        applicationName);
+                        project.getProjectName());
+                return null; // App not there
             } else {
                 log.info(
                         "[{}] Exception occurred when checking if application exists:{}",
-                        applicationName, e.getMessage());
+                        project.getProjectName(), e.getMessage());
                 throw new CodeCenterImportException(
                         "Error when getting Application:" + e.getMessage(), e);
             }
         }
+    }
 
-        if (createNewApplication) {
-            try {
-                String workflowName = configManager.getWorkflow();
-                String owner = configManager.getOwner();
+    private CCIApplication createApplication(CCIApplication cciApp, String applicationName, String version) throws CodeCenterImportException {
+        Application app;
+        ApplicationIdToken appIdToken;
+        try {
+            String workflowName = configManager.getWorkflow();
+            String owner = configManager.getOwner();
 
-                // Setup application to create it
-                ApplicationCreate appCreate = new ApplicationCreate();
-                appCreate.setName(applicationName);
-                appCreate.setVersion(version);
+            // Setup application to create it
+            ApplicationCreate appCreate = new ApplicationCreate();
+            appCreate.setName(applicationName);
+            appCreate.setVersion(version);
 
-                // This is the description that will show up in the main
-                // application
-                // view in Code Center.
-                String description = CCIConstants.DESCRIPTION
-                        + configManager.getVersion();
-                appCreate.setDescription(description);
-                WorkflowNameToken wf = new WorkflowNameToken();
-                wf.setName(workflowName);
-                appCreate.setWorkflowId(wf);
-                UserNameToken ownerToken = new UserNameToken();
-                ownerToken.setName(owner);
-                appCreate.setOwnerId(ownerToken);
-                RoleNameToken role = new RoleNameToken();
-                role.setName("Application Administrator"); // TODO should be
-                // configurable
-                appCreate.setOwnerRoleId(role);
+            // This is the description that will show up in the main
+            // application
+            // view in Code Center.
+            String description = CCIConstants.DESCRIPTION
+                    + configManager.getVersion();
+            appCreate.setDescription(description);
+            WorkflowNameToken wf = new WorkflowNameToken();
+            wf.setName(workflowName);
+            appCreate.setWorkflowId(wf);
+            UserNameToken ownerToken = new UserNameToken();
+            ownerToken.setName(owner);
+            appCreate.setOwnerId(ownerToken);
+            RoleNameToken role = new RoleNameToken();
+            role.setName("Application Administrator"); // TODO should be
+            // configurable
+            appCreate.setOwnerRoleId(role);
 
-                // create Application
-                appIdToken = ccWrapper.getInternalApiWrapper().getApplicationApi()
-                        .createApplication(appCreate);
+            // create Application
+            appIdToken = ccWrapper.getInternalApiWrapper().getApplicationApi()
+                    .createApplication(appCreate);
 
-                // retrieve it
-                app = ccWrapper.getInternalApiWrapper().getApplicationApi()
-                        .getApplication(appIdToken);
+            // retrieve it
+            app = ccWrapper.getInternalApiWrapper().getApplicationApi()
+                    .getApplication(appIdToken);
 
-                // wrap it in a CCIApplication, which tracks whether it's new or
-                // not
-                cciApp = new CCIApplication(app, true);
-                log.info("...success!");
+            // wrap it in a CCIApplication, which tracks whether it's new or
+            // not
+            cciApp = new CCIApplication(app, true);
+            log.info("...success!");
 
-            } catch (SdkFault sdke) {
-                throw new CodeCenterImportException(
-                        "Creating Code Center application failed:"
-                                + sdke.getMessage(), sdke);
-            }
+        } catch (SdkFault sdke) {
+            throw new CodeCenterImportException(
+                    "Creating Code Center application failed:"
+                            + sdke.getMessage(), sdke);
         }
-
         return cciApp;
     }
 
@@ -408,39 +421,16 @@ public class SyncProjectTask implements Callable<CCIReportSummary> {
     private com.blackducksoftware.sdk.codecenter.application.data.Project associateApplicationToProtexProject(
             CCIProject cciProject, Application app)
             throws CodeCenterImportException {
-        // Use this flag to determine whether we need to perform it
-        // In the case where it exists, we can exit out.
-        boolean performAssociation = false;
 
         String projectName = cciProject.getProjectName();
         String appVersion = cciProject.getProjectVersion();
         String ccProtexAliasName = configManager.getProtexServerName();
 
         // First attempt to retrieve it.
-        com.blackducksoftware.sdk.codecenter.application.data.Project associatedProject = null;
-        try {
-            associatedProject = ccWrapper.getInternalApiWrapper()
-                    .getApplicationApi()
-                    .getAssociatedProtexProject(app.getId());
+        com.blackducksoftware.sdk.codecenter.application.data.Project associatedProject = getProjectAssociatedWithThisApp(app, projectName);
 
-            log.info("[{}] Application is already associated!", projectName);
-
-            return associatedProject;
-        } catch (SdkFault e) {
-            ErrorCode code = e.getFaultInfo().getErrorCode();
-            if (code == ErrorCode.APPLICATION_NOT_ASSOCIATED_WITH_PROTEX_PROJECT
-                    || code == ErrorCode.NO_PROTEX_PROJECT_FOUND) {
-                performAssociation = true;
-            } else {
-                throw new CodeCenterImportException(
-                        "Retrieving Protex association failed:"
-                                + e.getMessage(), e);
-            }
-        }
-
-        // If there is no association and we had a "friendly" error message,
-        // then create one.
-        if (performAssociation) {
+        // If there is no association then create one.
+        if (associatedProject == null) {
             try {
                 log.info("Attempting Protex project association for: "
                         + projectName + " version: " + appVersion
@@ -464,7 +454,7 @@ public class SyncProjectTask implements Callable<CCIReportSummary> {
             } catch (SdkFault e) {
                 if (e.getFaultInfo().getErrorCode() == ErrorCode.PROJECT_ALREADY_ASSOCIATED) {
                     throw new CodeCenterImportException(
-                            "Protex project is already associated to a different application.  Please remove association: "
+                            "Protex project is currently associated to a different application.  Please remove association: "
                                     + e.getMessage());
                 } else {
                     throw new CodeCenterImportException(
@@ -478,20 +468,32 @@ public class SyncProjectTask implements Callable<CCIReportSummary> {
         return associatedProject;
     }
 
-    private void invokeAppAdjuster(CCIConfigurationManager configManager,
-            CCIApplication cciApp, CCIProject project)
+    private com.blackducksoftware.sdk.codecenter.application.data.Project getProjectAssociatedWithThisApp(Application app, String projectName)
             throws CodeCenterImportException {
-        if ((appAdjusterObject != null) && (appAdjusterMethod != null)) {
-            try {
-                appAdjusterMethod.invoke(appAdjusterObject, cciApp, project);
-            } catch (InvocationTargetException e) {
-                String msg = "Error during post-import application metadata adjustment: InvocationTargetException: "
-                        + e.getTargetException().getMessage();
-                throw new CodeCenterImportException(msg);
-            } catch (IllegalAccessException e) {
-                String msg = "Error during post-import application metadata adjustment: IllegalAccessException: "
-                        + e.getMessage();
-                throw new CodeCenterImportException(msg);
+        com.blackducksoftware.sdk.codecenter.application.data.Project associatedProject = null;
+        try {
+            associatedProject = ccWrapper.getInternalApiWrapper()
+                    .getApplicationApi()
+                    .getAssociatedProtexProject(app.getId());
+
+            log.info("[" + projectName + "] Application is already associated with project: " + associatedProject.getName());
+            // if this app is already associated with this project, return the app
+            if ((associatedProject != null) && associatedProject.getName().equals(projectName)) {
+                return associatedProject;
+            } else {
+                // Break the old/bad association, and force a new one
+                disassociateAppFromOldProject(project);
+                return null; // force a new association
+            }
+        } catch (SdkFault e) {
+            ErrorCode code = e.getFaultInfo().getErrorCode();
+            if (code == ErrorCode.APPLICATION_NOT_ASSOCIATED_WITH_PROTEX_PROJECT
+                    || code == ErrorCode.NO_PROTEX_PROJECT_FOUND) {
+                return null; // there is no associated project
+            } else {
+                throw new CodeCenterImportException(
+                        "Retrieving Protex association failed:"
+                                + e.getMessage(), e);
             }
         }
     }
@@ -514,8 +516,6 @@ public class SyncProjectTask implements Callable<CCIReportSummary> {
         Application app = importedProject.getApplication();
         String applicationName = app.getName();
         ApplicationIdToken appIdToken = app.getId();
-
-        boolean ccBomChanged = false;
 
         // ReValidate mode is really
         // "we don't want to see any validation failures" mode.
@@ -580,7 +580,7 @@ public class SyncProjectTask implements Callable<CCIReportSummary> {
                                 applicationName, lastValidatedTime,
                                 lastRefreshDate.toString());
                         summary.addToTotalValidatesSkipped();
-                        return ccBomChanged;
+                        return false;
                     }
                 }
             } catch (Exception e) {
@@ -607,16 +607,27 @@ public class SyncProjectTask implements Callable<CCIReportSummary> {
                     + sfe.getMessage(), sfe);
         }
 
-        // ADD REQUESTS
+        // Adjust the app's BOM
+        boolean ccBomChanged = adjustCcBom(summary, app);
+
+        return ccBomChanged;
+    }
+
+    /**
+     * Adjust CcBom based on validation results.
+     *
+     * @param summary
+     * @param app
+     * @return true if BOM was changed, false otherwise
+     */
+    private boolean adjustCcBom(CCIReportSummary summary, Application app) {
         int requestsAdded = addRequestsToCodeCenter(app, summary);
-        // DELETE REQUESTS
         int requestsDeleted = deleteRequestsFromCodeCenter(app, summary);
 
         if ((requestsAdded > 0) || (requestsDeleted > 0)) {
-            ccBomChanged = true;
+            return true;
         }
-
-        return ccBomChanged;
+        return false;
     }
 
     /**
@@ -653,29 +664,36 @@ public class SyncProjectTask implements Callable<CCIReportSummary> {
             log.info("[{}] Attempting {} component requests...",
                     applicationName, protexOnlyComponents.size());
 
-            List<RequestIdToken> newRequests = new ArrayList<RequestIdToken>();
+            // List<RequestIdToken> newRequests = new ArrayList<RequestIdToken>();
 
             log.debug("User specified submit set to: "
                     + configManager.isSubmit());
 
             for (ProtexRequest protexRequest : protexOnlyComponents) {
                 try {
-                    RequestCreate request = new RequestCreate();
+                    try {
+                        plugInManager.invokeComponentChangeInterceptorPreProcessAddMethod(protexRequest.getComponentId().getId());
+                    } catch (CodeCenterImportException e) {
+                        log.error("[{}] Error pre-processing add request: " + e.getMessage(),
+                                applicationName, e);
+                        summary.addTotalPlugInProcessingFailed();
+                        summary.addToFailedPlugInProcessingList(app.getName() + ":" + app.getVersion());
+                    }
 
-                    // Should this be requested
-                    request.setSubmit(configManager.isSubmit());
-
-                    RequestApplicationComponentToken token = new RequestApplicationComponentToken();
-                    token.setApplicationId(app.getId());
-                    token.setComponentId(protexRequest.getComponentId());
-
-                    request.setApplicationComponentToken(token);
-                    request.setLicenseId(protexRequest.getLicenseInfo().getId());
-                    newRequests.add(ccWrapper.getInternalApiWrapper()
-                            .getRequestApi().createRequest(request));
+                    String newRequestId = ccWrapper.getRequestManager().createRequest(app.getId().getId(), protexRequest.getComponentId().getId(),
+                            protexRequest.getLicenseInfo().getId().getId(), configManager.isSubmit());
 
                     requestsAdded++;
-                } catch (SdkFault e) {
+
+                    try {
+                        plugInManager.invokeComponentChangeInterceptorPostProcessAddMethod(newRequestId, protexRequest.getComponentId().getId());
+                    } catch (CodeCenterImportException e) {
+                        log.error("[{}] Error post-processing add request: " + e.getMessage(),
+                                applicationName, e);
+                        summary.addTotalPlugInProcessingFailed();
+                        summary.addToFailedPlugInProcessingList(app.getName() + ":" + app.getVersion());
+                    }
+                } catch (CommonFrameworkException e) {
                     log.error("[{}] Error creating request: " + e.getMessage(),
                             applicationName, e);
                 }
@@ -722,11 +740,18 @@ public class SyncProjectTask implements Callable<CCIReportSummary> {
 
             try {
                 for (RequestSummary request : ccOnlyComps) {
-                    ccWrapper.getInternalApiWrapper().getRequestApi()
-                            .deleteRequest(request.getId());
+                    try {
+                        plugInManager.invokeComponentChangeInterceptorPreProcessDeleteMethod(request.getId().getId(), request.getComponentId().getId());
+                    } catch (CodeCenterImportException e) {
+                        log.error("[{}] Error pre-processing delete request: " + e.getMessage(),
+                                applicationName, e);
+                        summary.addTotalPlugInProcessingFailed();
+                        summary.addToFailedPlugInProcessingList(app.getName() + ":" + app.getVersion());
+                    }
+                    ccWrapper.getRequestManager().deleteRequest(app.getId().getId(), request.getId().getId());
                     totalRequestsDeleted++;
                 }
-            } catch (SdkFault e) {
+            } catch (CommonFrameworkException e) {
                 log.error("[{}] error deleting request", applicationName, e);
             }
 
@@ -754,6 +779,7 @@ public class SyncProjectTask implements Callable<CCIReportSummary> {
     }
 
     private boolean disassociateAppFromOldProject(CCIProject project) {
+        log.info("Disassociating app " + project.getProjectName() + " from currently-associated Protex project");
         boolean retryImport = true;
         ApplicationNameVersionToken appToken = new ApplicationNameVersionToken();
         appToken.setName(project.getProjectName());

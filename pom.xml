@@ -4,7 +4,7 @@
 
 	<groupId>com.blackducksoftware.tools</groupId>
 	<artifactId>cc-importer</artifactId>
-	<version>1.4.2</version>
+	<version>1.4.3-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<name>cc-importer</name>
@@ -55,7 +55,7 @@
 		<dependency>
 			<groupId>com.blackducksoftware.tools</groupId>
 			<artifactId>cf-7x-connector</artifactId>
-			<version>1.4.8</version>
+			<version>1.4.9-SNAPSHOT</version>
 		</dependency>
 
 	</dependencies>

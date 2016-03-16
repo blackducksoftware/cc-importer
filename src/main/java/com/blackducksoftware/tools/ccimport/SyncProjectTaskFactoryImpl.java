@@ -17,7 +17,6 @@
  *******************************************************************************/
 package com.blackducksoftware.tools.ccimport;
 
-import java.lang.reflect.Method;
 import java.util.concurrent.Callable;
 
 import com.blackducksoftware.tools.ccimport.report.CCIReportSummary;
@@ -35,26 +34,23 @@ public class SyncProjectTaskFactoryImpl implements SyncProjectTaskFactory {
 
     private final IProtexServerWrapper<ProtexProjectPojo> protexWrapper;
 
-    private final Object appAdjusterObject;
-
-    private final Method appAdjusterMethod;
+    private final PlugInManager plugInManager;
 
     public SyncProjectTaskFactoryImpl(
             CCIConfigurationManager config,
             ICodeCenterServerWrapper codeCenterWrapper,
             IProtexServerWrapper<ProtexProjectPojo> protexWrapper,
-            Object appAdjusterObject, Method appAdjusterMethod) {
+            PlugInManager plugInManager) {
         this.config = config;
         this.codeCenterWrapper = codeCenterWrapper;
         this.protexWrapper = protexWrapper;
-        this.appAdjusterObject = appAdjusterObject;
-        this.appAdjusterMethod = appAdjusterMethod;
+        this.plugInManager = plugInManager;
     }
 
     @Override
     public Callable<CCIReportSummary> createTask(CCIProject project) {
         return new SyncProjectTask(config, codeCenterWrapper,
-                protexWrapper, appAdjusterObject, appAdjusterMethod, project);
+                protexWrapper, plugInManager, project);
     }
 
 }

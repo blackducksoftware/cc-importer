@@ -18,7 +18,6 @@
 
 package com.blackducksoftware.tools.ccimport;
 
-import java.lang.reflect.Method;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -33,7 +32,7 @@ import com.blackducksoftware.tools.ccimporter.model.CCIProject;
 import com.blackducksoftware.tools.commonframework.core.config.ConfigConstants.APPLICATION;
 import com.blackducksoftware.tools.commonframework.core.config.server.ServerBean;
 import com.blackducksoftware.tools.commonframework.standard.protex.ProtexProjectPojo;
-import com.blackducksoftware.tools.connector.codecenter.CodeCenterServerWrapper;
+import com.blackducksoftware.tools.connector.codecenter.ICodeCenterServerWrapper;
 import com.blackducksoftware.tools.connector.protex.ProtexServerWrapper;
 
 /**
@@ -57,10 +56,11 @@ public class CCIMultiServerProcessor extends CCIProcessor {
      */
     public CCIMultiServerProcessor(CodeCenterConfigManager configManager,
             ProtexConfigManager protexConfigManager,
-            CodeCenterServerWrapper codeCenterServerWrapper) throws Exception {
+            ICodeCenterServerWrapper codeCenterServerWrapper) throws Exception {
         super(configManager, codeCenterServerWrapper);
         protexConfig = protexConfigManager;
-        log.info("Using Protex URL [{}]", protexConfig.getServerBean(APPLICATION.PROTEX).getServerName());
+        log.info("Using Protex URL [{}]", protexConfig.getServerBean(APPLICATION.PROTEX)
+                .getServerName());
     }
 
     /**
@@ -103,21 +103,21 @@ public class CCIMultiServerProcessor extends CCIProcessor {
 
             ProtexServerWrapper<ProtexProjectPojo> wrapper = null;
             try {
-                wrapper = new ProtexServerWrapper<>(protexServer, protexConfig,
+                wrapper = new ProtexServerWrapper<>(protexConfig,
                         true);
             } catch (Exception e) {
                 throw new CodeCenterImportException(
                         "Unable to establish connection against: "
                                 + protexServer);
             }
-            Object appAdjusterObject = CCIProjectImporterHarness
-                    .getAppAdjusterObject(codeCenterConfigManager);
-            Method appAdjusterMethod = CCIProjectImporterHarness
-                    .getAppAdjusterMethod(super.codeCenterWrapper, wrapper,
-                            codeCenterConfigManager, appAdjusterObject);
+
+            PlugInManager plugInManager = new PlugInManager(codeCenterConfigManager, codeCenterWrapper,
+                    wrapper);
+            plugInManager.invokeComponentChangeInterceptorInitMethod();
+
             CodeCenterProjectSynchronizer synchronizer = new CodeCenterProjectSynchronizer(
                     codeCenterWrapper, wrapper, codeCenterConfigManager,
-                    appAdjusterObject, appAdjusterMethod);
+                    plugInManager);
             List<CCIProject> projectList = getAllProjects(wrapper);
             synchronizer.synchronize(projectList);
         }
