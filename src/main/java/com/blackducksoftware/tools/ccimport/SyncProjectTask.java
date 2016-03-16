@@ -454,7 +454,7 @@ public class SyncProjectTask implements Callable<CCIReportSummary> {
             } catch (SdkFault e) {
                 if (e.getFaultInfo().getErrorCode() == ErrorCode.PROJECT_ALREADY_ASSOCIATED) {
                     throw new CodeCenterImportException(
-                            "Protex project is already associated to a different application.  Please remove association: "
+                            "Protex project is currently associated to a different application.  Please remove association: "
                                     + e.getMessage());
                 } else {
                     throw new CodeCenterImportException(
@@ -476,8 +476,15 @@ public class SyncProjectTask implements Callable<CCIReportSummary> {
                     .getApplicationApi()
                     .getAssociatedProtexProject(app.getId());
 
-            log.info("[{}] Application is already associated!", projectName);
-            return associatedProject;
+            log.info("[" + projectName + "] Application is already associated with project: " + associatedProject.getName());
+            // if this app is already associated with this project, return the app
+            if ((associatedProject != null) && associatedProject.getName().equals(projectName)) {
+                return associatedProject;
+            } else {
+                // Break the old/bad association, and force a new one
+                disassociateAppFromOldProject(project);
+                return null; // force a new association
+            }
         } catch (SdkFault e) {
             ErrorCode code = e.getFaultInfo().getErrorCode();
             if (code == ErrorCode.APPLICATION_NOT_ASSOCIATED_WITH_PROTEX_PROJECT
@@ -608,7 +615,7 @@ public class SyncProjectTask implements Callable<CCIReportSummary> {
 
     /**
      * Adjust CcBom based on validation results.
-     * 
+     *
      * @param summary
      * @param app
      * @return true if BOM was changed, false otherwise
@@ -772,6 +779,7 @@ public class SyncProjectTask implements Callable<CCIReportSummary> {
     }
 
     private boolean disassociateAppFromOldProject(CCIProject project) {
+        log.info("Disassociating app " + project.getProjectName() + " from currently-associated Protex project");
         boolean retryImport = true;
         ApplicationNameVersionToken appToken = new ApplicationNameVersionToken();
         appToken.setName(project.getProjectName());

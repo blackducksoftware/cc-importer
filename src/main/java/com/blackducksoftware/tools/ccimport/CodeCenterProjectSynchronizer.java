@@ -777,7 +777,7 @@ public class CodeCenterProjectSynchronizer {
                     .getApplicationApi()
                     .getAssociatedProtexProject(app.getId());
 
-            log.info("[{}] Application is already associated!", projectName);
+            log.info("[" + projectName + "] Application is already associated with project: " + associatedProject.getName());
 
             return associatedProject;
         } catch (SdkFault e) {
