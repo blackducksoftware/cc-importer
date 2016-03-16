@@ -84,8 +84,6 @@ public abstract class CCIConfigurationManager extends ConfigurationManager {
 
     private int numThreads = 1;
 
-    private String hostName;
-
     private String timeZone;
 
     private Boolean runReport = false;
@@ -151,8 +149,6 @@ public abstract class CCIConfigurationManager extends ConfigurationManager {
         runReport = getOptionalProperty(CCIConstants.RUN_REPORT_PROPERTY,
                 false, Boolean.class);
 
-        // TODO: Temporary workaround for the DB access
-        hostName = getOptionalProperty(CCIConstants.VALIDATE_SMART_HOST_NAME_PROPERTY);
         timeZone = getOptionalProperty(CCIConstants.VALIDATE_SMART_TIMEZONE_PROPERTY);
 
         String attemptToFixInvalidAssociationString = getOptionalProperty(CCIConstants.ATTEMPT_TO_FIX_INVALID_ASSOCIATION_PROPERTY);
@@ -498,14 +494,6 @@ public abstract class CCIConfigurationManager extends ConfigurationManager {
 
     public void setPerformSmartValidate(Boolean performSmartValidate) {
         this.performSmartValidate = performSmartValidate;
-    }
-
-    public String getHostName() {
-        return hostName;
-    }
-
-    public void setHostName(String hostName) {
-        this.hostName = hostName;
     }
 
     public String getTimeZone() {

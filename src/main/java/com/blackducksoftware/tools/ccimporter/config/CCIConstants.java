@@ -82,9 +82,6 @@ public class CCIConstants {
     // Option to make the validation "smart" - see Readme
     public static final String VALIDATE_SMART_APPLICATION_PROPERTY = "validate.application.smart";
 
-    // TODO: Temporary workaround, remove after API is established
-    public static final String VALIDATE_SMART_HOST_NAME_PROPERTY = "validate.smart.host.name";
-
     public static final String VALIDATE_SMART_TIMEZONE_PROPERTY = "validate.smart.timezone";
 
     // Part of validate, should the requests be added?

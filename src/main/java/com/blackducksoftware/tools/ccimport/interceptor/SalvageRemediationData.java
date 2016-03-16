@@ -20,6 +20,17 @@ import com.blackducksoftware.tools.connector.codecenter.common.RequestVulnerabil
 import com.blackducksoftware.tools.connector.protex.IProtexServerWrapper;
 import com.blackducksoftware.tools.connector.protex.common.ComponentNameVersionIds;
 
+/**
+ * This component change interceptor salvages remediation data from deprecated components.
+ *
+ * If an about-to-be-deleted component is a deprecated component, and the replacement component was just added, for
+ * each vulnerability that exists on both the deprecated/deleted component and the replacement/added component, this
+ * interceptor copies the remediation data (target remediation date, actual remediation date, status, and comment) from
+ * the deprecated component's request/vulnerability to the replacement component's request/vulnerability.
+ *
+ * @author sbillings
+ *
+ */
 public class SalvageRemediationData implements CompChangeInterceptor {
     private final Logger log = LoggerFactory.getLogger(this.getClass().getName());
 
@@ -67,7 +78,9 @@ public class SalvageRemediationData implements CompChangeInterceptor {
             }
         }
         // This provides a way to, via configuration, disable checking of the deprecated flag on component
-        // so all that matters is whether or not it appears in the appropriate replacement table
+        // so all that matters is whether or not it appears in the appropriate replacement table.
+        // It is necessary to set this to false when testing using mock deprecated component replacement
+        // tables.
         String checkCompDeprecatedFlagString = config.getOptionalProperty("check.component.deprecated.flag");
         if ("false".equalsIgnoreCase(checkCompDeprecatedFlagString)) {
             checkCompDeprecatedFlag = false;

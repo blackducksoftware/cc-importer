@@ -8,6 +8,13 @@ import com.blackducksoftware.tools.commonframework.standard.protex.ProtexProject
 import com.blackducksoftware.tools.connector.codecenter.ICodeCenterServerWrapper;
 import com.blackducksoftware.tools.connector.protex.IProtexServerWrapper;
 
+/**
+ * This component change interceptor does nothing.
+ * Useful for testing.
+ *
+ * @author sbillings
+ *
+ */
 public class NopCompChangeInterceptor implements CompChangeInterceptor {
     private final Logger log = LoggerFactory.getLogger(this.getClass().getName());
 
