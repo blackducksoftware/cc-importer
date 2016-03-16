@@ -106,6 +106,7 @@ public class SyncProjectTask implements Callable<CCIReportSummary> {
                             project.getProjectName());
                 }
 
+                // Adjust app BOM so it equals project BOM
                 if (importSuccess) {
                     retryImport = validate(project, importedProject,
                             importRetryCount);
@@ -211,6 +212,15 @@ public class SyncProjectTask implements Callable<CCIReportSummary> {
         return project;
     }
 
+    /**
+     * Make the application BOM equal the Project BOM, using validation and component adds/deletes.
+     * Run the AppAdjuster, if any, if appropriate.
+     *
+     * @param project
+     * @param importedProject
+     * @param importRetryCount
+     * @return
+     */
     private boolean validate(CCIProject project, CCIProject importedProject,
             int importRetryCount) {
         boolean retryImport = false;
@@ -500,8 +510,6 @@ public class SyncProjectTask implements Callable<CCIReportSummary> {
         String applicationName = app.getName();
         ApplicationIdToken appIdToken = app.getId();
 
-        boolean ccBomChanged = false;
-
         // ReValidate mode is really
         // "we don't want to see any validation failures" mode.
         // In re-validate mode: we want to clear any old validation failures. So
@@ -565,7 +573,7 @@ public class SyncProjectTask implements Callable<CCIReportSummary> {
                                 applicationName, lastValidatedTime,
                                 lastRefreshDate.toString());
                         summary.addToTotalValidatesSkipped();
-                        return ccBomChanged;
+                        return false;
                     }
                 }
             } catch (Exception e) {
@@ -592,16 +600,27 @@ public class SyncProjectTask implements Callable<CCIReportSummary> {
                     + sfe.getMessage(), sfe);
         }
 
-        // ADD REQUESTS
+        // Adjust the app's BOM
+        boolean ccBomChanged = adjustCcBom(summary, app);
+
+        return ccBomChanged;
+    }
+
+    /**
+     * Adjust CcBom based on validation results.
+     * 
+     * @param summary
+     * @param app
+     * @return true if BOM was changed, false otherwise
+     */
+    private boolean adjustCcBom(CCIReportSummary summary, Application app) {
         int requestsAdded = addRequestsToCodeCenter(app, summary);
-        // DELETE REQUESTS
         int requestsDeleted = deleteRequestsFromCodeCenter(app, summary);
 
         if ((requestsAdded > 0) || (requestsDeleted > 0)) {
-            ccBomChanged = true;
+            return true;
         }
-
-        return ccBomChanged;
+        return false;
     }
 
     /**
