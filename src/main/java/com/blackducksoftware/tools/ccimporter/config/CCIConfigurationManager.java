@@ -425,7 +425,7 @@ public abstract class CCIConfigurationManager extends ConfigurationManager {
 
     public static void usage() {
         System.out.println();
-        System.out.println("USAGE:");
+        System.out.println("USAGE: bin/CCImporter [<configfile>] [options]");
         System.out.println(StringConstants.PROTEX_SERVER
                 + ": Protex server to import project(s) from.");
         System.out.println(StringConstants.PROTEX_USERNAME

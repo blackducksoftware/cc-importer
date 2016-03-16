@@ -74,6 +74,8 @@ public class CodeCenterProjectSynchronizer {
 
     private final PlugInManager plugInManager;
 
+    private final Pattern projectNameFilterPattern;
+
     public CodeCenterProjectSynchronizer(
             ICodeCenterServerWrapper codeCenterWrapper,
             IProtexServerWrapper<ProtexProjectPojo> protexWrapper,
@@ -82,6 +84,9 @@ public class CodeCenterProjectSynchronizer {
         this.protexWrapper = protexWrapper;
         configManager = config;
         this.plugInManager = plugInManager;
+
+        projectNameFilterPattern = configManager
+                .getProtexProjectNameFilterPattern();
     }
 
     /**
@@ -105,66 +110,69 @@ public class CodeCenterProjectSynchronizer {
             log.info("[{}/{}] Processing {}", projectCounter++,
                     projectList.size(), project.getProjectName());
 
-            Pattern projectNameFilterPattern = configManager
-                    .getProtexProjectNameFilterPattern();
-            if (projectNameFilterPattern != null) {
-                Matcher m = projectNameFilterPattern.matcher(project
-                        .getProjectName());
-                if (!m.matches()) {
-                    log.info(
-                            "Project {} does not match the project name filter; skipping it",
-                            project.getProjectName());
-                    reportSummary.addTotalProjectsSkipped();
-                    continue;
-                }
+            if (!matches(project.getProjectName())) {
+                log.info(
+                        "Project {} does not match the project name filter; skipping it",
+                        project.getProjectName());
+                reportSummary.addTotalProjectsSkipped();
+                continue;
             }
 
-            boolean retryImport = false;
-            int importRetryCount = 0;
-            do {
-                importRetryCount++;
-                retryImport = false;
-                boolean importSuccess = false;
-                CCIProject importedProject = null;
-                try {
-                    importedProject = processImport(project);
-                    importSuccess = true;
-                } catch (Exception e) {
-                    log.error(
-                            "[{}] Unable to perform import: " + e.getMessage(),
-                            project.getProjectName());
-                }
-
-                if (importSuccess) {
-                    retryImport = validate(project, importedProject,
-                            importRetryCount);
-                }
-            } while (retryImport);
+            int importAttemptCount = importAndSync(project);
             now = new Date();
             long endMilliseconds = now.getTime();
             long duration = endMilliseconds - startMilliseconds;
             log.info("cc-import app import time (seconds): "
-                    + Math.round(duration / 1000.0));
+                    + Math.round(duration / 1000.0) + " (" + importAttemptCount + " attempts)");
         }
 
         // Here, we display the basic summary
         log.info("Summary for THIS thread:\n" + reportSummary.toString());
     }
 
-    private boolean validate(CCIProject project, CCIProject importedProject,
+    private int importAndSync(CCIProject project) {
+        boolean retryImport = false;
+        int importAttemptCount = 0;
+        do {
+            importAttemptCount++;
+            retryImport = false;
+            boolean importSuccess = false;
+            CCIProject importedProject = null;
+            try {
+                importedProject = processImport(project);
+                importSuccess = true;
+            } catch (Exception e) {
+                log.error(
+                        "[{}] Unable to perform import: " + e.getMessage(),
+                        project.getProjectName());
+            }
+
+            if (importSuccess) {
+                retryImport = adjustApp(project, importedProject,
+                        importAttemptCount);
+            }
+        } while (retryImport);
+        return importAttemptCount;
+    }
+
+    private boolean matches(String projectName) {
+        if (projectNameFilterPattern == null) {
+            return true; // no pattern = do all
+        }
+
+        Matcher m = projectNameFilterPattern.matcher(projectName);
+        if (m.matches()) {
+            return true;
+        }
+        return false;
+    }
+
+    private boolean adjustApp(CCIProject project, CCIProject importedProject,
             int importRetryCount) {
         boolean retryImport = false;
-        boolean bomWasChanged = false;
-        try {
-            boolean performValidate = configManager.isValidate();
-            if (performValidate) {
-                bomWasChanged = processValidation(importedProject,
-                        reportSummary);
 
-                if (configManager.isReValidateAfterBomChange() && bomWasChanged) {
-                    reValidate(importedProject);
-                }
-            }
+        try {
+            boolean bomWasChanged = adjustAppBom(importedProject);
             if (configManager.isAppAdjusterOnlyIfBomEdits()
                     && (bomWasChanged || importedProject.getCciApplication()
                             .isJustCreated())) {
@@ -202,6 +210,20 @@ public class CodeCenterProjectSynchronizer {
             }
         }
         return retryImport;
+    }
+
+    private boolean adjustAppBom(CCIProject importedProject) throws CodeCenterImportException {
+        boolean bomWasChanged = false;
+        boolean performValidate = configManager.isValidate();
+        if (performValidate) {
+            bomWasChanged = validateAndSyncBom(importedProject,
+                    reportSummary);
+
+            if (configManager.isReValidateAfterBomChange() && bomWasChanged) {
+                reValidate(importedProject);
+            }
+        }
+        return bomWasChanged;
     }
 
     private void reValidate(CCIProject importedProject) {
@@ -365,7 +387,7 @@ public class CodeCenterProjectSynchronizer {
      * @return true if the Code Center BOM was changed
      * @throws CodeCenterImportException
      */
-    private boolean processValidation(CCIProject importedProject,
+    private boolean validateAndSyncBom(CCIProject importedProject,
             CCIReportSummary summary) throws CodeCenterImportException {
         // Set up for the validation call
         Application app = importedProject.getApplication();
@@ -391,51 +413,8 @@ public class CodeCenterProjectSynchronizer {
             // smart validate
             {
                 if (configManager.isPerformSmartValidate() && !forceValidation) {
-                    // get BOM refresh date from Protex
-                    Date lastRefreshDate = null;
-                    try {
-                        lastRefreshDate = protexWrapper
-                                .getInternalApiWrapper()
-                                .getBomApi()
-                                .getLastBomRefreshFinishDate(
-                                        importedProject.getProjectKey());
-                    } catch (Exception e) {
-                        throw new Exception(
-                                "Unable to get refresh date for project "
-                                        + importedProject.getProjectName(), e);
-                    }
-
-                    if (lastRefreshDate == null) {
-                        throw new Exception(
-                                "The last BOM refresh date is null, cannot perfom smart validate");
-                    }
-
-                    // Grab the validation date
-                    Date lastValidatedTime = app.getLastValidationDate();
-                    log.info("Last validation date from app " + app.getName()
-                            + ": " + lastValidatedTime);
-
-                    // Compare the two dates, if the validate date happened
-                    // before
-                    // the last refresh
-                    // then proceed, otherwise get out.
-
-                    // We want to check before or equals, since identical dates
-                    // will return false on just a 'before' check.
-                    boolean before = (lastValidatedTime == null)
-                            || lastValidatedTime.before(lastRefreshDate)
-                            || lastValidatedTime.equals(lastRefreshDate);
-
-                    if (before) {
-                        log.info(
-                                "[{}] Validation date {} is before refresh date {} proceeding with validation",
-                                applicationName, lastValidatedTime,
-                                lastRefreshDate.toString());
-                    } else {
-                        log.info(
-                                "[{}] Validation date {} is after refresh date {}, skipping validation.",
-                                applicationName, lastValidatedTime,
-                                lastRefreshDate.toString());
+                    boolean before = smartValidate(importedProject, app, applicationName);
+                    if (!before) {
                         summary.addToTotalValidatesSkipped();
                         return ccBomChanged;
                     }
@@ -474,6 +453,57 @@ public class CodeCenterProjectSynchronizer {
         }
 
         return ccBomChanged;
+    }
+
+    private boolean smartValidate(CCIProject importedProject, Application app, String applicationName) throws Exception {
+        // get BOM refresh date from Protex
+        Date lastRefreshDate = null;
+        try {
+            lastRefreshDate = protexWrapper
+                    .getInternalApiWrapper()
+                    .getBomApi()
+                    .getLastBomRefreshFinishDate(
+                            importedProject.getProjectKey());
+        } catch (Exception e) {
+            throw new Exception(
+                    "Unable to get refresh date for project "
+                            + importedProject.getProjectName(), e);
+        }
+
+        if (lastRefreshDate == null) {
+            throw new Exception(
+                    "The last BOM refresh date is null, cannot perfom smart validate");
+        }
+
+        // Grab the validation date
+        Date lastValidatedTime = app.getLastValidationDate();
+        log.info("Last validation date from app " + app.getName()
+                + ": " + lastValidatedTime);
+
+        // Compare the two dates, if the validate date happened
+        // before
+        // the last refresh
+        // then proceed, otherwise get out.
+
+        // We want to check before or equals, since identical dates
+        // will return false on just a 'before' check.
+        boolean before = (lastValidatedTime == null)
+                || lastValidatedTime.before(lastRefreshDate)
+                || lastValidatedTime.equals(lastRefreshDate);
+
+        if (before) {
+            log.info(
+                    "[{}] Validation date {} is before refresh date {} proceeding with validation",
+                    applicationName, lastValidatedTime,
+                    lastRefreshDate.toString());
+        } else {
+            log.info(
+                    "[{}] Validation date {} is after refresh date {}, skipping validation.",
+                    applicationName, lastValidatedTime,
+                    lastRefreshDate.toString());
+
+        }
+        return before;
     }
 
     /**
