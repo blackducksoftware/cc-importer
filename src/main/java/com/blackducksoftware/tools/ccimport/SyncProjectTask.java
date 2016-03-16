@@ -79,6 +79,9 @@ public class SyncProjectTask implements Callable<CCIReportSummary> {
         this.project = project;
     }
 
+    /**
+     * Imports the project (makes sure the app exists) and then syncs app BOM with Protex BOM.
+     */
     @Override
     public CCIReportSummary call() throws CodeCenterImportNamedException {
         try {
@@ -93,6 +96,7 @@ public class SyncProjectTask implements Callable<CCIReportSummary> {
                 retryImport = false;
                 boolean importSuccess = false;
                 CCIProject importedProject = null;
+                // Make sure app exists and is associated
                 try {
                     importedProject = processImport(project);
                     importSuccess = true;
