@@ -55,7 +55,7 @@
 		<dependency>
 			<groupId>com.blackducksoftware.tools</groupId>
 			<artifactId>cf-7x-connector</artifactId>
-			<version>1.4.9-SNAPSHOT</version>
+			<version>1.4.9</version>
 		</dependency>
 
 	</dependencies>
