@@ -15,6 +15,7 @@ import com.blackducksoftware.tools.connector.codecenter.application.ApplicationP
 import com.blackducksoftware.tools.connector.codecenter.application.ApplicationUserPojo;
 import com.blackducksoftware.tools.connector.codecenter.application.IApplicationManager;
 import com.blackducksoftware.tools.connector.codecenter.common.AttachmentDetails;
+import com.blackducksoftware.tools.connector.codecenter.common.AttributeValuePojo;
 import com.blackducksoftware.tools.connector.codecenter.common.CodeCenterComponentPojo;
 import com.blackducksoftware.tools.connector.codecenter.common.RequestPojo;
 import com.blackducksoftware.tools.connector.codecenter.user.UserStatus;
@@ -194,6 +195,12 @@ public class MockApplicationManager implements IApplicationManager {
 
     @Override
     public void deleteAttachment(String applicationId, String filename) throws CommonFrameworkException {
+        // TODO Auto-generated function stub
+
+    }
+
+    @Override
+    public void updateAttributeValues(String appId, Set<AttributeValuePojo> changedAttrValues) throws CommonFrameworkException {
         // TODO Auto-generated function stub
 
     }

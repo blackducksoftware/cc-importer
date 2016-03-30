@@ -7,7 +7,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
+import com.blackducksoftware.tools.ccimport.interceptor.UpdateAttributeValuesOperation;
 import com.blackducksoftware.tools.commonframework.core.exception.CommonFrameworkException;
 import com.blackducksoftware.tools.connector.codecenter.common.AttachmentDetails;
 import com.blackducksoftware.tools.connector.codecenter.common.AttributeValuePojo;
@@ -27,6 +29,8 @@ public class MockCodeCenterComponentManager implements
     private List<String> callsMadeDeleteAttachment = new ArrayList<>();
 
     private List<String> callsMadeAttachFile = new ArrayList<>();
+
+    private List<UpdateAttributeValuesOperation> updateAttributeValuesOperations = new ArrayList<>();
 
     public static final String COMPONENT_ID_PREFIX = "testCompId";
 
@@ -92,25 +96,25 @@ public class MockCodeCenterComponentManager implements
             Class<T> pojoClass, String id) throws CommonFrameworkException {
         List<AttributeValuePojo> attributeValues = new ArrayList<>();
         AttributeValuePojo attrValue = new AttributeValuePojo("testAttrId1",
-                "Siemens Protex Server ID", "MengerHttps");
+                "Customer Protex Server ID", "MengerHttps");
         attributeValues.add(attrValue);
         attrValue = new AttributeValuePojo("testAttrId2",
-                "Siemens Protex Project ID", "siemensproject1");
+                "Customer Protex Project ID", "Customerproject1");
         attributeValues.add(attrValue);
         attrValue = new AttributeValuePojo("testAttrId3",
-                "Siemens Component Copyright Statement",
-                "Mock Siemens Component Copyright Statement");
+                "Customer Component Copyright Statement",
+                "Mock Customer Component Copyright Statement");
         attributeValues.add(attrValue);
         attrValue = new AttributeValuePojo("testAttrId4",
-                "Siemens Custom Acknowledgements",
-                "Mock Siemens Custom Acknowledgements");
+                "Customer Custom Acknowledgements",
+                "Mock Customer Custom Acknowledgements");
         attributeValues.add(attrValue);
         attrValue = new AttributeValuePojo("testAttrId5",
-                "Siemens Custom Component License Text",
-                "Mock Siemens Custom Component License Text");
+                "Customer Custom Component License Text",
+                "Mock Customer Custom Component License Text");
         attributeValues.add(attrValue);
-        attrValue = new AttributeValuePojo("testAttrId5", "Siemens CERT ID",
-                "Mock Siemens CERT ID");
+        attrValue = new AttributeValuePojo("testAttrId6", "Customer CERT ID",
+                "Mock Customer CERT ID");
         attributeValues.add(attrValue);
 
         List<LicensePojo> licenses = new ArrayList<>(2);
@@ -142,7 +146,11 @@ public class MockCodeCenterComponentManager implements
         comp.setApplicationComponent(false);
         comp.setApplicationId(null);
         comp.setDeprecated(true);
-        comp.setAttributeValues(attributeValues);
+        if ("addedCompId".equals(id)) {
+            comp.setAttributeValues(new ArrayList<AttributeValuePojo>());
+        } else {
+            comp.setAttributeValues(attributeValues);
+        }
         comp.setLicenses(licenses);
         comp.setSubComponents(null);
         return comp;
@@ -269,6 +277,22 @@ public class MockCodeCenterComponentManager implements
     public <T extends CodeCenterComponentPojo> T getComponentById(Class<T> pojoClass, String componentId) throws CommonFrameworkException {
         T comp = createComponentPojo(pojoClass, componentId);
         return comp;
+    }
+
+    @Override
+    public <T extends CodeCenterComponentPojo> void updateAttributeValues(Class<T> pojoClass, String compId, Set<AttributeValuePojo> changedAttrValues)
+            throws CommonFrameworkException {
+        UpdateAttributeValuesOperation op = new UpdateAttributeValuesOperation(compId, changedAttrValues);
+        updateAttributeValuesOperations.add(op);
+
+    }
+
+    public List<UpdateAttributeValuesOperation> getUpdateAttributeValuesOperations() {
+        return updateAttributeValuesOperations;
+    }
+
+    public void clearUpdateAttributeValuesOperations() {
+        updateAttributeValuesOperations = new ArrayList<>();
     }
 
 }

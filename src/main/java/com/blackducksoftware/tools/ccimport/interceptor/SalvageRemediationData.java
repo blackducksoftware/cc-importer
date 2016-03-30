@@ -34,7 +34,7 @@ import com.blackducksoftware.tools.connector.protex.common.ComponentNameVersionI
 public class SalvageRemediationData implements CompChangeInterceptor {
     private final Logger log = LoggerFactory.getLogger(this.getClass().getName());
 
-    private ICodeCenterServerWrapper ccsw = null;
+    protected ICodeCenterServerWrapper ccsw = null;
 
     private Map<ComponentNameVersionIds, String> addedRequestIds;
 
@@ -155,9 +155,15 @@ public class SalvageRemediationData implements CompChangeInterceptor {
             return true;
         }
 
-        salvageRequestRemediationData(deleteRequestId, deleteComp, addedRequestIds.get(replacementKbComponent), addedComponents.get(replacementKbComponent));
-
+        CodeCenterComponentPojo addedComponent = addedComponents.get(replacementKbComponent);
+        salvageRequestRemediationData(deleteRequestId, deleteComp, addedRequestIds.get(replacementKbComponent), addedComponent);
+        salvageComponentCustomAttributeData(deleteComp, addedComponent);
         return true;
+    }
+
+    protected void salvageComponentCustomAttributeData(CodeCenterComponentPojo deleteComponent, CodeCenterComponentPojo addedComponent)
+            throws InterceptorException {
+
     }
 
     private CodeCenterComponentPojo loadComponent(String compId) throws InterceptorException {

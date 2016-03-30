@@ -2,6 +2,7 @@ package com.blackducksoftware.tools.ccimport.interceptor;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
@@ -17,9 +18,10 @@ import com.blackducksoftware.tools.ccimport.mocks.MockDeprecatedComponentReplace
 import com.blackducksoftware.tools.ccimport.mocks.MockRequestManager;
 import com.blackducksoftware.tools.ccimporter.config.CodeCenterConfigManager;
 import com.blackducksoftware.tools.connector.codecenter.ICodeCenterServerWrapper;
+import com.blackducksoftware.tools.connector.codecenter.common.AttributeValuePojo;
 import com.blackducksoftware.tools.connector.codecenter.common.RequestVulnerabilityPojo;
 
-public class SalvageRemediationDataTest {
+public class SalvageRemediationDataAndCompCustAttrDataTest {
     private static final String ADDED_COMP_ID = "addedCompId";
 
     private static final String DELETED_COMP_ID = "deletedCompId";
@@ -52,7 +54,7 @@ public class SalvageRemediationDataTest {
     public void testRemediationData() throws InterceptorException {
 
         DeprecatedComponentReplacementTable table = new MockDeprecatedComponentReplacementTable(false);
-        CompChangeInterceptor interceptor = new SalvageRemediationData(table, true, null);
+        CompChangeInterceptor interceptor = new SalvageRemediationDataAndCompCustAttrData(table, true, null);
 
         interceptor.init(ccConfig, ccsw, null); // this interceptor does not use Protex
         interceptor.initForApp(APP_ID);
@@ -78,7 +80,7 @@ public class SalvageRemediationDataTest {
         MockCodeCenterComponentManager mockCompMgr = (MockCodeCenterComponentManager) ccsw.getComponentManager();
         mockCompMgr.clearUpdateAttributeValuesOperations();
         DeprecatedComponentReplacementTable table = new MockDeprecatedComponentReplacementTable(false);
-        CompChangeInterceptor interceptor = new SalvageRemediationData(table, true, null);
+        CompChangeInterceptor interceptor = new SalvageRemediationDataAndCompCustAttrData(table, true, null);
 
         interceptor.init(ccConfig, ccsw, null); // this interceptor does not use Protex
         interceptor.initForApp(APP_ID);
@@ -94,8 +96,34 @@ public class SalvageRemediationDataTest {
             System.out.println("Operation: " + op);
         }
 
-        // This interceptor should not touch custom attr data
-        assertEquals(0, ops.size());
+        assertEquals(1, ops.size());
+        assertEquals("addedCompId", ops.get(0).getCompId());
+        List<AttributeValuePojo> attrValues = new ArrayList<>(ops.get(0).getChangedAttrValues());
+        assertEquals(6, attrValues.size());
+
+        assertEquals("testAttrId1", attrValues.get(0).getAttrId());
+        assertEquals("Customer Protex Server ID", attrValues.get(0).getName());
+        assertEquals("MengerHttps", attrValues.get(0).getValue());
+
+        assertEquals("testAttrId2", attrValues.get(1).getAttrId());
+        assertEquals("Customer Protex Project ID", attrValues.get(1).getName());
+        assertEquals("Customerproject1", attrValues.get(1).getValue());
+
+        assertEquals("testAttrId3", attrValues.get(2).getAttrId());
+        assertEquals("Customer Component Copyright Statement", attrValues.get(2).getName());
+        assertEquals("Mock Customer Component Copyright Statement", attrValues.get(2).getValue());
+
+        assertEquals("testAttrId4", attrValues.get(3).getAttrId());
+        assertEquals("Customer Custom Acknowledgements", attrValues.get(3).getName());
+        assertEquals("Mock Customer Custom Acknowledgements", attrValues.get(3).getValue());
+
+        assertEquals("testAttrId5", attrValues.get(4).getAttrId());
+        assertEquals("Customer Custom Component License Text", attrValues.get(4).getName());
+        assertEquals("Mock Customer Custom Component License Text", attrValues.get(4).getValue());
+
+        assertEquals("testAttrId6", attrValues.get(5).getAttrId());
+        assertEquals("Customer CERT ID", attrValues.get(5).getName());
+        assertEquals("Mock Customer CERT ID", attrValues.get(5).getValue());
     }
 
     private static Properties createBasicProperties(String appName) {

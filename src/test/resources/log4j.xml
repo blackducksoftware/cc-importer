@@ -34,7 +34,7 @@
     </appender>
  
  
-    <category name="com.blackducksoftware.tools.ccimport.report">
+    <category name="com.blackducksoftware.tools.ccimport.interceptor">
         <priority value="DEBUG" />
     </category>
          

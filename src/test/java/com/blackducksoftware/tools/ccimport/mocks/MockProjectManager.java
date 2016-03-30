@@ -18,8 +18,8 @@ public class MockProjectManager implements IProjectManager {
 
     public MockProjectManager(IProtexComponentManager compMgr) {
         this.compMgr = compMgr;
-        project = new ProtexProjectPojo("c_siemensproject1_9246",
-                "Siemens Project1");
+        project = new ProtexProjectPojo("c_Customerproject1_9246",
+                "Customer Project1");
 
     }
 
