@@ -59,17 +59,24 @@ public class SalvageRemediationDataAndCompCustAttrData extends SalvageRemediatio
     @Override
     protected void salvageComponentCustomAttributeData(CodeCenterComponentPojo deleteComponent, CodeCenterComponentPojo addedComponent)
             throws InterceptorException {
-
+        log.info("Salvaging custom attribute data from component " + deleteComponent.getName() + " / " + deleteComponent.getVersion());
         Set<AttributeValuePojo> changedAttrValues = new TreeSet<>();
 
         Map<String, AttributeValuePojo> deleteCompAttrValues = deleteComponent.getAttributeValues();
+        if (deleteCompAttrValues == null) {
+            log.debug("NOT salvaging attribute values from deleted/deprecated component to added/replacmenet component because there are no custom attribute values on the deleted/deprecated component");
+            return;
+        }
         Map<String, AttributeValuePojo> addedCompAttrValues = addedComponent.getAttributeValues();
 
         for (String attrName : deleteCompAttrValues.keySet()) {
             log.debug("Delete component: Attribute ID: " + deleteCompAttrValues.get(attrName).getAttrId() + ": " + attrName + ": "
                     + deleteCompAttrValues.get(attrName).getValue());
 
-            AttributeValuePojo addedCompAttrValue = addedCompAttrValues.get(attrName);
+            AttributeValuePojo addedCompAttrValue = null;
+            if (addedCompAttrValues != null) {
+                addedCompAttrValue = addedCompAttrValues.get(attrName);
+            }
             if (addedCompAttrValue == null) {
                 log.info("Added component: Attribute ID: " + deleteCompAttrValues.get(attrName).getAttrId() + ": " + attrName + ": <null>");
             } else {
@@ -81,7 +88,7 @@ public class SalvageRemediationDataAndCompCustAttrData extends SalvageRemediatio
                 log.debug("NOT copying this attribute value from deleted/deprecated component to added/replacmenet component because there is no value on the deleted/deprecated component");
                 continue;
             }
-            if ((addedCompAttrValue != null) && !StringUtils.isBlank(addedCompAttrValues.get(attrName).getValue())) {
+            if ((addedCompAttrValue != null) && !StringUtils.isBlank(addedCompAttrValue.getValue())) {
                 log.debug("NOT copying this attribute value from deleted/deprecated component to added/replacmenet component because there is already a value on the added/replacement component");
                 continue;
             }
