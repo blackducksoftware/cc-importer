@@ -10,9 +10,13 @@ import org.slf4j.LoggerFactory;
 
 import com.blackducksoftware.tools.ccimport.deprecatedcomp.DeprecatedComponentReplacementTable;
 import com.blackducksoftware.tools.ccimport.exception.CodeCenterImportException;
+import com.blackducksoftware.tools.ccimporter.config.CCIConfigurationManager;
 import com.blackducksoftware.tools.commonframework.core.exception.CommonFrameworkException;
+import com.blackducksoftware.tools.commonframework.standard.protex.ProtexProjectPojo;
+import com.blackducksoftware.tools.connector.codecenter.ICodeCenterServerWrapper;
 import com.blackducksoftware.tools.connector.codecenter.common.AttributeValuePojo;
 import com.blackducksoftware.tools.connector.codecenter.common.CodeCenterComponentPojo;
+import com.blackducksoftware.tools.connector.protex.IProtexServerWrapper;
 
 /**
  * This component change interceptor salvages remediation data associated with requests that point to deprecated
@@ -31,7 +35,7 @@ import com.blackducksoftware.tools.connector.codecenter.common.CodeCenterCompone
  * @author sbillings
  *
  */
-public class SalvageRemediationDataAndCompCustAttrData extends SalvageRemediationData {
+public class SalvageRemediationDataAndCompCustAttrData extends SalvageRemediationData implements CompChangeInterceptor {
     private final Logger log = LoggerFactory.getLogger(this.getClass().getName());
 
     /**
@@ -49,6 +53,31 @@ public class SalvageRemediationDataAndCompCustAttrData extends SalvageRemediatio
     public SalvageRemediationDataAndCompCustAttrData(DeprecatedComponentReplacementTable table, boolean checkCompDeprecatedFlag,
             Map<String, String> equivalentVulnerabilityIds) {
         super(table, checkCompDeprecatedFlag, equivalentVulnerabilityIds);
+    }
+
+    @Override
+    public void init(CCIConfigurationManager config, ICodeCenterServerWrapper ccsw, IProtexServerWrapper<ProtexProjectPojo> psw) throws InterceptorException {
+        super.init(config, ccsw, psw);
+    }
+
+    @Override
+    public void initForApp(String appId) throws InterceptorException {
+        super.initForApp(appId);
+    }
+
+    @Override
+    public boolean preProcessAdd(String compId) throws InterceptorException {
+        return super.preProcessAdd(compId);
+    }
+
+    @Override
+    public void postProcessAdd(String requestId, String compId) throws InterceptorException {
+        super.postProcessAdd(requestId, compId);
+    }
+
+    @Override
+    public boolean preProcessDelete(String deleteRequestId, String compId) throws InterceptorException {
+        return super.preProcessDelete(deleteRequestId, compId);
     }
 
     /**
