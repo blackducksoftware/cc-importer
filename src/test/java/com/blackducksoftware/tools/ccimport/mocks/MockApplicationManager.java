@@ -205,4 +205,16 @@ public class MockApplicationManager implements IApplicationManager {
 
     }
 
+    @Override
+    public List<ApplicationPojo> getAllApplications() throws CommonFrameworkException {
+        // TODO Auto-generated function stub
+        return null;
+    }
+
+    @Override
+    public List<ApplicationPojo> getAllApplications(int chunkSize) throws CommonFrameworkException {
+        // TODO Auto-generated function stub
+        return null;
+    }
+
 }
