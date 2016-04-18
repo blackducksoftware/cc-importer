@@ -94,4 +94,7 @@ public class CCIConstants {
 
     // Option to run the tool in report mode only.
     public static final String RUN_REPORT_PROPERTY = "generate.report";
+
+    // Option to use the pre-Code Center 7.1.1 method of setting remediation status to Unreviewed
+    public static final String SALVAGE_REM_DATA_SET_UNREVIEWED_AS_NULL_PROPERTY = "salvage.rem.data.set.unreviewed.as.null";
 }

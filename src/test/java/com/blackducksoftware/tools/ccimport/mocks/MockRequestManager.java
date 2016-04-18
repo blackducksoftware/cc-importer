@@ -16,11 +16,21 @@ public class MockRequestManager implements IRequestManager {
 
     private List<RequestVulnerabilityPojo> updateOperations;
 
+    private List<RequestVulnerabilityPojo> updateUnreviewedAsNullOperations;
+
     private List<String> createRequestOperations;
 
     private List<String> deleteRequestOperations;
 
+    private Date today;
+
     public MockRequestManager(Date today) {
+        this.today = today;
+
+        initMockOperations();
+    }
+
+    public void initMockOperations() {
         addVulns = new ArrayList<>();
         RequestVulnerabilityPojo vuln = new RequestVulnerabilityPojo("testVulnerabilityId", "testVulnerabilityName", "testDescription",
                 VulnerabilitySeverity.HIGH,
@@ -39,6 +49,7 @@ public class MockRequestManager implements IRequestManager {
         deleteVulns.add(vuln);
 
         updateOperations = new ArrayList<>();
+        updateUnreviewedAsNullOperations = new ArrayList<>();
         createRequestOperations = new ArrayList<>();
         deleteRequestOperations = new ArrayList<>();
     }
@@ -58,8 +69,22 @@ public class MockRequestManager implements IRequestManager {
         updateOperations.add(updatedRequestVulnerability);
     }
 
+    @Override
+    public void updateRequestVulnerability(RequestVulnerabilityPojo updatedRequestVulnerability, boolean setUnreviewedAsNull) throws CommonFrameworkException {
+        System.out.println("updateRequestVulnerability(): " + updatedRequestVulnerability);
+        if (setUnreviewedAsNull) {
+            updateUnreviewedAsNullOperations.add(updatedRequestVulnerability);
+        } else {
+            updateOperations.add(updatedRequestVulnerability);
+        }
+    }
+
     public List<RequestVulnerabilityPojo> getUpdateOperations() {
         return updateOperations;
+    }
+
+    public List<RequestVulnerabilityPojo> getUpdateUnreviewedAsNullOperations() {
+        return updateUnreviewedAsNullOperations;
     }
 
     @Override
@@ -82,4 +107,5 @@ public class MockRequestManager implements IRequestManager {
     public List<String> getDeleteRequestOperations() {
         return deleteRequestOperations;
     }
+
 }

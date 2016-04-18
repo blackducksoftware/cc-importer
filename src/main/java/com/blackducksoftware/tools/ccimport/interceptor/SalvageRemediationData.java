@@ -46,6 +46,8 @@ public class SalvageRemediationData implements CompChangeInterceptor {
 
     private Map<String, String> equivalentVulnerabilityIds;
 
+    private boolean salvageRemDataSetUnreviewedAsNull = false;
+
     /**
      * Code Center will call this constructor
      *
@@ -85,6 +87,9 @@ public class SalvageRemediationData implements CompChangeInterceptor {
         if ("false".equalsIgnoreCase(checkCompDeprecatedFlagString)) {
             checkCompDeprecatedFlag = false;
         }
+
+        // This provides a way to set remediation status to Unreviewed the pre-Code Center 7.1.1 way
+        salvageRemDataSetUnreviewedAsNull = config.isSalvageRemDataSetUnreviewedAsNull();
     }
 
     @Override
@@ -260,7 +265,7 @@ public class SalvageRemediationData implements CompChangeInterceptor {
         toVuln.setReviewStatusName(fromVuln.getReviewStatusName());
         log.debug("Vulnerability update: " + toVuln);
         try {
-            ccsw.getRequestManager().updateRequestVulnerability(toVuln);
+            ccsw.getRequestManager().updateRequestVulnerability(toVuln, salvageRemDataSetUnreviewedAsNull);
         } catch (CommonFrameworkException e) {
             throw new InterceptorException(e);
         }

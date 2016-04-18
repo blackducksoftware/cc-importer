@@ -34,6 +34,8 @@ public class SalvageRemediationDataAndCompCustAttrDataTest {
 
     private static CodeCenterConfigManager ccConfig;
 
+    private static CodeCenterConfigManager ccConfigSetUnreviewedAsNull;
+
     private static ICodeCenterServerWrapper ccsw;
 
     private static Date today = new Date();
@@ -43,6 +45,10 @@ public class SalvageRemediationDataAndCompCustAttrDataTest {
         Properties props = createBasicProperties(APP_NAME);
 
         ccConfig = new CodeCenterConfigManager(props);
+
+        props.setProperty("salvage.rem.data.set.unreviewed.as.null", "true");
+        ccConfigSetUnreviewedAsNull = new CodeCenterConfigManager(props);
+
         ccsw = new MockCodeCenterServerWrapper(false, true, today);
     }
 
@@ -52,6 +58,8 @@ public class SalvageRemediationDataAndCompCustAttrDataTest {
 
     @Test
     public void testRemediationData() throws InterceptorException {
+        MockRequestManager mockRequestManager = (MockRequestManager) ccsw.getRequestManager();
+        mockRequestManager.initMockOperations();
 
         DeprecatedComponentReplacementTable table = new MockDeprecatedComponentReplacementTable(false);
         CompChangeInterceptor interceptor = new SalvageRemediationDataAndCompCustAttrData(table, true, null);
@@ -62,7 +70,6 @@ public class SalvageRemediationDataAndCompCustAttrDataTest {
         interceptor.postProcessAdd("addRequestId", ADDED_COMP_ID);
         interceptor.preProcessDelete("deleteRequestId", DELETED_COMP_ID);
 
-        MockRequestManager mockRequestManager = (MockRequestManager) ccsw.getRequestManager();
         List<RequestVulnerabilityPojo> ops = mockRequestManager.getUpdateOperations();
         assertEquals(1, ops.size());
         assertEquals("testVulnerabilityId", ops.get(0).getVulnerabilityId());
@@ -75,7 +82,34 @@ public class SalvageRemediationDataAndCompCustAttrDataTest {
     }
 
     @Test
+    public void testRemediationDataSetUnreviewedAsNull() throws InterceptorException {
+        MockRequestManager mockRequestManager = (MockRequestManager) ccsw.getRequestManager();
+        mockRequestManager.initMockOperations();
+
+        DeprecatedComponentReplacementTable table = new MockDeprecatedComponentReplacementTable(false);
+        CompChangeInterceptor interceptor = new SalvageRemediationDataAndCompCustAttrData(table, true, null);
+
+        interceptor.init(ccConfigSetUnreviewedAsNull, ccsw, null); // this interceptor does not use Protex
+        interceptor.initForApp(APP_ID);
+        interceptor.preProcessAdd(ADDED_COMP_ID);
+        interceptor.postProcessAdd("addRequestId", ADDED_COMP_ID);
+        interceptor.preProcessDelete("deleteRequestId", DELETED_COMP_ID);
+
+        List<RequestVulnerabilityPojo> ops = mockRequestManager.getUpdateUnreviewedAsNullOperations();
+        assertEquals(1, ops.size());
+        assertEquals("testVulnerabilityId", ops.get(0).getVulnerabilityId());
+        assertEquals("testAddRequestId", ops.get(0).getRequestId());
+        assertEquals(today, ops.get(0).getActualRemediationDate());
+        assertEquals(today, ops.get(0).getTargetRemediationDate());
+        assertEquals("REMEDIATED", ops.get(0).getReviewStatusName());
+        assertEquals("test comments", ops.get(0).getComments());
+
+    }
+
+    @Test
     public void testCompCustAttrData() throws InterceptorException {
+        MockRequestManager mockRequestManager = (MockRequestManager) ccsw.getRequestManager();
+        mockRequestManager.initMockOperations();
 
         MockCodeCenterComponentManager mockCompMgr = (MockCodeCenterComponentManager) ccsw.getComponentManager();
         mockCompMgr.clearUpdateAttributeValuesOperations();

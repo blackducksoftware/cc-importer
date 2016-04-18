@@ -88,6 +88,8 @@ public abstract class CCIConfigurationManager extends ConfigurationManager {
 
     private Boolean runReport = false;
 
+    private boolean salvageRemDataSetUnreviewedAsNull = false;
+
     private List<CCIProject> projectList = new ArrayList<CCIProject>();
 
     public CCIConfigurationManager() {
@@ -154,6 +156,11 @@ public abstract class CCIConfigurationManager extends ConfigurationManager {
         String attemptToFixInvalidAssociationString = getOptionalProperty(CCIConstants.ATTEMPT_TO_FIX_INVALID_ASSOCIATION_PROPERTY);
         if ("true".equalsIgnoreCase(attemptToFixInvalidAssociationString)) {
             attemptToFixInvalidAssociation = true;
+        }
+
+        String salvageRemDataSetUnreviewedAsNullString = getOptionalProperty(CCIConstants.SALVAGE_REM_DATA_SET_UNREVIEWED_AS_NULL_PROPERTY);
+        if ("true".equalsIgnoreCase(salvageRemDataSetUnreviewedAsNullString)) {
+            salvageRemDataSetUnreviewedAsNull = true;
         }
 
         /**
@@ -421,6 +428,10 @@ public abstract class CCIConfigurationManager extends ConfigurationManager {
 
     public void setCmdLineArgs(String[] cmdLineArgs) {
         this.cmdLineArgs = cmdLineArgs;
+    }
+
+    public boolean isSalvageRemDataSetUnreviewedAsNull() {
+        return salvageRemDataSetUnreviewedAsNull;
     }
 
     public static void usage() {
