@@ -4,7 +4,7 @@
 
 	<groupId>com.blackducksoftware.tools</groupId>
 	<artifactId>cc-importer</artifactId>
-	<version>1.4.5</version>
+	<version>1.4.6-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<name>cc-importer</name>
@@ -224,6 +224,9 @@
 						<goals>
 							<goal>jar</goal>
 						</goals>
+						<configuration>
+							<failOnError>false</failOnError>
+        				</configuration>
 					</execution>
 				</executions>
 				
